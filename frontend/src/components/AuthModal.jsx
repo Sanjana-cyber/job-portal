@@ -14,7 +14,6 @@ import {
   AlertCircle,
 } from "lucide-react";
 import toast from "react-hot-toast";
-import "./AuthModal.css";
 
 /**
  * Authentication Modal Component
@@ -55,9 +54,9 @@ const AuthModal = ({ isOpen, onClose, role }) => {
    */
   const redirectToDashboard = (userRole) => {
     const routes = {
-      jobseeker: "/jobseeker/dashboard",
+      jobseeker: "/dashboard",
       recruiter: "/recruiter/dashboard",
-      admin: "/admin/dashboard",
+      admin: "/admin",
     };
     navigate(routes[userRole] || "/");
     onClose();

@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { Mail, Lock, Eye, EyeOff, Loader2, Shield, AlertCircle } from "lucide-react";
 import toast from "react-hot-toast";
-import "./AdminLogin.css";
 
 /**
  * Admin Login Page
@@ -43,7 +42,7 @@ const AdminLogin = () => {
       }
 
       toast.success("Welcome back, Admin!");
-      navigate("/admin/dashboard");
+      navigate("/admin");
     } catch (err) {
       const message =
         err.response?.data?.message || "Login failed. Please try again.";
@@ -64,9 +63,9 @@ const AdminLogin = () => {
           <Shield size={32} />
         </div>
 
-        <h1 className="admin-title">Admin Access</h1>
+        <h1 className="admin-title">Platform Control Center</h1>
         <p className="admin-subtitle">
-          Restricted area. Authorized personnel only.
+          Authorized Personnel Only
         </p>
 
         {/* Error Display */}
@@ -124,10 +123,7 @@ const AdminLogin = () => {
                 Authenticating...
               </>
             ) : (
-              <>
-                <Shield size={18} />
-                Sign In as Admin
-              </>
+              "Access Control Center"
             )}
           </button>
         </form>

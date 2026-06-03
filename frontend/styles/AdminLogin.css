@@ -1,0 +1,147 @@
+/* ============================================================
+   Admin Login — TalentBridge
+   ============================================================ */
+
+.admin-login-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: var(--sp-6);
+  background: var(--navy-900);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Decorative background pattern */
+.admin-login-page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+}
+
+.admin-ambient-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(239, 68, 68, 0.08) 0%, transparent 65%);
+  pointer-events: none;
+}
+
+.admin-login-card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 400px;
+  padding: var(--sp-10);
+  border-radius: var(--radius-xl);
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(20px);
+  text-align: center;
+}
+
+.admin-icon-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
+  border-radius: var(--radius-lg);
+  color: white;
+  margin-bottom: var(--sp-5);
+}
+
+.admin-title {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: 500;
+  color: white;
+  margin-bottom: var(--sp-2);
+  letter-spacing: -0.02em;
+}
+
+.admin-subtitle {
+  font-size: var(--text-sm);
+  color: rgba(255,255,255,0.45);
+  margin-bottom: var(--sp-6);
+  font-weight: 300;
+}
+
+.admin-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  text-align: left;
+}
+
+/* Override auth-input for dark context */
+.admin-form .auth-input {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.10);
+  color: white;
+}
+
+.admin-form .auth-input::placeholder {
+  color: rgba(255,255,255,0.30);
+}
+
+.admin-form .auth-input:hover {
+  border-color: rgba(255,255,255,0.18);
+}
+
+.admin-form .auth-input:focus {
+  border-color: rgba(239,68,68,0.6);
+  box-shadow: 0 0 0 3px rgba(239,68,68,0.12);
+  background: rgba(255,255,255,0.08);
+}
+
+.admin-form .input-icon {
+  color: rgba(255,255,255,0.30);
+}
+
+.btn-admin-login {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  width: 100%;
+  padding: 0.75rem var(--sp-6);
+  background: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
+  color: white;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: 500;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--ease-normal);
+  margin-top: var(--sp-2);
+}
+
+.btn-admin-login:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(239, 68, 68, 0.35);
+  filter: brightness(1.05);
+}
+
+.btn-admin-login:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.admin-notice {
+  margin-top: var(--sp-6);
+  font-size: var(--text-xs);
+  color: rgba(255,255,255,0.25);
+  line-height: 1.65;
+}

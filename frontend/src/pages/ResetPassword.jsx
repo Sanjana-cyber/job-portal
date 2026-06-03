@@ -3,7 +3,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import { resetPassword } from "../api/authApi";
 import { Lock, Eye, EyeOff, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import toast from "react-hot-toast";
-import "./ResetPassword.css";
 
 /**
  * Reset Password Page

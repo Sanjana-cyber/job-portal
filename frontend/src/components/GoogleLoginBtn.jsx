@@ -1,6 +1,5 @@
 import { GoogleLogin } from "@react-oauth/google";
 import toast from "react-hot-toast";
-import "./GoogleLoginBtn.css";
 
 /**
  * Google OAuth Login Button Component

@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { LogOut, User, ChevronDown, Briefcase } from "lucide-react";
+import { LogOut, User, ChevronDown, Briefcase, Shield } from "lucide-react";
 import toast from "react-hot-toast";
-import "./Navbar.css";
 
 /**
  * Navigation Bar Component
@@ -25,9 +24,9 @@ const Navbar = () => {
   const handleDashboard = () => {
     if (!user) return;
     const dashboardRoutes = {
-      jobseeker: "/jobseeker/dashboard",
+      jobseeker: "/dashboard",
       recruiter: "/recruiter/dashboard",
-      admin: "/admin/dashboard",
+      admin: "/admin",
     };
     navigate(dashboardRoutes[user.role] || "/");
     setShowDropdown(false);
@@ -36,16 +35,35 @@ const Navbar = () => {
   return (
     <nav className="navbar glass" id="main-navbar">
       <div className="navbar-container">
-        {/* Logo */}
-        <div className="navbar-logo" onClick={() => navigate("/")} id="navbar-logo">
-          <div className="logo-icon">
-            <Briefcase size={22} />
+        {/* Left Side: Logo & Main Navigation Links */}
+        <div style={{ display: "flex", alignItems: "center", gap: "var(--space-8)" }}>
+          {/* Logo */}
+          <div className="navbar-logo" onClick={() => navigate("/")} id="navbar-logo">
+            <div className="logo-icon">
+              <Briefcase size={22} />
+            </div>
+            <span className="logo-text">JobPortal</span>
           </div>
-          <span className="logo-text">JobPortal</span>
+
+          {/* Navigation Links */}
+          <div className="navbar-links">
+            <a href="/#features" className="nav-link">Features</a>
+            <a href="/#about" className="nav-link">About</a>
+          </div>
         </div>
 
-        {/* Right side */}
+        {/* Right Side Actions */}
         <div className="navbar-right">
+          {/* Shield Icon Link for admin login page */}
+          <button
+            className="btn-shield-admin"
+            onClick={() => navigate("/admin/login")}
+            title="Authorized Personnel Only"
+            id="admin-portal-link"
+          >
+            <Shield size={20} />
+          </button>
+
           {isAuthenticated && user ? (
             <div className="user-menu">
               <button
@@ -93,10 +111,10 @@ const Navbar = () => {
           ) : (
             <button
               className="btn-get-started"
-              onClick={() => navigate("/")}
+              onClick={() => navigate("/login")}
               id="btn-get-started"
             >
-              Get Started
+              Login
             </button>
           )}
         </div>

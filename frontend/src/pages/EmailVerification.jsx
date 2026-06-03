@@ -3,7 +3,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import api from "../api/authApi";
 import { CheckCircle, XCircle, Loader2, Mail } from "lucide-react";
 import toast from "react-hot-toast";
-import "./EmailVerification.css";
 
 /**
  * Email Verification Page

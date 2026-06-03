@@ -9,7 +9,6 @@ import {
   CheckCircle,
   XCircle,
 } from "lucide-react";
-import "./Dashboard.css";
 
 /**
  * Job Seeker Dashboard

@@ -23,18 +23,18 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
     );
   }
 
-  // Not authenticated — redirect to home
+  // Not authenticated — redirect to login page
   if (!isAuthenticated || !user) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/login" replace />;
   }
 
   // Check role authorization
   if (allowedRoles && !allowedRoles.includes(user.role)) {
     // Redirect to user's own dashboard
     const dashboardRoutes = {
-      jobseeker: "/jobseeker/dashboard",
+      jobseeker: "/dashboard",
       recruiter: "/recruiter/dashboard",
-      admin: "/admin/dashboard",
+      admin: "/admin",
     };
     return <Navigate to={dashboardRoutes[user.role] || "/"} replace />;
   }

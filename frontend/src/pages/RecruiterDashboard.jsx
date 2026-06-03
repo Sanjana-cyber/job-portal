@@ -9,7 +9,6 @@ import {
   Plus,
   BarChart3,
 } from "lucide-react";
-import "./Dashboard.css";
 
 /**
  * Recruiter Dashboard

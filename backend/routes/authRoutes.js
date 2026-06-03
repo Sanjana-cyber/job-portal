@@ -10,7 +10,7 @@ const {
   googleAuth,
   verifyEmail,
 } = require("../controllers/authController");
-const { protect } = require("../middleware/auth");
+const { protect, authorize } = require("../middleware/auth");
 const { authLimiter } = require("../middleware/rateLimiter");
 
 /**
@@ -32,5 +32,19 @@ router.get("/verify-email/:token", verifyEmail);
 // Protected routes (require authentication)
 router.post("/logout", protect, logout);
 router.get("/me", protect, getMe);
+
+// Admin validation check (returns success if the authenticated user has the 'admin' role)
+router.get("/admin-check", protect, authorize("admin"), (req, res) => {
+  res.status(200).json({
+    success: true,
+    role: "admin",
+    message: "Admin access granted",
+    user: {
+      id: req.user._id,
+      name: req.user.name,
+      email: req.user.email,
+    },
+  });
+});
 
 module.exports = router;

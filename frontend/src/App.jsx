@@ -3,10 +3,12 @@ import { Toaster } from "react-hot-toast";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
 import HomePage from "./pages/HomePage";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
 import AdminLogin from "./pages/AdminLogin";
 import JobSeekerDashboard from "./pages/JobSeekerDashboard";
 import RecruiterDashboard from "./pages/RecruiterDashboard";
-import AdminDashboard from "./pages/AdminDashboard";
+import SystemManagementConsole from "./pages/SystemManagementConsole";
 import ResetPassword from "./pages/ResetPassword";
 import EmailVerification from "./pages/EmailVerification";
 
@@ -45,13 +47,15 @@ function App() {
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<HomePage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/verify-email/:token" element={<EmailVerification />} />
 
         {/* Protected Dashboard Routes */}
         <Route
-          path="/jobseeker/dashboard"
+          path="/dashboard"
           element={
             <ProtectedRoute allowedRoles={["jobseeker"]}>
               <JobSeekerDashboard />
@@ -67,10 +71,10 @@ function App() {
           }
         />
         <Route
-          path="/admin/dashboard"
+          path="/admin"
           element={
             <ProtectedRoute allowedRoles={["admin"]}>
-              <AdminDashboard />
+              <SystemManagementConsole />
             </ProtectedRoute>
           }
         />

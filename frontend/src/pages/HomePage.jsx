@@ -7,19 +7,19 @@ import {
   Briefcase,
   Users,
   ArrowRight,
+  ArrowUpRight,
   Shield,
   Zap,
   Globe,
-  Star,
+  CheckCircle,
 } from "lucide-react";
-import "./HomePage.css";
 
 /**
  * Home Page — Public Landing Page
  * Features:
- * - Hero section with gradient background and floating particles
- * - Two premium role cards (Job Seeker & Recruiter)
+ * - Hero section with dark navy background and role cards
  * - Features section
+ * - About section
  * - Auth modal opens on role card click
  */
 const HomePage = () => {
@@ -32,9 +32,9 @@ const HomePage = () => {
   useEffect(() => {
     if (isAuthenticated && user) {
       const routes = {
-        jobseeker: "/jobseeker/dashboard",
+        jobseeker: "/dashboard",
         recruiter: "/recruiter/dashboard",
-        admin: "/admin/dashboard",
+        admin: "/admin",
       };
       navigate(routes[user.role] || "/");
     }
@@ -47,171 +47,195 @@ const HomePage = () => {
 
   return (
     <div className="home-page">
-      {/* Floating Particles Background */}
-      <div className="particles">
-        {[...Array(6)].map((_, i) => (
-          <div key={i} className={`particle particle-${i + 1}`} />
-        ))}
-      </div>
 
-      {/* Ambient Glow Effects */}
-      <div className="ambient-glow glow-1" />
-      <div className="ambient-glow glow-2" />
-
-      {/* Hero Section */}
+      {/* ── Hero ────────────────────────────────────────── */}
       <section className="hero-section" id="hero-section">
-        <div className="hero-content animate-fade-in-up">
-          <div className="hero-badge">
-            <Zap size={14} />
-            <span>Powered by AI-Driven Matching</span>
-          </div>
+        <div className="hero-inner">
 
-          <h1 className="hero-title">
-            Find Your <span className="gradient-text">Dream Career</span>
-            <br />
-            Start Today
-          </h1>
+          {/* Left — Headline */}
+          <div className="hero-content animate-fade-in-up">
+            <div className="hero-eyebrow">
+              <Zap size={12} />
+              <span>AI-Driven ATS Platform</span>
+            </div>
 
-          <p className="hero-subtitle">
-            Connect with top companies and talented professionals. 
-            Our intelligent platform makes hiring and job searching seamless.
-          </p>
+            <h1 className="hero-title">
+              Where Talent Meets<br />
+              <em className="accent">Opportunity</em>
+            </h1>
 
-          <div className="hero-stats">
-            <div className="stat-item">
-              <span className="stat-number">10K+</span>
-              <span className="stat-label">Active Jobs</span>
-            </div>
-            <div className="stat-divider" />
-            <div className="stat-item">
-              <span className="stat-number">5K+</span>
-              <span className="stat-label">Companies</span>
-            </div>
-            <div className="stat-divider" />
-            <div className="stat-item">
-              <span className="stat-number">50K+</span>
-              <span className="stat-label">Hired</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Role Selection Cards */}
-        <div className="role-cards" id="role-cards">
-          {/* Job Seeker Card */}
-          <div
-            className="role-card card-jobseeker"
-            onClick={() => handleRoleClick("jobseeker")}
-            id="card-jobseeker"
-          >
-            <div className="card-glow" />
-            <div className="card-icon-wrapper">
-              <Search size={28} />
-            </div>
-            <h3 className="card-title">Job Seeker</h3>
-            <p className="card-description">
-              Discover opportunities that match your skills. Get personalized 
-              recommendations and apply with one click.
+            <p className="hero-description">
+              A modern hiring platform connecting exceptional candidates
+              with forward-thinking companies. Built for clarity, speed,
+              and results.
             </p>
-            <ul className="card-features">
-              <li>
-                <Star size={14} />
-                AI-powered job matching
-              </li>
-              <li>
-                <Star size={14} />
-                One-click applications
-              </li>
-              <li>
-                <Star size={14} />
-                Track application status
-              </li>
-            </ul>
-            <div className="card-action">
-              <span>Get Started</span>
-              <ArrowRight size={18} />
+
+            <div className="hero-cta">
+              <button
+                className="btn-hero-primary"
+                onClick={() => handleRoleClick("jobseeker")}
+                id="hero-find-jobs-btn"
+              >
+                Find Jobs
+                <ArrowRight size={16} />
+              </button>
+              <button
+                className="btn-hero-secondary"
+                onClick={() => handleRoleClick("recruiter")}
+                id="hero-hire-talent-btn"
+              >
+                Hire Talent
+              </button>
             </div>
           </div>
 
-          {/* Recruiter Card */}
-          <div
-            className="role-card card-recruiter"
-            onClick={() => handleRoleClick("recruiter")}
-            id="card-recruiter"
-          >
-            <div className="card-glow" />
-            <div className="card-icon-wrapper recruiter-icon">
-              <Users size={28} />
+          {/* Right — Role Cards */}
+          <div className="hero-cards" id="role-cards">
+
+            {/* Job Seeker Card */}
+            <div
+              className="role-card card-jobseeker animate-fade-in-up"
+              onClick={() => handleRoleClick("jobseeker")}
+              id="card-jobseeker"
+            >
+              <div className="card-header-row">
+                <div className="card-icon-wrapper">
+                  <Search size={22} />
+                </div>
+                <ArrowUpRight size={18} className="card-arrow" />
+              </div>
+              <h3 className="card-title">Job Seeker</h3>
+              <p className="card-description">
+                Discover roles matched to your skills and experience.
+                Apply with one click and track every application.
+              </p>
+              <ul className="card-features">
+                <li>
+                  <CheckCircle size={13} />
+                  AI-powered job matching
+                </li>
+                <li>
+                  <CheckCircle size={13} />
+                  Resume builder & ATS check
+                </li>
+                <li>
+                  <CheckCircle size={13} />
+                  Real-time application tracking
+                </li>
+              </ul>
+              <div className="card-action">
+                <span>Get Started</span>
+                <ArrowRight size={14} />
+              </div>
             </div>
-            <h3 className="card-title">Recruiter</h3>
-            <p className="card-description">
-              Find the perfect candidates for your team. Post jobs and manage 
-              applications efficiently.
-            </p>
-            <ul className="card-features">
-              <li>
-                <Star size={14} />
-                Smart candidate filtering
-              </li>
-              <li>
-                <Star size={14} />
-                Applicant tracking system
-              </li>
-              <li>
-                <Star size={14} />
-                Analytics dashboard
-              </li>
-            </ul>
-            <div className="card-action">
-              <span>Start Hiring</span>
-              <ArrowRight size={18} />
+
+            {/* Recruiter Card */}
+            <div
+              className="role-card card-recruiter animate-fade-in-up"
+              onClick={() => handleRoleClick("recruiter")}
+              id="card-recruiter"
+              style={{ animationDelay: "0.1s" }}
+            >
+              <div className="card-header-row">
+                <div className="card-icon-wrapper">
+                  <Users size={22} />
+                </div>
+                <ArrowUpRight size={18} className="card-arrow" />
+              </div>
+              <h3 className="card-title">Recruiter</h3>
+              <p className="card-description">
+                Post roles, screen candidates intelligently, and manage
+                your entire hiring pipeline from one dashboard.
+              </p>
+              <ul className="card-features">
+                <li>
+                  <CheckCircle size={13} />
+                  Smart candidate filtering
+                </li>
+                <li>
+                  <CheckCircle size={13} />
+                  Integrated applicant tracking
+                </li>
+                <li>
+                  <CheckCircle size={13} />
+                  Pipeline analytics
+                </li>
+              </ul>
+              <div className="card-action">
+                <span>Start Hiring</span>
+                <ArrowRight size={14} />
+              </div>
             </div>
+
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="features-section" id="features-section">
+      {/* ── Features ────────────────────────────────────── */}
+      <section className="features-section" id="features">
+        <div className="section-label">
+          <Briefcase size={12} />
+          Why TalentBridge
+        </div>
         <h2 className="section-title">
-          Why Choose <span className="gradient-text">JobPortal</span>?
+          Built for modern hiring
         </h2>
+        <p>
+          Everything you need to find the right role or the right person —
+          without the noise.
+        </p>
+
         <div className="features-grid">
-          <div className="feature-card glass">
+          <div className="feature-card">
             <div className="feature-icon">
-              <Shield size={24} />
+              <Shield size={20} />
             </div>
             <h4>Enterprise Security</h4>
-            <p>Bank-grade encryption and secure authentication to protect your data.</p>
+            <p>End-to-end encryption and SOC 2-compliant infrastructure protect every interaction.</p>
           </div>
-          <div className="feature-card glass">
+          <div className="feature-card">
             <div className="feature-icon">
-              <Zap size={24} />
+              <Zap size={20} />
             </div>
-            <h4>Lightning Fast</h4>
-            <p>Optimized platform delivering instant search results and smooth interactions.</p>
+            <h4>Instant Matching</h4>
+            <p>Semantic AI surfaces the most relevant roles and candidates in seconds, not hours.</p>
           </div>
-          <div className="feature-card glass">
+          <div className="feature-card">
             <div className="feature-icon">
-              <Globe size={24} />
+              <Globe size={20} />
             </div>
             <h4>Global Reach</h4>
-            <p>Connect with opportunities and talent from around the world.</p>
+            <p>Access remote-first and location-based roles across every major industry and market.</p>
           </div>
-          <div className="feature-card glass">
+          <div className="feature-card">
             <div className="feature-icon">
-              <Briefcase size={24} />
+              <Briefcase size={20} />
             </div>
-            <h4>Smart Matching</h4>
-            <p>AI-powered algorithms to match the right candidates with the right roles.</p>
+            <h4>ATS-Optimized</h4>
+            <p>Resume parsing and scoring tools ensure candidates pass automated screening with confidence.</p>
           </div>
         </div>
       </section>
 
-      {/* Footer */}
+      {/* ── About ───────────────────────────────────────── */}
+      <section className="about-section" id="about">
+        <h2 className="section-title">
+          About <span className="gradient-text">TalentBridge</span>
+        </h2>
+        <p>
+          TalentBridge is an AI-driven Applicant Tracking System and job board
+          designed to make hiring human again. We give job seekers the tools to
+          present themselves effectively and recruiters the intelligence to hire
+          with confidence — all in one streamlined platform.
+        </p>
+      </section>
+
+      {/* ── Footer ──────────────────────────────────────── */}
       <footer className="home-footer">
-        <p>© {new Date().getFullYear()} JobPortal. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} TalentBridge. All rights reserved.</p>
       </footer>
 
-      {/* Auth Modal */}
+      {/* ── Auth Modal ──────────────────────────────────── */}
       <AuthModal
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
