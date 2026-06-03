@@ -19,87 +19,89 @@
    DESIGN TOKENS
    ============================================================ */
 :root {
-  /* ── Brand Palette ── */
-  --navy-50:  #f0f2f8;
-  --navy-100: #dce1f0;
-  --navy-200: #b5bfdf;
-  --navy-300: #8594c8;
-  --navy-400: #5568ab;
-  --navy-500: #3a4e8c;
-  --navy-600: #2c3d70;
-  --navy-700: #1e2d54;
-  --navy-800: #131e38;
-  --navy-900: #0a1020;
+  /* ── Brand Palette — Black / Granite / Beige / Brown / White ── */
+  --navy-50:  #ffffff;  /* White */
+  --navy-100: #feece3;  /* Beige */
+  --navy-200: #e5dec9;  /* Light beige-grey */
+  --navy-300: #a7a7a5;  /* Granite */
+  --navy-400: #91766e;  /* Brown */
+  --navy-500: #765f58;  /* Dark brown */
+  --navy-600: #574641;  /* Rich brown */
+  --navy-700: #382c29;  /* Deep espresso */
+  --navy-800: #1c1614;  /* Near black */
+  --navy-900: #0c0d0d;  /* Black */
 
-  --amber-50:  #fffbf0;
-  --amber-100: #fef3d0;
-  --amber-200: #fce49a;
-  --amber-300: #f9cf5a;
-  --amber-400: #f0b429;
-  --amber-500: #d4960d;
-  --amber-600: #a87108;
-  --amber-700: #7c5005;
-  --amber-800: #503203;
-  --amber-900: #281801;
+  /* ── Accent Palette (Brown / Warm Tones) ── */
+  --amber-50:  #ffffff;
+  --amber-100: #feece3;
+  --amber-200: #e8d0c5;
+  --amber-300: #cbb0a3;
+  --amber-400: #91766e;  /* Brown from swatch */
+  --amber-500: #765f58;
+  --amber-600: #574641;
+  --amber-700: #382c29;
+  --amber-800: #1c1614;
+  --amber-900: #0c0d0d;
 
-  --cream-50:  #fefdfb;
-  --cream-100: #faf7f2;
-  --cream-200: #f4ede2;
-  --cream-300: #ecddd0;
-  --cream-400: #deccba;
-  --cream-500: #c9b09a;
+  /* ── Neutral Palette (Beige / Cream / White) ── */
+  --cream-50:  #ffffff;
+  --cream-100: #feece3;
+  --cream-200: #e5dec9;
+  --cream-300: #a7a7a5;
+  --cream-400: #91766e;
+  --cream-500: #0c0d0d;
 
-  --slate-50:  #f8f9fb;
-  --slate-100: #edeef2;
-  --slate-200: #d5d8e1;
-  --slate-300: #b0b5c4;
-  --slate-400: #8a90a5;
-  --slate-500: #646b82;
-  --slate-600: #4a5168;
-  --slate-700: #363c52;
-  --slate-800: #252938;
-  --slate-900: #161820;
+  --slate-50:  #f5f0eb;
+  --slate-100: #e8e0d8;
+  --slate-200: #d5c5b1;
+  --slate-300: #a09a94;
+  --slate-400: #7a736c;
+  --slate-500: #5c534b;
+  --slate-600: #4a3728;
+  --slate-700: #3e2e22;
+  --slate-800: #1a1412;
+  --slate-900: #0a0808;
 
   /* ── Semantic Surface Tokens ── */
   --bg-page:          var(--cream-100);
   --bg-surface:       #ffffff;
   --bg-surface-alt:   var(--cream-50);
   --bg-card:          #ffffff;
-  --bg-card-hover:    var(--cream-50);
+  --bg-card-hover:    var(--cream-100);
   --bg-input:         #ffffff;
   --bg-input-focus:   var(--cream-50);
-  --bg-overlay:       rgba(10, 16, 32, 0.55);
+  --bg-overlay:       rgba(10, 8, 8, 0.72);
 
   /* ── Text ── */
   --text-primary:     var(--navy-900);
-  --text-secondary:   var(--slate-600);
+  --text-secondary:   var(--slate-500);
   --text-tertiary:    var(--slate-400);
   --text-inverse:     #ffffff;
-  --text-accent:      var(--amber-600);
-  --text-link:        var(--navy-600);
+  --text-accent:      var(--amber-500);
+  --text-link:        var(--navy-700);
 
   /* ── Borders ── */
-  --border-faint:     rgba(19, 30, 56, 0.06);
-  --border-subtle:    rgba(19, 30, 56, 0.10);
-  --border-default:   rgba(19, 30, 56, 0.18);
-  --border-hover:     rgba(19, 30, 56, 0.30);
-  --border-focus:     var(--navy-500);
+  --border-faint:     rgba(10, 8, 8, 0.05);
+  --border-subtle:    rgba(10, 8, 8, 0.10);
+  --border-default:   rgba(10, 8, 8, 0.16);
+  --border-hover:     rgba(10, 8, 8, 0.28);
+  --border-focus:     var(--navy-600);
 
   /* ── Brand Gradients ── */
-  --gradient-brand:      linear-gradient(135deg, var(--navy-700) 0%, var(--navy-500) 100%);
+  --gradient-brand:      linear-gradient(135deg, var(--navy-800) 0%, var(--navy-600) 100%);
   --gradient-amber:      linear-gradient(135deg, var(--amber-400) 0%, var(--amber-600) 100%);
-  --gradient-hero:       linear-gradient(160deg, var(--navy-900) 0%, var(--navy-700) 55%, var(--navy-600) 100%);
-  --gradient-card-seeker: linear-gradient(140deg, rgba(60, 78, 140, 0.04) 0%, rgba(240, 180, 41, 0.06) 100%);
-  --gradient-card-recruiter: linear-gradient(140deg, rgba(240, 180, 41, 0.06) 0%, rgba(60, 78, 140, 0.04) 100%);
+  --gradient-hero:       linear-gradient(180deg, #a7a7a5 0%, #91766e 35%, #ffffff 70%, #0c0d0d 100%);
+  --gradient-card-seeker: linear-gradient(140deg, rgba(74, 55, 40, 0.04) 0%, rgba(160, 120, 80, 0.06) 100%);
+  --gradient-card-recruiter: linear-gradient(140deg, rgba(160, 120, 80, 0.06) 0%, rgba(74, 55, 40, 0.04) 100%);
 
   /* ── Shadows ── */
-  --shadow-xs:   0 1px 2px rgba(10, 16, 32, 0.04);
-  --shadow-sm:   0 1px 4px rgba(10, 16, 32, 0.06), 0 1px 2px rgba(10, 16, 32, 0.04);
-  --shadow-md:   0 4px 12px rgba(10, 16, 32, 0.08), 0 1px 4px rgba(10, 16, 32, 0.05);
-  --shadow-lg:   0 8px 28px rgba(10, 16, 32, 0.10), 0 2px 8px rgba(10, 16, 32, 0.06);
-  --shadow-xl:   0 16px 48px rgba(10, 16, 32, 0.12), 0 4px 12px rgba(10, 16, 32, 0.08);
-  --shadow-card: 0 2px 8px rgba(10, 16, 32, 0.06), 0 0 0 1px var(--border-faint);
-  --shadow-focus: 0 0 0 3px rgba(58, 78, 140, 0.18);
+  --shadow-xs:   0 1px 2px rgba(10, 8, 8, 0.04);
+  --shadow-sm:   0 1px 3px rgba(10, 8, 8, 0.06), 0 1px 2px rgba(10, 8, 8, 0.04);
+  --shadow-md:   0 4px 12px rgba(10, 8, 8, 0.08), 0 1px 4px rgba(10, 8, 8, 0.05);
+  --shadow-lg:   0 8px 24px rgba(10, 8, 8, 0.10), 0 2px 6px rgba(10, 8, 8, 0.05);
+  --shadow-xl:   0 16px 40px rgba(10, 8, 8, 0.12), 0 4px 12px rgba(10, 8, 8, 0.07);
+  --shadow-card: 0 2px 8px rgba(10, 8, 8, 0.05), 0 0 0 1px var(--border-faint);
+  --shadow-focus: 0 0 0 3px rgba(122, 90, 58, 0.18);
 
   /* ── Typography ── */
   --font-display: 'Fraunces', Georgia, serif;

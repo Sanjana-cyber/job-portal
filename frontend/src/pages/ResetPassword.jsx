@@ -75,8 +75,6 @@ const ResetPassword = () => {
 
   return (
     <div className="reset-password-page">
-      <div className="reset-ambient-glow" />
-
       <div className="reset-card glass-strong animate-scale-in">
         <h2>Reset Password</h2>
         <p className="reset-subtitle">Enter your new password below.</p>

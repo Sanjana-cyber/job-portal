@@ -12,6 +12,9 @@ import {
   Zap,
   Globe,
   CheckCircle,
+  Mail,
+  Phone,
+  MessageCircle,
 } from "lucide-react";
 
 /**
@@ -50,123 +53,38 @@ const HomePage = () => {
 
       {/* ── Hero ────────────────────────────────────────── */}
       <section className="hero-section" id="hero-section">
-        <div className="hero-inner">
+        {/* Golden wave decoration */}
+        <div className="hero-waves">
+          <svg viewBox="0 0 1440 320" preserveAspectRatio="none" className="wave wave-1">
+            <path d="M0,224L60,213.3C120,203,240,181,360,186.7C480,192,600,224,720,234.7C840,245,960,235,1080,213.3C1200,192,1320,160,1380,144L1440,128L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z" />
+          </svg>
+          <svg viewBox="0 0 1440 320" preserveAspectRatio="none" className="wave wave-2">
+            <path d="M0,288L48,272C96,256,192,224,288,213.3C384,203,480,213,576,229.3C672,245,768,267,864,261.3C960,256,1056,224,1152,208C1248,192,1344,192,1392,192L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z" />
+          </svg>
+          <div className="hero-shimmer"></div>
+        </div>
 
-          {/* Left — Headline */}
-          <div className="hero-content animate-fade-in-up">
-            <div className="hero-eyebrow">
-              <Zap size={12} />
-              <span>AI-Driven ATS Platform</span>
-            </div>
-
-            <h1 className="hero-title">
-              Where Talent Meets<br />
-              <em className="accent">Opportunity</em>
-            </h1>
-
-            <p className="hero-description">
-              A modern hiring platform connecting exceptional candidates
-              with forward-thinking companies. Built for clarity, speed,
-              and results.
-            </p>
-
-            <div className="hero-cta">
-              <button
-                className="btn-hero-primary"
-                onClick={() => handleRoleClick("jobseeker")}
-                id="hero-find-jobs-btn"
-              >
-                Find Jobs
-                <ArrowRight size={16} />
-              </button>
-              <button
-                className="btn-hero-secondary"
-                onClick={() => handleRoleClick("recruiter")}
-                id="hero-hire-talent-btn"
-              >
-                Hire Talent
-              </button>
-            </div>
-          </div>
-
-          {/* Right — Role Cards */}
-          <div className="hero-cards" id="role-cards">
-
-            {/* Job Seeker Card */}
-            <div
-              className="role-card card-jobseeker animate-fade-in-up"
+        <div className="hero-center animate-fade-in-up">
+          <h1 className="hero-brand-name">
+            TalentBridge
+          </h1>
+          <p className="hero-tagline">Where talent meets opportunity</p>
+          <div className="hero-cta">
+            <button
+              className="btn-hero-primary"
               onClick={() => handleRoleClick("jobseeker")}
-              id="card-jobseeker"
+              id="hero-find-jobs-btn"
             >
-              <div className="card-header-row">
-                <div className="card-icon-wrapper">
-                  <Search size={22} />
-                </div>
-                <ArrowUpRight size={18} className="card-arrow" />
-              </div>
-              <h3 className="card-title">Job Seeker</h3>
-              <p className="card-description">
-                Discover roles matched to your skills and experience.
-                Apply with one click and track every application.
-              </p>
-              <ul className="card-features">
-                <li>
-                  <CheckCircle size={13} />
-                  AI-powered job matching
-                </li>
-                <li>
-                  <CheckCircle size={13} />
-                  Resume builder & ATS check
-                </li>
-                <li>
-                  <CheckCircle size={13} />
-                  Real-time application tracking
-                </li>
-              </ul>
-              <div className="card-action">
-                <span>Get Started</span>
-                <ArrowRight size={14} />
-              </div>
-            </div>
-
-            {/* Recruiter Card */}
-            <div
-              className="role-card card-recruiter animate-fade-in-up"
+              Find Jobs
+              <ArrowRight size={16} />
+            </button>
+            <button
+              className="btn-hero-secondary"
               onClick={() => handleRoleClick("recruiter")}
-              id="card-recruiter"
-              style={{ animationDelay: "0.1s" }}
+              id="hero-hire-talent-btn"
             >
-              <div className="card-header-row">
-                <div className="card-icon-wrapper">
-                  <Users size={22} />
-                </div>
-                <ArrowUpRight size={18} className="card-arrow" />
-              </div>
-              <h3 className="card-title">Recruiter</h3>
-              <p className="card-description">
-                Post roles, screen candidates intelligently, and manage
-                your entire hiring pipeline from one dashboard.
-              </p>
-              <ul className="card-features">
-                <li>
-                  <CheckCircle size={13} />
-                  Smart candidate filtering
-                </li>
-                <li>
-                  <CheckCircle size={13} />
-                  Integrated applicant tracking
-                </li>
-                <li>
-                  <CheckCircle size={13} />
-                  Pipeline analytics
-                </li>
-              </ul>
-              <div className="card-action">
-                <span>Start Hiring</span>
-                <ArrowRight size={14} />
-              </div>
-            </div>
-
+              Hire Talent
+            </button>
           </div>
         </div>
       </section>
@@ -232,7 +150,60 @@ const HomePage = () => {
 
       {/* ── Footer ──────────────────────────────────────── */}
       <footer className="home-footer">
-        <p>© {new Date().getFullYear()} TalentBridge. All rights reserved.</p>
+        <div className="footer-container">
+          <div className="footer-brand-col">
+            <div className="footer-logo">
+              <span className="logo-icon"><Briefcase size={18} /></span>
+              <span className="logo-text">Talent<em>Bridge</em></span>
+            </div>
+            <p className="footer-brand-description">
+              Next-generation Applicant Tracking System and recruitment engine, bringing clarity, speed, and precision to the hiring ecosystem.
+            </p>
+          </div>
+
+          <div className="footer-links-col">
+            <h4 className="footer-col-title">Quick Links</h4>
+            <ul className="footer-links-list">
+              <li><a href="#hero-section">Home</a></li>
+              <li><a href="#features">Features</a></li>
+              <li><a href="#about">About Us</a></li>
+              <li><span className="footer-link-dummy" onClick={() => handleRoleClick("jobseeker")}>Find a Job</span></li>
+              <li><span className="footer-link-dummy" onClick={() => handleRoleClick("recruiter")}>Post a Job</span></li>
+            </ul>
+          </div>
+
+          <div className="footer-contact-col">
+            <h4 className="footer-col-title">Contact Information</h4>
+            <ul className="footer-contact-list">
+              <li className="contact-person">
+                <strong>Sanjana Pandey</strong>
+                <span className="person-role">Platform Administrator</span>
+              </li>
+              <li>
+                <a href="mailto:sanjanpandey29256@gmail.com" className="contact-item">
+                  <Mail size={16} />
+                  <span>sanjanpandey29256@gmail.com</span>
+                </a>
+              </li>
+              <li>
+                <a href="tel:9877932989" className="contact-item">
+                  <Phone size={16} />
+                  <span>+91 98779 32989</span>
+                </a>
+              </li>
+              <li>
+                <a href="https://wa.me/919877932989" target="_blank" rel="noopener noreferrer" className="contact-item whatsapp-link">
+                  <MessageCircle size={16} />
+                  <span>WhatsApp: +91 98779 32989</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="footer-bottom-bar">
+          <p>© {new Date().getFullYear()} TalentBridge. All rights reserved.</p>
+        </div>
       </footer>
 
       {/* ── Auth Modal ──────────────────────────────────── */}

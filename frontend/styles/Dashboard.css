@@ -120,16 +120,15 @@
   align-items: center;
   justify-content: center;
   border-radius: var(--radius-md);
-  color: white;
   flex-shrink: 0;
 }
 
-.icon-blue   { background: linear-gradient(135deg, #3b82f6, #06b6d4); }
-.icon-green  { background: linear-gradient(135deg, #22c55e, #10b981); }
-.icon-amber  { background: linear-gradient(135deg, var(--amber-400), var(--amber-600)); }
-.icon-purple { background: linear-gradient(135deg, #8b5cf6, #a855f7); }
-.icon-red    { background: linear-gradient(135deg, #ef4444, #f97316); }
-.icon-navy   { background: var(--gradient-brand); }
+.icon-blue   { background: rgba(3, 105, 161, 0.08); color: var(--amber-600); }
+.icon-green  { background: rgba(22, 163, 74, 0.08); color: #16a34a; }
+.icon-amber  { background: rgba(217, 119, 6, 0.08); color: #d97706; }
+.icon-purple { background: rgba(124, 58, 237, 0.08); color: #7c3aed; }
+.icon-red    { background: rgba(220, 38, 38, 0.08); color: #dc2626; }
+.icon-navy   { background: rgba(55, 65, 81, 0.08); color: var(--navy-700); }
 
 .stat-card-info {
   display: flex;

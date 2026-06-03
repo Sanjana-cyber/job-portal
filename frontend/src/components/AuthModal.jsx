@@ -181,15 +181,15 @@ const AuthModal = ({ isOpen, onClose, role }) => {
             {showForgotPassword
               ? "Reset Password"
               : activeTab === "login"
-              ? "Welcome Back"
-              : "Create Account"}
+                ? "Welcome Back"
+                : "Create Account"}
           </h2>
           <p className="modal-subtitle">
             {showForgotPassword
               ? "We'll help you get back in"
               : activeTab === "login"
-              ? `Sign in to your ${roleLabel} account`
-              : `Join as a ${roleLabel}`}
+                ? `Sign in to your ${roleLabel} account`
+                : `Join as a ${roleLabel}`}
           </p>
         </div>
 
@@ -378,9 +378,8 @@ const AuthModal = ({ isOpen, onClose, role }) => {
                         confirmPassword: e.target.value,
                       })
                     }
-                    className={`auth-input ${
-                      errors.confirmPassword ? "input-error" : ""
-                    }`}
+                    className={`auth-input ${errors.confirmPassword ? "input-error" : ""
+                      }`}
                     required
                     id="register-confirm-password"
                   />

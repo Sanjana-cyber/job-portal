@@ -55,8 +55,6 @@ const AdminLogin = () => {
 
   return (
     <div className="admin-login-page">
-      <div className="admin-ambient-glow" />
-
       <div className="admin-login-card glass-strong animate-scale-in" id="admin-login-card">
         {/* Shield Icon */}
         <div className="admin-icon-wrapper">
