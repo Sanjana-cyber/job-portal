@@ -433,11 +433,167 @@
 }
 
 /* ============================================================
+   Resume Showcase Section
+   ============================================================ */
+.resume-showcase-section {
+  padding: var(--sp-20) var(--sp-6);
+  background-color: #ffffff; /* White background provides excellent contrast */
+  border-top: 1px solid var(--border-faint);
+  border-bottom: 1px solid var(--border-faint);
+  position: relative;
+  z-index: 1;
+}
+
+.showcase-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: var(--sp-12);
+  align-items: center;
+}
+
+.showcase-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.showcase-title {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1.15;
+  margin-bottom: var(--sp-4);
+  letter-spacing: -0.02em;
+}
+
+.showcase-description {
+  font-size: var(--text-lg);
+  color: var(--text-secondary);
+  font-weight: 300;
+  line-height: 1.7;
+  margin-bottom: var(--sp-8);
+}
+
+.btn-showcase-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 0.9rem 2.25rem;
+  background: var(--navy-900);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  transition: all var(--ease-normal);
+  cursor: pointer;
+}
+
+.btn-showcase-primary:hover {
+  background: var(--navy-800);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(12, 13, 13, 0.15);
+}
+
+/* Showcase Visual & SVG Animations */
+.showcase-visual {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.resume-drawing-container {
+  position: relative;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  padding: var(--sp-8);
+  box-shadow: var(--shadow-xl);
+  transition: all var(--ease-slow);
+}
+
+.resume-drawing-container:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 48px rgba(10, 8, 8, 0.12);
+}
+
+.resume-svg-drawing {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Animations for SVG elements */
+.resume-document-group {
+  transition: transform var(--ease-spring);
+}
+
+.resume-drawing-container:hover .resume-document-group {
+  transform: scale(1.02);
+}
+
+.resume-pencil-group {
+  transform-origin: 176px 208px;
+  animation: pencilFloat 4s ease-in-out infinite;
+  transition: transform var(--ease-spring);
+}
+
+.resume-drawing-container:hover .resume-pencil-group {
+  animation: pencilWrite 2.5s ease-in-out infinite alternate;
+}
+
+/* Keyframes */
+@keyframes pencilFloat {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate(-3px, -5px) rotate(-1.5deg);
+  }
+}
+
+@keyframes pencilWrite {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate(-10px, -4px) rotate(-3deg);
+  }
+  50% {
+    transform: translate(-5px, 2px) rotate(1deg);
+  }
+  75% {
+    transform: translate(-15px, -2px) rotate(-2deg);
+  }
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+}
+
+/* ============================================================
    Responsive
    ============================================================ */
 @media (max-width: 1024px) {
   .features-grid { grid-template-columns: repeat(2, 1fr); }
   .footer-container { gap: var(--sp-8); }
+}
+
+@media (max-width: 992px) {
+  .showcase-container {
+    grid-template-columns: 1fr;
+    gap: var(--sp-8);
+    text-align: center;
+  }
+  .showcase-content {
+    align-items: center;
+    text-align: center;
+  }
 }
 
 @media (max-width: 768px) {
@@ -446,10 +602,13 @@
 
   .features-grid { grid-template-columns: repeat(2, 1fr); gap: var(--sp-4); }
   .footer-container { grid-template-columns: 1fr; gap: var(--sp-8); }
+  
+  .resume-showcase-section { padding: var(--sp-12) var(--sp-6); }
 }
 
 @media (max-width: 480px) {
   .hero-section { padding: 100px var(--sp-4) 120px; min-height: 380px; }
   .features-grid { grid-template-columns: 1fr; }
   .hero-cta { flex-direction: column; align-items: center; }
+  .resume-drawing-container { padding: var(--sp-4); }
 }

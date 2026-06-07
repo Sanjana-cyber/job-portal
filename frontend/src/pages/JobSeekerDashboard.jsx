@@ -1,130 +1,133 @@
-import { useAuth } from "../context/AuthContext";
-import {
-  Search,
-  FileText,
-  BookmarkCheck,
-  Bell,
-  TrendingUp,
-  Clock,
-  CheckCircle,
-  XCircle,
-} from "lucide-react";
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { ProfileProvider } from "../context/ProfileContext";
+import HamburgerMenu from "../components/dashboard/HamburgerMenu";
+import WelcomeBanner from "../components/dashboard/WelcomeBanner";
+import ProfileCompletionRing from "../components/dashboard/ProfileCompletionRing";
+import ProfileStatusGrid from "../components/dashboard/ProfileStatusGrid";
 
-/**
- * Job Seeker Dashboard
- * Displays welcome message, quick stats, and activity overview
- */
-const JobSeekerDashboard = () => {
-  const { user } = useAuth();
-
+const DashboardContent = () => {
   return (
-    <div className="dashboard-page">
-      <div className="dashboard-container">
-        {/* Welcome Section */}
-        <div className="welcome-section animate-fade-in-up">
-          <div className="welcome-text">
-            <h1>
-              Welcome back, <span className="gradient-text">{user?.name}</span>
-            </h1>
-            <p>Here's an overview of your job search activity.</p>
-          </div>
-          <div className="welcome-badge role-jobseeker">
-            <Search size={16} />
-            Job Seeker
-          </div>
+    <div style={{
+      minHeight: "100vh",
+      background: "var(--bg-page)",
+      fontFamily: "var(--font-body)",
+    }}>
+      {/* ── Fixed Top Bar ── */}
+      <header style={{
+        position: "sticky",
+        top: 0,
+        zIndex: 100,
+        background: "var(--bg-surface)",
+        borderBottom: "1px solid var(--border-subtle)",
+        boxShadow: "var(--shadow-sm)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "0 24px",
+        height: "64px",
+      }}>
+        {/* Logo */}
+        <Link to="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: "10px" }}>
+          <div style={{
+            width: "32px", height: "32px",
+            background: "var(--navy-800)",
+            borderRadius: "8px",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            color: "var(--cream-50)",
+            fontSize: "16px",
+          }}>💼</div>
+          <span style={{
+            color: "var(--navy-900)",
+            fontWeight: "700",
+            fontSize: "18px",
+            letterSpacing: "-0.3px",
+            fontFamily: "var(--font-display)"
+          }}>JobPortal</span>
+        </Link>
+
+        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+          <span style={{
+            background: "var(--amber-100)",
+            border: "1px solid var(--amber-200)",
+            color: "var(--amber-700)",
+            padding: "4px 12px",
+            borderRadius: "20px",
+            fontSize: "12px",
+            fontWeight: "600",
+          }}>Candidate</span>
+          <HamburgerMenu />
+        </div>
+      </header>
+
+      {/* ── Page Content ── */}
+      <main style={{ maxWidth: "1100px", margin: "0 auto", padding: "32px 20px", display: "flex", flexDirection: "column", gap: "24px" }}>
+
+        {/* Welcome Banner — full width */}
+        <WelcomeBanner />
+
+        {/* Middle row: Completion Ring + Status Grid */}
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "220px 1fr",
+          gap: "24px",
+          alignItems: "start",
+        }}>
+          <ProfileCompletionRing />
+          <ProfileStatusGrid />
         </div>
 
-        {/* Stats Grid */}
-        <div className="stats-grid">
-          <div className="stat-card glass" style={{ animationDelay: "0.1s" }}>
-            <div className="stat-card-icon icon-blue">
-              <FileText size={22} />
-            </div>
-            <div className="stat-card-info">
-              <span className="stat-card-value">0</span>
-              <span className="stat-card-label">Applications</span>
-            </div>
+        {/* Build Profile CTA */}
+        <div style={{
+          background: "var(--gradient-brand)",
+          borderRadius: "20px",
+          padding: "28px 36px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          gap: "20px",
+          flexWrap: "wrap",
+          boxShadow: "var(--shadow-lg)",
+        }}>
+          <div>
+            <h2 style={{ color: "var(--cream-50)", fontWeight: "700", fontSize: "20px", margin: "0 0 6px", fontFamily: "var(--font-display)" }}>
+              Ready to build your profile?
+            </h2>
+            <p style={{ color: "rgba(255,255,255,0.75)", fontSize: "14px", margin: 0 }}>
+              Complete your profile to get discovered by top recruiters.
+            </p>
           </div>
-
-          <div className="stat-card glass" style={{ animationDelay: "0.2s" }}>
-            <div className="stat-card-icon icon-green">
-              <CheckCircle size={22} />
-            </div>
-            <div className="stat-card-info">
-              <span className="stat-card-value">0</span>
-              <span className="stat-card-label">Shortlisted</span>
-            </div>
-          </div>
-
-          <div className="stat-card glass" style={{ animationDelay: "0.3s" }}>
-            <div className="stat-card-icon icon-amber">
-              <Clock size={22} />
-            </div>
-            <div className="stat-card-info">
-              <span className="stat-card-value">0</span>
-              <span className="stat-card-label">Pending</span>
-            </div>
-          </div>
-
-          <div className="stat-card glass" style={{ animationDelay: "0.4s" }}>
-            <div className="stat-card-icon icon-purple">
-              <BookmarkCheck size={22} />
-            </div>
-            <div className="stat-card-info">
-              <span className="stat-card-value">0</span>
-              <span className="stat-card-label">Saved Jobs</span>
-            </div>
-          </div>
+          <Link
+            to="/dashboard/profile"
+            id="build-profile-btn"
+            style={{
+              padding: "14px 32px",
+              background: "var(--cream-50)",
+              color: "var(--navy-800)",
+              textDecoration: "none",
+              borderRadius: "12px",
+              fontWeight: "700",
+              fontSize: "14px",
+              whiteSpace: "nowrap",
+              boxShadow: "var(--shadow-md)",
+              transition: "transform 0.2s, box-shadow 0.2s",
+              display: "inline-block",
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "var(--shadow-lg)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "var(--shadow-md)"; }}
+          >
+            Build Profile →
+          </Link>
         </div>
-
-        {/* Main Content Grid */}
-        <div className="dashboard-grid">
-          {/* Recent Activity */}
-          <div className="dashboard-card glass animate-fade-in-up">
-            <div className="card-header">
-              <h3>
-                <Bell size={18} />
-                Recent Activity
-              </h3>
-            </div>
-            <div className="empty-state">
-              <TrendingUp size={40} className="empty-icon" />
-              <p>No recent activity</p>
-              <span>Start applying to jobs to see your activity here.</span>
-            </div>
-          </div>
-
-          {/* Profile Completion */}
-          <div className="dashboard-card glass animate-fade-in-up" style={{ animationDelay: "0.15s" }}>
-            <div className="card-header">
-              <h3>
-                <CheckCircle size={18} />
-                Profile Status
-              </h3>
-            </div>
-            <div className="profile-checklist">
-              <div className="checklist-item completed">
-                <CheckCircle size={16} />
-                <span>Account created</span>
-              </div>
-              <div className={`checklist-item ${user?.isVerified ? "completed" : ""}`}>
-                {user?.isVerified ? <CheckCircle size={16} /> : <XCircle size={16} />}
-                <span>Email verified</span>
-              </div>
-              <div className="checklist-item">
-                <XCircle size={16} />
-                <span>Resume uploaded</span>
-              </div>
-              <div className="checklist-item">
-                <XCircle size={16} />
-                <span>Profile completed</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      </main>
     </div>
   );
 };
+
+const JobSeekerDashboard = () => (
+  <ProfileProvider>
+    <DashboardContent />
+  </ProfileProvider>
+);
 
 export default JobSeekerDashboard;

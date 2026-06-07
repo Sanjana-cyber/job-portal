@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { LogOut, User, ChevronDown, Briefcase, Shield } from "lucide-react";
 import toast from "react-hot-toast";
@@ -12,7 +12,13 @@ import toast from "react-hot-toast";
 const Navbar = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [showDropdown, setShowDropdown] = useState(false);
+
+  // Hide Navbar on dashboard routes
+  if (location.pathname.startsWith("/dashboard") || location.pathname.startsWith("/recruiter/dashboard") || location.pathname.startsWith("/admin/dashboard")) {
+    return null;
+  }
 
   const handleLogout = async () => {
     await logout();

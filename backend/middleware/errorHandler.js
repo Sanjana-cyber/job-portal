@@ -20,7 +20,12 @@ const errorHandler = (err, req, res, next) => {
 
   // Log error for development debugging
   if (process.env.NODE_ENV === "development") {
-    console.error("❌ Error:", err);
+    // Don't log full stack traces for expected 401/404 errors
+    if (err.statusCode === 401 || err.statusCode === 404) {
+      console.error(`⚠️  [${err.statusCode}] ${err.message}`);
+    } else {
+      console.error("❌ Error:", err);
+    }
   }
 
   // Mongoose bad ObjectId (CastError)

@@ -11,6 +11,7 @@ import RecruiterDashboard from "./pages/RecruiterDashboard";
 import SystemManagementConsole from "./pages/SystemManagementConsole";
 import ResetPassword from "./pages/ResetPassword";
 import EmailVerification from "./pages/EmailVerification";
+import ProfileBuilderPage from "./pages/ProfileBuilderPage";
 
 function App() {
   return (
@@ -59,6 +60,14 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={["jobseeker"]}>
               <JobSeekerDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/profile"
+          element={
+            <ProtectedRoute allowedRoles={["jobseeker"]}>
+              <ProfileBuilderPage />
             </ProtectedRoute>
           }
         />

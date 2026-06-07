@@ -89,6 +89,136 @@ const HomePage = () => {
         </div>
       </section>
 
+      {/* ── Resume Showcase Section ──────────────────────── */}
+      <section className="resume-showcase-section">
+        <div className="showcase-container">
+          <div className="showcase-content">
+            <div className="section-label">
+              <CheckCircle size={12} />
+              Resume Builder
+            </div>
+            <h2 className="showcase-title">
+              Craft a standout <span className="gradient-text-amber">resume</span> in minutes
+            </h2>
+            <p className="showcase-description">
+              Our smart builder formats your resume according to recruiter standards. Focus on your story while we take care of the design, ensuring alignment with ATS requirements.
+            </p>
+            <div className="showcase-cta">
+              <button
+                className="btn-showcase-primary"
+                onClick={() => handleRoleClick("jobseeker")}
+              >
+                Build Your Resume
+                <ArrowRight size={16} />
+              </button>
+            </div>
+          </div>
+          <div className="showcase-visual">
+            <div className="resume-drawing-container">
+              {/* Modern SVG Resume Drawing */}
+              <svg
+                width="320"
+                height="320"
+                viewBox="0 0 320 320"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                className="resume-svg-drawing"
+              >
+                {/* Background glow shadow */}
+                <circle cx="160" cy="160" r="120" fill="url(#glow-gradient)" opacity="0.15" />
+                
+                {/* Resume Document Frame */}
+                <g className="resume-document-group">
+                  {/* Document Shadow */}
+                  <rect x="64" y="44" width="160" height="220" rx="16" fill="black" opacity="0.04" />
+                  <rect x="62" y="42" width="160" height="220" rx="16" fill="black" opacity="0.06" />
+                  
+                  {/* Document Body */}
+                  <rect x="60" y="40" width="160" height="220" rx="16" fill="#FFFFFF" stroke="var(--border-subtle)" strokeWidth="1.5" />
+                  
+                  {/* Dog-ear Folded Corner at Top-Right */}
+                  <path d="M204 40.75 H214 C216.5 40.75 220 44 220 46.5 V56" stroke="var(--border-subtle)" strokeWidth="1.5" />
+                  <path d="M204 40.75 V56 H220 L204 40.75 Z" fill="#F5EFE9" stroke="var(--border-subtle)" strokeWidth="1.5" />
+
+                  {/* Resume Header Area */}
+                  {/* Avatar/Icon Circle */}
+                  <circle cx="88" cy="72" r="14" fill="#F5EFE9" />
+                  <circle cx="88" cy="72" r="6" fill="var(--navy-600)" />
+                  
+                  {/* Name lines */}
+                  <rect x="112" y="64" width="64" height="6" rx="3" fill="var(--navy-800)" />
+                  <rect x="112" y="74" width="44" height="4" rx="2" fill="var(--navy-400)" />
+
+                  {/* Section Divider 1 */}
+                  <line x1="76" y1="96" x2="204" y2="96" stroke="var(--border-subtle)" strokeWidth="1" strokeDasharray="2 2" />
+
+                  {/* Work Experience Section */}
+                  {/* Title */}
+                  <rect x="76" y="106" width="50" height="5" rx="2.5" fill="var(--navy-800)" />
+                  {/* Subtitle */}
+                  <rect x="76" y="116" width="30" height="3" rx="1.5" fill="var(--navy-400)" />
+                  {/* Bullet lines */}
+                  <rect x="76" y="126" width="128" height="3.5" rx="1.75" fill="var(--navy-200)" />
+                  <rect x="76" y="134" width="118" height="3.5" rx="1.75" fill="var(--navy-200)" />
+                  <rect x="76" y="142" width="88" height="3.5" rx="1.75" fill="var(--navy-200)" />
+
+                  {/* Section Divider 2 */}
+                  <line x1="76" y1="156" x2="204" y2="156" stroke="var(--border-subtle)" strokeWidth="1" strokeDasharray="2 2" />
+
+                  {/* Skills Section */}
+                  {/* Title */}
+                  <rect x="76" y="166" width="35" height="5" rx="2.5" fill="var(--navy-800)" />
+                  {/* Pill items (tags) */}
+                  <rect x="76" y="176" width="36" height="10" rx="5" fill="#F5EFE9" />
+                  <rect x="116" y="176" width="44" height="10" rx="5" fill="#F5EFE9" />
+                  <rect x="164" y="176" width="32" height="10" rx="5" fill="#F5EFE9" />
+                  
+                  <rect x="76" y="190" width="42" height="10" rx="5" fill="#F5EFE9" />
+                  <rect x="122" y="190" width="36" height="10" rx="5" fill="#F5EFE9" />
+
+                  {/* Section Divider 3 */}
+                  <line x1="76" y1="210" x2="204" y2="210" stroke="var(--border-subtle)" strokeWidth="1" strokeDasharray="2 2" />
+
+                  {/* Signature/Verification line at bottom */}
+                  <rect x="76" y="222" width="60" height="4" rx="2" fill="var(--amber-400)" />
+                  <path d="M184 220 L204 225" stroke="var(--navy-400)" strokeWidth="1.5" strokeLinecap="round" />
+                </g>
+
+                {/* Pencil Group */}
+                <g className="resume-pencil-group">
+                  {/* Pencil shadow */}
+                  <path d="M192 192 L234 150 L242 158 L200 200 Z" fill="black" opacity="0.06" />
+                  
+                  {/* Pencil Lead/Tip */}
+                  <path d="M176 208 L185 197 L193 205 Z" fill="var(--navy-900)" />
+                  
+                  {/* Pencil Wood Cone */}
+                  <path d="M185 197 L195 187 L203 195 L193 205 Z" fill="#EAD5C3" />
+                  
+                  {/* Pencil Body (Gold/Amber) */}
+                  <path d="M195 187 L235 147 C237.5 144.5 241.5 144.5 244 147 L249 152 C251.5 154.5 251.5 158.5 249 161 L209 201 Z" fill="var(--amber-400)" />
+                  
+                  {/* Pencil Stripes (Espresso) */}
+                  <path d="M201 181 L238 144 C239 143 241 143 242 144 L244 146 C245 147 245 149 244 150 L207 187 Z" fill="var(--navy-800)" />
+                  
+                  {/* Metal Band & Eraser */}
+                  <path d="M239 143 L245 137 C247 135 250 135 252 137 L255 140 C257 142 257 145 255 147 L249 153 Z" fill="var(--navy-300)" />
+                  <path d="M248 134 L251 131 C252.5 129.5 255.5 129.5 257 131 L260 134 C261.5 135.5 261.5 138.5 260 140 L257 143 Z" fill="#F4A261" />
+                </g>
+
+                {/* Gradients */}
+                <defs>
+                  <radialGradient id="glow-gradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+                    <stop offset="0%" stopColor="var(--amber-400)" />
+                    <stop offset="100%" stopColor="var(--amber-100)" stopOpacity="0" />
+                  </radialGradient>
+                </defs>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── Features ────────────────────────────────────── */}
       <section className="features-section" id="features">
         <div className="section-label">

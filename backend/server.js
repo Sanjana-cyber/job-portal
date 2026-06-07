@@ -6,6 +6,7 @@ const mongoSanitize = require("express-mongo-sanitize");
 const connectDB = require("./config/db");
 const { errorHandler } = require("./middleware/errorHandler");
 const authRoutes = require("./routes/authRoutes");
+const profileRoutes = require("./routes/profileRoutes");
 
 // Load environment variables strictly from the backend/.env file
 const path = require("path");
@@ -21,7 +22,10 @@ const app = express();
 // CORS — Allow frontend to communicate with backend
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    origin: [
+      process.env.FRONTEND_URL || "http://localhost:5173",
+      "http://localhost:5174"
+    ],
     credentials: true, // Allow cookies to be sent cross-origin
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -72,6 +76,9 @@ app.get("/api/health", (req, res) => {
 
 // Authentication routes
 app.use("/api/auth", authRoutes);
+
+// Candidate profile routes
+app.use("/api/profile", profileRoutes);
 
 // 404 handler for unknown routes
 app.use((req, res) => {
