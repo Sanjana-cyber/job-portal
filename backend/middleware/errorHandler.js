@@ -60,6 +60,15 @@ const errorHandler = (err, req, res, next) => {
     error = new ErrorResponse(message, 401);
   }
 
+  // Multer errors (file type / size violations)
+  if (err.name === "MulterError") {
+    let message = "File upload error";
+    if (err.code === "LIMIT_FILE_SIZE")  message = "File too large. Check the size limit.";
+    if (err.code === "LIMIT_FILE_COUNT") message = "Too many files.";
+    if (err.code === "LIMIT_UNEXPECTED_FILE") message = `Unexpected field: ${err.field}`;
+    error = new ErrorResponse(message, 400);
+  }
+
   res.status(error.statusCode || 500).json({
     success: false,
     message: error.message || "Internal Server Error",

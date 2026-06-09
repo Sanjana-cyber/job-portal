@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { uploadPhoto, deletePhoto } from "../../api/profileApi";
 import { useProfile } from "../../context/ProfileContext";
 import toast from "react-hot-toast";
@@ -13,6 +13,14 @@ const ProfilePhotoUpload = () => {
   const fileInputRef = useRef(null);
   const [preview, setPreview]   = useState(profile?.photo?.url || "");
   const [loading, setLoading]   = useState(false);
+
+  useEffect(() => {
+    if (profile?.photo?.url) {
+      setPreview(profile.photo.url);
+    } else {
+      setPreview("");
+    }
+  }, [profile?.photo?.url]);
 
   const initials = (() => {
     try {

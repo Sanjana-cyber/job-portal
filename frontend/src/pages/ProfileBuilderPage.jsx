@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ProfileProvider } from "../context/ProfileContext";
 import HamburgerMenu from "../components/dashboard/HamburgerMenu";
 import SectionTabs from "../components/profile/SectionTabs";
@@ -25,6 +25,7 @@ const TAB_COMPONENTS = {
 
 const ProfileBuilderContent = () => {
   const [activeTab, setActiveTab] = useState("personal");
+  const navigate = useNavigate();
 
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg-page)", fontFamily: "var(--font-body)" }}>
@@ -118,21 +119,28 @@ const ProfileBuilderContent = () => {
                 >← Previous</button>
                 <button
                   type="button"
-                  onClick={() => setActiveTab(tabs[idx + 1])}
-                  disabled={idx === tabs.length - 1}
+                  onClick={() => {
+                    if (idx === tabs.length - 1) {
+                      navigate("/dashboard");
+                    } else {
+                      setActiveTab(tabs[idx + 1]);
+                    }
+                  }}
                   style={{
                     padding: "10px 20px",
                     border: "none",
                     borderRadius: "10px",
-                    background: idx === tabs.length - 1 ? "var(--border-subtle)" : "var(--navy-800)",
-                    color: idx === tabs.length - 1 ? "var(--text-tertiary)" : "var(--cream-50)",
+                    background: idx === tabs.length - 1 ? "#059669" : "var(--navy-800)",
+                    color: "var(--cream-50)",
                     fontWeight: "600", fontSize: "13px",
-                    cursor: idx === tabs.length - 1 ? "default" : "pointer",
-                    boxShadow: idx === tabs.length - 1 ? "none" : "var(--shadow-sm)",
+                    cursor: "pointer",
+                    boxShadow: idx === tabs.length - 1 ? "0 4px 14px rgba(5, 150, 105, 0.3)" : "var(--shadow-sm)",
                     fontFamily: "inherit",
                     transition: "all 0.2s",
                   }}
-                >Next →</button>
+                  onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-1px)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; }}
+                >{idx === tabs.length - 1 ? "Complete Profile ✓" : "Next →"}</button>
               </>
             );
           })()}

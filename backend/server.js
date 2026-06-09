@@ -1,5 +1,10 @@
-const express = require("express");
+const path = require("path");
 const dotenv = require("dotenv");
+
+// Load environment variables strictly from the backend/.env file BEFORE importing other local modules
+dotenv.config({ path: path.join(__dirname, ".env") });
+
+const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const mongoSanitize = require("express-mongo-sanitize");
@@ -7,10 +12,6 @@ const connectDB = require("./config/db");
 const { errorHandler } = require("./middleware/errorHandler");
 const authRoutes = require("./routes/authRoutes");
 const profileRoutes = require("./routes/profileRoutes");
-
-// Load environment variables strictly from the backend/.env file
-const path = require("path");
-dotenv.config({ path: path.join(__dirname, ".env") });
 
 // Create Express application
 const app = express();

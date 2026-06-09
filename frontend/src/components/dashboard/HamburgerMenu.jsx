@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../../context/AuthContext";
+import { useProfile } from "../../context/ProfileContext";
 import { useNavigate } from "react-router-dom";
 
 /**
@@ -9,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 const HamburgerMenu = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { user, logout } = useAuth();
+  const { profile } = useProfile();
   const navigate = useNavigate();
   const drawerRef = useRef(null);
 
@@ -122,8 +124,13 @@ const HamburgerMenu = () => {
             display: "flex", alignItems: "center", justifyContent: "center",
             fontSize: "28px", fontWeight: "700", color: "#fff",
             boxShadow: "0 0 0 4px rgba(145, 118, 110, 0.3)",
+            overflow: "hidden",
           }}>
-            {initials}
+            {profile?.photo?.url ? (
+              <img src={profile.photo.url} alt="Profile" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            ) : (
+              initials
+            )}
           </div>
 
           {/* Name */}

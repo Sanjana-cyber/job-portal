@@ -6,7 +6,7 @@ import { getMyProfile } from "../api/profileApi";
  * Global profile state for jobseeker dashboard & profile builder.
  * Any component can call useProfile() to read or refresh profile data.
  */
-const ProfileContext = createContext(null);
+export const ProfileContext = createContext(null);
 
 export const useProfile = () => {
   const ctx = useContext(ProfileContext);
@@ -48,5 +48,3 @@ export const ProfileProvider = ({ children }) => {
     </ProfileContext.Provider>
   );
 };
-
-export default ProfileContext;

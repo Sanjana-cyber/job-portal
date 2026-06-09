@@ -1,10 +1,12 @@
 import { useAuth } from "../../context/AuthContext";
+import { useProfile } from "../../context/ProfileContext";
 
 /**
  * WelcomeBanner — Personalized greeting with animated gradient text
  */
 const WelcomeBanner = () => {
   const { user } = useAuth();
+  const { profile } = useProfile();
   const firstName = user?.name?.split(" ")[0] || "there";
 
   const hour = new Date().getHours();
@@ -53,19 +55,28 @@ const WelcomeBanner = () => {
         </p>
       </div>
 
-      {/* Decorative badge */}
-      <div style={{
-        background: "var(--amber-100)",
-        border: "1px solid var(--amber-200)",
-        borderRadius: "16px",
-        padding: "12px 20px",
-        textAlign: "center",
-        minWidth: "120px",
-      }}>
-        <p style={{ color: "var(--amber-700)", fontWeight: "700", fontSize: "24px", margin: 0 }}>🚀</p>
-        <p style={{ color: "var(--amber-700)", fontSize: "12px", margin: "4px 0 0", fontWeight: "600" }}>
-          {user?.role === "jobseeker" ? "Job Seeker" : user?.role}
-        </p>
+      {/* Decorative badge and Photo */}
+      <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+        {profile?.photo?.url && (
+          <img 
+            src={profile.photo.url} 
+            alt="Profile" 
+            style={{ width: "64px", height: "64px", borderRadius: "50%", objectFit: "cover", boxShadow: "0 4px 12px rgba(0,0,0,0.08)", border: "2px solid #fff" }} 
+          />
+        )}
+        <div style={{
+          background: "var(--amber-100)",
+          border: "1px solid var(--amber-200)",
+          borderRadius: "16px",
+          padding: "12px 20px",
+          textAlign: "center",
+          minWidth: "120px",
+        }}>
+          <p style={{ color: "var(--amber-700)", fontWeight: "700", fontSize: "24px", margin: 0 }}>🚀</p>
+          <p style={{ color: "var(--amber-700)", fontSize: "12px", margin: "4px 0 0", fontWeight: "600" }}>
+            {user?.role === "jobseeker" ? "Job Seeker" : user?.role}
+          </p>
+        </div>
       </div>
     </div>
   );

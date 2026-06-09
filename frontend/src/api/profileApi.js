@@ -7,8 +7,11 @@ import axios from "axios";
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
   withCredentials: true,
-  headers: { "Content-Type": "application/json" },
+  // Do NOT set Content-Type here.
+  // Axios auto-sets: 'application/json' for plain objects, 'multipart/form-data; boundary=...' for FormData.
+  // A hard-coded Content-Type here would strip the multipart boundary → multer fails → 500.
 });
+
 
 // ─── Profile ──────────────────────────────────────────────────────────────
 export const getMyProfile        = ()     => api.get("/profile/me");
