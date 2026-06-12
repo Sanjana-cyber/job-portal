@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { getMyProfile } from "../api/profileApi";
+import { getMyProfile, getResumes } from "../api/profileApi";
 
 /**
  * ProfileContext
@@ -16,19 +16,28 @@ export const useProfile = () => {
 
 export const ProfileProvider = ({ children }) => {
   const [profile, setProfile]               = useState(null);
+  const [resumes, setResumes]               = useState([]);
   const [completionScore, setCompletionScore] = useState(0);
   const [profileLoading, setProfileLoading] = useState(true);
 
   const fetchProfile = useCallback(async () => {
     try {
-      setProfileLoading(true);
-      const res = await getMyProfile();
-      if (res.data.success) {
-        setProfile(res.data.data.profile);
-        setCompletionScore(res.data.data.completionScore);
+      const [profileRes, resumesRes] = await Promise.all([
+        getMyProfile(),
+        getResumes().catch(() => ({ data: { data: [] } }))
+      ]);
+      
+      if (profileRes.data.success) {
+        setProfile(profileRes.data.data.profile);
+        setCompletionScore(profileRes.data.data.completionScore);
+      }
+      
+      if (resumesRes?.data?.data) {
+        setResumes(resumesRes.data.data);
       }
     } catch {
       setProfile(null);
+      setResumes([]);
     } finally {
       setProfileLoading(false);
     }
@@ -43,7 +52,7 @@ export const ProfileProvider = ({ children }) => {
   const refetchProfile = fetchProfile;
 
   return (
-    <ProfileContext.Provider value={{ profile, completionScore, profileLoading, refetchProfile, setProfile, setCompletionScore }}>
+    <ProfileContext.Provider value={{ profile, resumes, completionScore, profileLoading, refetchProfile, setProfile, setCompletionScore }}>
       {children}
     </ProfileContext.Provider>
   );

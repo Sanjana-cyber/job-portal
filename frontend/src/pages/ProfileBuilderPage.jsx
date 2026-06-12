@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { ProfileProvider } from "../context/ProfileContext";
 import HamburgerMenu from "../components/dashboard/HamburgerMenu";
 import SectionTabs from "../components/profile/SectionTabs";
@@ -11,6 +11,8 @@ import ExperienceForm from "../components/profile/ExperienceForm";
 import ProjectsForm from "../components/profile/ProjectsForm";
 import CertificationsForm from "../components/profile/CertificationsForm";
 import ResumeUpload from "../components/profile/ResumeUpload";
+
+const VALID_TABS = ["personal", "professional", "skills", "education", "experience", "projects", "certifications", "resume"];
 
 const TAB_COMPONENTS = {
   personal:       <PersonalInfoForm />,
@@ -24,8 +26,20 @@ const TAB_COMPONENTS = {
 };
 
 const ProfileBuilderContent = () => {
-  const [activeTab, setActiveTab] = useState("personal");
+  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
+
+  // Read ?tab= from URL; fall back to "personal" if missing or invalid
+  const initialTab = VALID_TABS.includes(searchParams.get("tab"))
+    ? searchParams.get("tab")
+    : "personal";
+
+  const [activeTab, setActiveTab] = useState(initialTab);
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    setSearchParams({ tab }, { replace: true });
+  };
 
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg-page)", fontFamily: "var(--font-body)" }}>
@@ -87,7 +101,7 @@ const ProfileBuilderContent = () => {
         </div>
 
         {/* Tab Navigation */}
-        <SectionTabs activeTab={activeTab} onTabChange={setActiveTab} />
+        <SectionTabs activeTab={activeTab} onTabChange={handleTabChange} />
 
         {/* Active Tab Form */}
         <div key={activeTab} style={{ animation: "fadeIn 0.2s ease" }}>
@@ -97,13 +111,13 @@ const ProfileBuilderContent = () => {
         {/* Tab Navigation Footer Arrows */}
         <div style={{ display: "flex", justifyContent: "space-between", paddingBottom: "20px" }}>
           {(() => {
-            const tabs = ["personal","professional","skills","education","experience","projects","certifications","resume"];
+            const tabs = VALID_TABS;
             const idx  = tabs.indexOf(activeTab);
             return (
               <>
                 <button
                   type="button"
-                  onClick={() => setActiveTab(tabs[idx - 1])}
+                  onClick={() => handleTabChange(tabs[idx - 1])}
                   disabled={idx === 0}
                   style={{
                     padding: "10px 20px",
@@ -123,7 +137,7 @@ const ProfileBuilderContent = () => {
                     if (idx === tabs.length - 1) {
                       navigate("/dashboard");
                     } else {
-                      setActiveTab(tabs[idx + 1]);
+                      handleTabChange(tabs[idx + 1]);
                     }
                   }}
                   style={{

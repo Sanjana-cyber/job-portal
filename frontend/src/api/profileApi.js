@@ -47,5 +47,9 @@ export const deleteCertification = (id)   => api.delete(`/profile/certifications
 // Manually forcing the header strips the boundary → multer can't parse → 500 error.
 export const uploadPhoto  = (formData) => api.post("/profile/photo",  formData);
 export const deletePhoto  = ()         => api.delete("/profile/photo");
-export const uploadResume = (formData) => api.post("/profile/resume", formData);
-export const deleteResume = ()         => api.delete("/profile/resume");
+
+// ─── Resume Versions ──────────────────────────────────────────────────────
+export const getResumes           = ()         => api.get("/profile/resumes");
+export const uploadResumeVersion  = (formData) => api.post("/profile/resumes", formData);
+export const setActiveResume      = (id)       => api.put(`/profile/resumes/${id}/active`);
+export const deleteResumeVersion  = (id)       => api.delete(`/profile/resumes/${id}`);

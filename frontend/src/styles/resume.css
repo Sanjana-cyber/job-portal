@@ -1,0 +1,291 @@
+/* Resume Upload & Version History Styles */
+
+.resume-container {
+  background: #fff;
+  border-radius: 20px;
+  padding: 32px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+  border: 1px solid #e2e8f0;
+}
+
+.resume-header {
+  color: #1e293b;
+  font-weight: 700;
+  font-size: 18px;
+  margin: 0 0 8px;
+}
+
+.resume-required {
+  color: #ef4444;
+}
+
+.resume-subtitle {
+  color: #94a3b8;
+  font-size: 13px;
+  margin: 0 0 24px;
+}
+
+.resume-upload-box {
+  border: 2px dashed #e2e8f0;
+  border-radius: 14px;
+  padding: 32px 24px;
+  text-align: center;
+  background: #f8fafc;
+  transition: all 0.2s;
+  margin-bottom: 32px;
+}
+
+.resume-upload-box.dragging {
+  border-color: #6366f1;
+  background: rgba(99,102,241,0.04);
+}
+
+.resume-upload-icon {
+  font-size: 36px;
+  margin: 0 0 12px;
+}
+
+.resume-title-input {
+  width: 100%;
+  max-width: 400px;
+  padding: 10px 14px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #1e293b;
+  background: #fff;
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.2s;
+  margin-bottom: 16px;
+}
+
+.resume-title-input:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+}
+
+.resume-file-btn {
+  padding: 8px 20px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  display: inline-block;
+  margin-top: 8px;
+}
+
+.resume-file-btn:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+}
+
+.resume-file-btn.secondary {
+  background: #fff;
+  color: #6366f1;
+  border: 1.5px solid #6366f1;
+}
+
+.resume-versions-header {
+  color: #1e293b;
+  font-weight: 700;
+  font-size: 16px;
+  margin: 0 0 16px;
+  padding-top: 24px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.resume-version-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.resume-item {
+  border: 1.5px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 16px 20px;
+  background: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  transition: all 0.2s;
+}
+
+.resume-item.active {
+  border-color: rgba(34,197,94,0.4);
+  background: rgba(34,197,94,0.04);
+}
+
+.resume-item-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.resume-item-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(239,68,68,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+.resume-item-title {
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 4px;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.resume-badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: 700;
+}
+
+.resume-badge.version {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.resume-badge.active-badge {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.resume-item-meta {
+  color: #94a3b8;
+  font-size: 12px;
+  margin: 0;
+}
+
+.resume-item-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.resume-action-btn {
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+
+.resume-action-btn.view {
+  border: 1.5px solid #6366f1;
+  color: #6366f1;
+  background: transparent;
+  text-decoration: none;
+}
+
+.resume-action-btn.view:hover {
+  background: rgba(99,102,241,0.05);
+}
+
+.resume-action-btn.set-active {
+  border: 1.5px solid #f59e0b;
+  color: #d97706;
+  background: transparent;
+}
+
+.resume-action-btn.set-active:hover {
+  background: rgba(245,158,11,0.05);
+}
+
+.resume-action-btn.delete {
+  border: 1.5px solid #ef4444;
+  color: #ef4444;
+  background: transparent;
+}
+
+.resume-action-btn.delete:hover {
+  background: rgba(239,68,68,0.05);
+}
+
+.resume-action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Dashboard Active Resume Card */
+.active-resume-card {
+  background: var(--bg-surface);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.active-resume-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.active-resume-title {
+  color: var(--navy-900);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 18px;
+  margin: 0;
+}
+
+.active-resume-count {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6366f1;
+  background: rgba(99,102,241,0.1);
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+.active-resume-body {
+  border: 1.5px solid rgba(34,197,94,0.3);
+  border-radius: 14px;
+  padding: 16px;
+  background: rgba(34,197,94,0.04);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.active-resume-empty {
+  border: 1.5px dashed var(--border-default);
+  border-radius: 14px;
+  padding: 24px;
+  text-align: center;
+  background: var(--bg-page);
+}
+
+.active-resume-empty p {
+  color: var(--text-secondary);
+  font-size: 13px;
+  margin: 0 0 12px;
+}
+
+.active-resume-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}

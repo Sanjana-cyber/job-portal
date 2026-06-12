@@ -12,7 +12,7 @@ const {
   addProject, updateProject, deleteProject,
   addCertification, updateCertification, deleteCertification,
   uploadPhoto: uploadPhotoCtrl, deletePhoto,
-  uploadResume: uploadResumeCtrl, deleteResume,
+  getResumes, uploadResumeVersion, setActiveResume, deleteResumeVersion
 } = require("../controllers/profileController");
 
 // All profile routes require authentication
@@ -51,9 +51,10 @@ router.delete("/certifications/:id",  deleteCertification);
 router.post("/photo",   uploadPhoto.single("photo"),   uploadPhotoCtrl);
 router.delete("/photo", deletePhoto);
 
-// ─── Resume ────────────────────────────────────────────────────────────────
-// uploadResume.single("resume") — multer processes "resume" field
-router.post("/resume",   uploadResume.single("resume"), uploadResumeCtrl);
-router.delete("/resume", deleteResume);
+// ─── Resume Versions ───────────────────────────────────────────────────────
+router.get("/resumes", getResumes);
+router.post("/resumes", uploadResume.single("resume"), uploadResumeVersion);
+router.put("/resumes/:id/active", setActiveResume);
+router.delete("/resumes/:id", deleteResumeVersion);
 
 module.exports = router;

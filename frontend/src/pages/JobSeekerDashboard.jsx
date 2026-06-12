@@ -1,12 +1,16 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ProfileProvider } from "../context/ProfileContext";
+import { ProfileProvider, useProfile } from "../context/ProfileContext";
 import HamburgerMenu from "../components/dashboard/HamburgerMenu";
 import WelcomeBanner from "../components/dashboard/WelcomeBanner";
 import ProfileCompletionRing from "../components/dashboard/ProfileCompletionRing";
 import ProfileStatusGrid from "../components/dashboard/ProfileStatusGrid";
+import ActiveResumeCard from "../components/dashboard/ActiveResumeCard";
+import AtsAnalysisPanel from "../components/dashboard/AtsAnalysisPanel";
 
 const DashboardContent = () => {
+  const { resumes } = useProfile();
+  const activeResume = resumes?.find((r) => r.isActive) || null;
   return (
     <div style={{
       minHeight: "100vh",
@@ -77,8 +81,17 @@ const DashboardContent = () => {
           <ProfileStatusGrid />
         </div>
 
-        {/* Build Profile CTA */}
+        {/* Third row: Active Resume + Build Profile CTA */}
         <div style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 2fr",
+          gap: "24px",
+          alignItems: "stretch",
+        }}>
+          <ActiveResumeCard />
+          
+          {/* Build Profile CTA */}
+          <div style={{
           background: "var(--gradient-brand)",
           borderRadius: "20px",
           padding: "28px 36px",
@@ -118,7 +131,12 @@ const DashboardContent = () => {
           >
             Build Profile →
           </Link>
+          </div>
         </div>
+
+        {/* ATS Match Analyzer — full width */}
+        <AtsAnalysisPanel activeResume={activeResume} />
+
       </main>
     </div>
   );

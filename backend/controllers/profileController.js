@@ -1,4 +1,5 @@
 const CandidateProfile = require("../models/CandidateProfile");
+const Resume = require("../models/Resume");
 const { ErrorResponse } = require("../middleware/errorHandler");
 const { uploadToCloudinary, deleteFromCloudinary } = require("../utils/cloudinaryHelper");
 
@@ -217,38 +218,110 @@ exports.deletePhoto = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
-// ─── RESUME UPLOAD ────────────────────────────────────────────────────────
-exports.uploadResume = async (req, res, next) => {
+// ─── RESUME VERSION HISTORY ────────────────────────────────────────────────
+exports.getResumes = async (req, res, next) => {
+  try {
+    const resumes = await Resume.find({ user: req.user._id }).sort({ versionNumber: -1 });
+    res.status(200).json({ success: true, data: resumes });
+  } catch (err) { next(err); }
+};
+
+exports.uploadResumeVersion = async (req, res, next) => {
   try {
     if (!req.file) return next(new ErrorResponse("No resume file provided", 400));
-    const profile = await getOrCreate(req.user._id);
-    // Delete old resume from Cloudinary before uploading new one
-    if (profile.resume && profile.resume.publicId) {
-      await deleteFromCloudinary(profile.resume.publicId, "raw");
-    }
+    const title = req.body.title || "Untitled Resume";
+    
+    // Find highest version number
+    const existingResumes = await Resume.find({ user: req.user._id });
+    const versionNumber = existingResumes.length > 0 ? Math.max(...existingResumes.map(r => r.versionNumber)) + 1 : 1;
+    
     const { url, publicId } = await uploadToCloudinary(
       req.file.buffer,
       "job-portal/profiles/resumes",
       "raw"
     );
-    profile.resume = {
-      url,
-      publicId,
-      originalName: req.file.originalname,
-      uploadedAt: new Date(),
-    };
-    await profile.save();
-    res.status(200).json({ success: true, message: "Resume uploaded", data: { resumeUrl: url, originalName: req.file.originalname, completionScore: profile.completionScore } });
+    
+    const isFirst = existingResumes.length === 0;
+    
+    const newResume = new Resume({
+      user: req.user._id,
+      title,
+      versionNumber,
+      fileUrl: url,
+      cloudinaryPublicId: publicId,
+      originalFileName: req.file.originalname,
+      isActive: isFirst,
+    });
+    
+    await newResume.save();
+    
+    let completionScore = 0;
+    if (isFirst) {
+      const profile = await getOrCreate(req.user._id);
+      profile.resume = {
+        url,
+        publicId,
+        originalName: req.file.originalname,
+        uploadedAt: newResume.createdAt,
+      };
+      await profile.save();
+      completionScore = profile.completionScore;
+    } else {
+      const profile = await CandidateProfile.findOne({ user: req.user._id });
+      completionScore = profile ? profile.completionScore : 0;
+    }
+    
+    res.status(201).json({ success: true, message: "Resume version uploaded", data: { resume: newResume, completionScore } });
   } catch (err) { next(err); }
 };
 
-exports.deleteResume = async (req, res, next) => {
+exports.setActiveResume = async (req, res, next) => {
   try {
-    const profile = await CandidateProfile.findOne({ user: req.user._id });
-    if (!profile) return next(new ErrorResponse("Profile not found", 404));
-    await deleteFromCloudinary(profile.resume.publicId, "raw");
-    profile.resume = { url: "", publicId: "", originalName: "", uploadedAt: null };
+    const resumeId = req.params.id;
+    const targetResume = await Resume.findOne({ _id: resumeId, user: req.user._id });
+    if (!targetResume) return next(new ErrorResponse("Resume not found", 404));
+    
+    await Resume.updateMany({ user: req.user._id }, { isActive: false });
+    targetResume.isActive = true;
+    await targetResume.save();
+    
+    const profile = await getOrCreate(req.user._id);
+    profile.resume = {
+      url: targetResume.fileUrl,
+      publicId: targetResume.cloudinaryPublicId,
+      originalName: targetResume.originalFileName,
+      uploadedAt: targetResume.createdAt,
+    };
     await profile.save();
-    res.status(200).json({ success: true, message: "Resume removed", data: { completionScore: profile.completionScore } });
+    
+    res.status(200).json({ success: true, message: "Active resume updated", data: { resume: targetResume, completionScore: profile.completionScore } });
+  } catch (err) { next(err); }
+};
+
+exports.deleteResumeVersion = async (req, res, next) => {
+  try {
+    const resumeId = req.params.id;
+    const targetResume = await Resume.findOne({ _id: resumeId, user: req.user._id });
+    if (!targetResume) return next(new ErrorResponse("Resume not found", 404));
+    
+    await deleteFromCloudinary(targetResume.cloudinaryPublicId, "raw");
+    await Resume.findByIdAndDelete(resumeId);
+    
+    let completionScore = 0;
+    
+    if (targetResume.isActive) {
+      // Clear active resume in candidate profile as per user request (manual active button)
+      const profile = await CandidateProfile.findOne({ user: req.user._id });
+      if (profile) {
+        profile.resume = { url: "", publicId: "", originalName: "", uploadedAt: null };
+        await profile.save();
+        completionScore = profile.completionScore;
+      }
+    } else {
+      const profile = await CandidateProfile.findOne({ user: req.user._id });
+      completionScore = profile ? profile.completionScore : 0;
+    }
+    
+    res.status(200).json({ success: true, message: "Resume version deleted", data: { completionScore } });
   } catch (err) { next(err); }
 };
