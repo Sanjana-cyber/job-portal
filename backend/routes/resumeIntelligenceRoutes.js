@@ -5,6 +5,7 @@ const {
   parseResume,
   matchATS,
   getAiFeedback,
+  getAiIntelligence,
 } = require("../controllers/resumeIntelligenceController");
 
 // All routes require authentication
@@ -14,14 +15,22 @@ router.use(protect);
 // POST /api/resume-intelligence/:id/parse
 router.post("/:id/parse", parseResume);
 
-// ─── ATS match score ────────────────────────────────────────────────────────
+// ─── Deterministic ATS match score (no Gemini) ─────────────────────────────
 // POST /api/resume-intelligence/:id/ats-match
 // Body: { jobDescription: "..." }
+// Returns: { matchScore, matchedKeywords, missingKeywords, status }
 router.post("/:id/ats-match", matchATS);
 
-// ─── AI Feedback ────────────────────────────────────────────────────────────
+// ─── AI Intelligence (NEW) — Gemini explanation only ──────────────────────
+// POST /api/resume-intelligence/:id/ai-intelligence
+// Body: { jobDescription, atsScore, matchedSkills, missingSkills,
+//         matchedRequirements?, missingRequirements?,
+//         internalJobsList?, jobMatchScores? }
+// Returns: { atsFeedback, recommendedJobs }
+router.post("/:id/ai-intelligence", getAiIntelligence);
+
+// ─── AI Feedback (LEGACY — preserved for backward compat) ──────────────────
 // POST /api/resume-intelligence/:id/ai-feedback
-// Body: { jobDescription: "...", atsScore: 82, matchedSkills: [...], missingKeywords: [...] }
 router.post("/:id/ai-feedback", getAiFeedback);
 
 module.exports = router;

@@ -1,22 +1,30 @@
 /**
  * resumeIntelligenceController.js
  *
- * Handles AI-powered resume intelligence:
- *  1. Parse (text extraction + Gemini structured JSON)
- *  2. ATS Match scoring via Affinda API
- *  3. AI Feedback via Gemini
+ * Three-layer resume intelligence pipeline:
+ *  1. parseResume     — Gemini extracts structured JSON from PDF/DOCX
+ *  2. matchATS        — DETERMINISTIC backend scoring (no Gemini)
+ *  3. getAiIntelligence — Gemini explains the fixed score + recommends jobs
+ *
+ * Legacy endpoint preserved for backward compat:
+ *  4. getAiFeedback   — original qualitative feedback (untouched)
  */
 
 const path = require("path");
 const dotenv = require("dotenv");
 dotenv.config({ path: path.join(__dirname, "../.env") });
 
-
 const mammoth = require("mammoth");
 const fetch = require("node-fetch");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const Resume = require("../models/Resume");
+const Job = require("../models/Job");
 const { ErrorResponse } = require("../middleware/errorHandler");
+const {
+  computeAtsScore,
+  computeJobMatchScore,
+  scoreToStatus,
+} = require("../utils/atsScoringService");
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
@@ -24,11 +32,10 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 async function fetchBuffer(url) {
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Failed to fetch resume file: ${res.statusText}`);
-  const arrayBuffer = await res.arrayBuffer();
-  return Buffer.from(arrayBuffer);
+  return Buffer.from(await res.arrayBuffer());
 }
 
-// ─── Helper: extract plain text from DOCX ───────────────────────────
+// ─── Helper: extract plain text from DOCX ─────────────────────────────────
 async function extractText(buffer, originalName) {
   const ext = (originalName || "").toLowerCase().split(".").pop();
   if (ext === "docx" || ext === "doc") {
@@ -38,23 +45,106 @@ async function extractText(buffer, originalName) {
   return null;
 }
 
-// ─── 1. POST /api/resume-intelligence/:id/parse ────────────────────────────
-// Extracts text from the resume file and calls Gemini to produce structured JSON.
-// Result is saved to Resume.parsedData.
+// ─── Helper: safe JSON parse from Gemini response ─────────────────────────
+function safeParseJson(text) {
+  const cleaned = text
+    .trim()
+    .replace(/^```json?\s*/i, "")
+    .replace(/```\s*$/i, "")
+    .trim();
+  return JSON.parse(cleaned);
+}
+
+// ─── Helper: build strict Gemini prompt for ai-intelligence ───────────────
+function buildAiIntelligencePrompt({
+  parsedResumeData,
+  jobDescription,
+  atsScore,
+  matchedSkills,
+  missingSkills,
+  matchedRequirements,
+  missingRequirements,
+  internalJobsList,
+  jobMatchScores,
+}) {
+  return `You are an ATS feedback and job recommendation explanation assistant inside a MERN-based ATS job portal.
+
+IMPORTANT RULES (DO NOT IGNORE):
+1. You are NEVER allowed to calculate or change the ATS score. The ATS score has already been calculated by backend logic using a deterministic formula. Your job is ONLY to explain the score and provide grounded recommendations.
+2. You must NEVER invent skills, experience, tools, projects, certifications, or achievements.
+3. You must NEVER recommend jobs outside the provided internal job list.
+4. You must NEVER change backend match scores for jobs.
+5. You must use ONLY the data provided in this input.
+6. You must output JSON only, no extra text.
+
+INPUT DATA:
+
+1. Candidate Parsed Resume Data:
+${JSON.stringify(parsedResumeData, null, 2).substring(0, 2500)}
+
+2. Job Description:
+${jobDescription.substring(0, 1500)}
+
+3. Backend ATS Match Data (FIXED AND IMMUTABLE — do NOT recalculate):
+${JSON.stringify({ atsScore, matchedSkills, missingSkills, matchedRequirements, missingRequirements }, null, 2)}
+
+4. Internal Job List (ONLY recruiter-posted jobs from the database):
+${JSON.stringify(internalJobsList, null, 2)}
+
+5. Precomputed Job Match Scores (do NOT change these):
+${JSON.stringify(jobMatchScores, null, 2)}
+
+YOUR TASKS:
+
+A. ATS Feedback Task
+- Output atsScore as exactly ${atsScore}. DO NOT change it.
+- matchLevel: 80-100 = "Strong", 60-79 = "Moderate", below 60 = "Weak"
+- strengths: come ONLY from matchedSkills or matchedRequirements (max 5 items)
+- weaknesses: come ONLY from missingSkills or missingRequirements (max 5 items)
+- recommendations: practical, based ONLY on real gaps in missingSkills/missingRequirements (max 5 items)
+- If atsScore < 60, do NOT give overly positive feedback.
+
+B. Job Recommendation Explanation Task
+- Use ONLY the internal job list above. If it is empty, return recommendedJobs: [].
+- Do NOT invent or recommend any job outside that list.
+- Use the precomputed matchScore values — do NOT change them.
+- For each job, write a concise reason explaining the match based on candidate skills and job requirements.
+- Return at most 5 recommended jobs.
+
+OUTPUT (valid JSON only, no markdown, no extra text):
+{
+  "atsFeedback": {
+    "atsScore": ${atsScore},
+    "matchLevel": "",
+    "matchedSkills": [],
+    "missingSkills": [],
+    "strengths": [],
+    "weaknesses": [],
+    "recommendations": []
+  },
+  "recommendedJobs": [
+    { "jobId": "", "title": "", "company": "", "matchScore": 0, "reason": "" }
+  ]
+}
+
+CRITICAL: The atsScore in your output MUST be exactly ${atsScore}. Do not modify it under any circumstances.`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 1. POST /api/resume-intelligence/:id/parse
+// ═══════════════════════════════════════════════════════════════════════════
 exports.parseResume = async (req, res, next) => {
   try {
     const resume = await Resume.findOne({ _id: req.params.id, user: req.user._id });
     if (!resume) return next(new ErrorResponse("Resume not found", 404));
 
-    // Mark as parsing
     resume.parsingStatus = "parsing";
     await resume.save();
 
-    // Step 1: Download file and prepare for parsing
     const buffer = await fetchBuffer(resume.fileUrl);
     const ext = (resume.originalFileName || "").toLowerCase().split(".").pop();
-    
-    if (ext !== "pdf" && ext !== "docx" && ext !== "doc") {
+
+    if (!["pdf", "docx", "doc"].includes(ext)) {
       resume.parsingStatus = "failed";
       await resume.save();
       return next(new ErrorResponse("Unsupported file type. Only PDF and DOCX are supported.", 422));
@@ -64,15 +154,13 @@ exports.parseResume = async (req, res, next) => {
     let pdfPart = null;
 
     if (ext === "pdf") {
-      // Use Gemini native PDF parsing
       pdfPart = {
         inlineData: {
           data: buffer.toString("base64"),
-          mimeType: "application/pdf"
-        }
+          mimeType: "application/pdf",
+        },
       };
     } else {
-      // Extract text from DOCX
       rawText = await extractText(buffer, resume.originalFileName);
       if (!rawText || rawText.trim().length < 50) {
         resume.parsingStatus = "failed";
@@ -81,12 +169,11 @@ exports.parseResume = async (req, res, next) => {
       }
     }
 
-    // Step 2: Gemini extracts structured JSON
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-    const prompt = `You are a professional resume parser. Extract the following information from the resume text below and return it as valid JSON only (no markdown, no explanation).
+    const prompt = `You are a professional resume parser. Extract the following information from the resume and return it as valid JSON only (no markdown, no explanation).
 
-The JSON must match this schema exactly:
+Schema:
 {
   "fullName": "string",
   "email": "string",
@@ -95,72 +182,38 @@ The JSON must match this schema exactly:
   "linkedin": "string",
   "github": "string",
   "portfolio": "string",
-  "headline": "string (professional title/summary, 1 line)",
+  "headline": "string (professional title, 1 line)",
   "about": "string (professional summary, 2-4 sentences)",
   "technicalSkills": ["array of technical skill strings"],
   "tools": ["array of tool/technology strings"],
   "softSkills": ["array of soft skill strings"],
-  "experience": [
-    {
-      "company": "string",
-      "role": "string",
-      "startDate": "string (e.g. Jan 2022)",
-      "endDate": "string (e.g. Dec 2023 or Present)",
-      "description": "string"
-    }
-  ],
-  "education": [
-    {
-      "institution": "string",
-      "degree": "string",
-      "field": "string",
-      "startYear": "string",
-      "endYear": "string",
-      "grade": "string"
-    }
-  ],
-  "projects": [
-    {
-      "name": "string",
-      "description": "string",
-      "techStack": ["array"],
-      "link": "string"
-    }
-  ],
-  "certifications": [
-    {
-      "name": "string",
-      "issuer": "string",
-      "year": "string"
-    }
-  ]
+  "experience": [{ "company": "string", "role": "string", "startDate": "string", "endDate": "string", "description": "string" }],
+  "education": [{ "institution": "string", "degree": "string", "field": "string", "startYear": "string", "endYear": "string", "grade": "string" }],
+  "projects": [{ "name": "string", "description": "string", "techStack": ["array"], "link": "string" }],
+  "certifications": [{ "name": "string", "issuer": "string", "year": "string" }]
 }
 
 RULES:
-- If a field is not found, use an empty string "" or empty array [].
-- Do NOT invent or fabricate any information. Only extract what is present.
-- Return ONLY valid JSON, no markdown code fences.
-`;
+- If a field is not found, use empty string "" or empty array [].
+- Do NOT invent any information. Extract only what is present.
+- Return ONLY valid JSON, no markdown code fences.`;
 
-    const promptWithText = rawText ? prompt + `\nResume Text:\n---\n${rawText.substring(0, 12000)}\n---` : prompt;
-
+    const promptWithText = rawText
+      ? prompt + `\nResume Text:\n---\n${rawText.substring(0, 12000)}\n---`
+      : prompt;
     const promptParts = pdfPart ? [promptWithText, pdfPart] : [promptWithText];
     const result = await model.generateContent(promptParts);
     const responseText = result.response.text().trim();
 
-    // Parse the JSON from Gemini response
     let parsedData;
     try {
-      // Strip any accidental markdown fences
-      const cleaned = responseText.replace(/^```json?\s*/i, "").replace(/```\s*$/i, "").trim();
-      parsedData = JSON.parse(cleaned);
-    } catch (parseErr) {
+      parsedData = safeParseJson(responseText);
+    } catch {
       resume.parsingStatus = "failed";
       await resume.save();
       return next(new ErrorResponse("AI returned invalid JSON. Please try again.", 500));
     }
 
-    // Save parsed data
     resume.parsedData = parsedData;
     resume.parsingStatus = "done";
     await resume.save();
@@ -171,100 +224,66 @@ RULES:
       data: { parsedData, resumeId: resume._id },
     });
   } catch (err) {
-    // Mark failed on unexpected errors
-    try {
-      await Resume.findByIdAndUpdate(req.params.id, { parsingStatus: "failed" });
-    } catch (_) {}
+    try { await Resume.findByIdAndUpdate(req.params.id, { parsingStatus: "failed" }); } catch (_) {}
     next(err);
   }
 };
 
-// ─── 2. POST /api/resume-intelligence/:id/ats-match ───────────────────────
-// Sends resume + job description to Affinda for an ATS score.
+// ═══════════════════════════════════════════════════════════════════════════
+// 2. POST /api/resume-intelligence/:id/ats-match
+//    DETERMINISTIC — no Gemini, pure backend scoring
+// ═══════════════════════════════════════════════════════════════════════════
 exports.matchATS = async (req, res, next) => {
   try {
     const { jobDescription } = req.body;
     if (!jobDescription || jobDescription.trim().length < 20) {
-      return next(new ErrorResponse("A job description is required for ATS matching.", 400));
+      return next(new ErrorResponse("A job description (min 20 chars) is required for ATS matching.", 400));
     }
 
     const resume = await Resume.findOne({ _id: req.params.id, user: req.user._id });
     if (!resume) return next(new ErrorResponse("Resume not found", 404));
     if (resume.parsingStatus !== "done" || !resume.parsedData) {
-      return next(new ErrorResponse("Resume must be parsed before ATS matching. Please parse the resume first.", 400));
+      return next(new ErrorResponse("Resume must be parsed before ATS matching.", 400));
     }
 
-    // Compute ATS Match Score locally using Gemini.
-    // (Affinda API call was removed here because Gemini is more reliable and natively handles scoring)
-
-    // Build the text representation of the parsed resume for Gemini ATS scoring
-    const parsedData = resume.parsedData;
-    const resumeText = [
-      parsedData.fullName || "",
-      parsedData.headline || "",
-      parsedData.about || "",
-      "Skills: " + ([...(parsedData.technicalSkills || []), ...(parsedData.tools || []), ...(parsedData.softSkills || [])].join(", ")),
-      (parsedData.experience || []).map(e => `${e.role} at ${e.company}: ${e.description}`).join("\n"),
-      (parsedData.education || []).map(e => `${e.degree} ${e.field} from ${e.institution}`).join("\n"),
-      (parsedData.certifications || []).map(c => c.name).join(", "),
-    ].filter(Boolean).join("\n\n");
-
-    // Compute a simple keyword overlap score locally using Gemini
-    // We use Gemini as the scorer for reliability
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-    const scorePrompt = `You are a ruthless, highly critical Applicant Tracking System (ATS) for top-tier tech companies. Analyze the following resume against the job description.
-
-SCORING RUBRIC (BE BRUTALLY STRICT):
-- 0-40: Poor match. Lacks core requirements.
-- 41-60: Average match. Has some basics, but missing key skills or lacks quantifiable impact. (Most resumes fall here).
-- 61-75: Strong match. Covers most requirements well.
-- 76-89: Exceptional match. Highly quantifiable, covers almost all skills.
-- 90-100: Unicorn candidate (extremely rare).
-
-Do NOT inflate scores. If core keywords from the JD are missing, deduct heavily. If the resume is fluffy and lacks metrics, deduct heavily.
-
-Return ONLY a JSON object like this:
-{
-  "matchScore": <number 0-100>,
-  "matchedKeywords": ["keyword1", "keyword2"],
-  "missingKeywords": ["keyword3", "keyword4"],
-  "status": "<one of: Excellent Match | Strong Match | Good Match | Fair Match | Needs Improvement>"
-}
-
-No markdown, no explanation. Only valid JSON.
-
-RESUME:
-${resumeText.substring(0, 4000)}
-
-JOB DESCRIPTION:
-${jobDescription.substring(0, 3000)}`;
-
-    const scoreResult = await model.generateContent(scorePrompt);
-    const scoreText = scoreResult.response.text().trim();
-    let scoreData;
-    try {
-      const cleaned = scoreText.replace(/^```json?\s*/i, "").replace(/```\s*$/i, "").trim();
-      scoreData = JSON.parse(cleaned);
-    } catch (_) {
-      scoreData = { matchScore: 0, matchedKeywords: [], missingKeywords: [], status: "Analysis failed" };
-    }
+    // Pure deterministic scoring — no AI
+    const { atsScore, matchedKeywords, missingKeywords, status } =
+      computeAtsScore(resume.parsedData, jobDescription);
 
     res.status(200).json({
       success: true,
       message: "ATS match analysis complete",
-      data: scoreData,
+      data: { matchScore: atsScore, matchedKeywords, missingKeywords, status },
     });
   } catch (err) {
     next(err);
   }
 };
 
-// ─── 3. POST /api/resume-intelligence/:id/ai-feedback ─────────────────────
-// Uses Gemini to generate detailed qualitative feedback based on parsed resume + JD + ATS score.
-exports.getAiFeedback = async (req, res, next) => {
+// ═══════════════════════════════════════════════════════════════════════════
+// 3. POST /api/resume-intelligence/:id/ai-intelligence  (NEW)
+//    Accepts precomputed ATS data, Gemini only explains + recommends jobs
+// ═══════════════════════════════════════════════════════════════════════════
+exports.getAiIntelligence = async (req, res, next) => {
   try {
-    const { jobDescription, atsScore, matchedSkills, missingKeywords } = req.body;
-    if (!jobDescription) return next(new ErrorResponse("Job description is required", 400));
+    const {
+      jobDescription,
+      atsScore,
+      matchedSkills,
+      missingSkills,
+      matchedRequirements = [],
+      missingRequirements = [],
+      internalJobsList: providedJobsList,
+      jobMatchScores: providedJobScores,
+    } = req.body;
+
+    // ── Validate required fields ──
+    if (!jobDescription || jobDescription.trim().length < 20) {
+      return next(new ErrorResponse("jobDescription is required (min 20 chars).", 400));
+    }
+    if (typeof atsScore !== "number" || atsScore < 0 || atsScore > 100) {
+      return next(new ErrorResponse("atsScore must be a number between 0 and 100.", 400));
+    }
 
     const resume = await Resume.findOne({ _id: req.params.id, user: req.user._id });
     if (!resume) return next(new ErrorResponse("Resume not found", 404));
@@ -272,47 +291,154 @@ exports.getAiFeedback = async (req, res, next) => {
       return next(new ErrorResponse("Resume must be parsed first.", 400));
     }
 
+    // ── Determine internal jobs list ──
+    let internalJobsList = [];
+    let jobMatchScores = [];
+
+    if (Array.isArray(providedJobsList) && providedJobsList.length > 0) {
+      // Frontend passed the list directly
+      internalJobsList = providedJobsList;
+      jobMatchScores = Array.isArray(providedJobScores) ? providedJobScores : [];
+    } else {
+      // Fetch from DB and score deterministically
+      const jobs = await Job.find({ isActive: true }).limit(20).lean();
+      if (jobs.length > 0) {
+        const scored = jobs.map((job) => ({
+          job,
+          ...computeJobMatchScore(resume.parsedData, job),
+        }));
+        scored.sort((a, b) => b.matchScore - a.matchScore);
+        const top5 = scored.slice(0, 5);
+
+        internalJobsList = top5.map(({ job }) => ({
+          jobId: String(job._id),
+          title: job.title,
+          company: job.company,
+          requiredSkills: job.requiredSkills || [],
+          description: (job.description || "").substring(0, 300),
+        }));
+        jobMatchScores = top5.map(({ jobId, matchScore }) => ({ jobId, matchScore }));
+      }
+    }
+
+    // ── Build prompt and call Gemini ──
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const prompt = buildAiIntelligencePrompt({
+      parsedResumeData: resume.parsedData,
+      jobDescription,
+      atsScore,
+      matchedSkills: matchedSkills || [],
+      missingSkills: missingSkills || [],
+      matchedRequirements,
+      missingRequirements,
+      internalJobsList,
+      jobMatchScores,
+    });
+
+    const result = await model.generateContent(prompt);
+    const raw = result.response.text().trim();
+
+    let parsed;
+    try {
+      parsed = safeParseJson(raw);
+    } catch {
+      return next(new ErrorResponse("AI returned invalid JSON. Please try again.", 500));
+    }
+
+    // ── Sanitize response — backend is source of truth for scores ──
+    const matchLevel = scoreToStatus(atsScore);
+
+    const atsFeedback = {
+      atsScore,  // Always override with backend value
+      matchLevel,
+      matchedSkills: Array.isArray(parsed.atsFeedback?.matchedSkills)
+        ? parsed.atsFeedback.matchedSkills
+        : matchedSkills || [],
+      missingSkills: Array.isArray(parsed.atsFeedback?.missingSkills)
+        ? parsed.atsFeedback.missingSkills
+        : missingSkills || [],
+      strengths: (parsed.atsFeedback?.strengths || []).slice(0, 5),
+      weaknesses: (parsed.atsFeedback?.weaknesses || []).slice(0, 5),
+      recommendations: (parsed.atsFeedback?.recommendations || []).slice(0, 5),
+    };
+
+    // Enforce that recommended jobs come only from internalJobsList
+    const allowedJobIds = new Set(internalJobsList.map((j) => j.jobId || String(j._id)));
+    const scoreMap = Object.fromEntries(
+      jobMatchScores.map((s) => [s.jobId, s.matchScore])
+    );
+
+    const recommendedJobs = (Array.isArray(parsed.recommendedJobs) ? parsed.recommendedJobs : [])
+      .filter((j) => allowedJobIds.size === 0 || allowedJobIds.has(j.jobId))
+      .slice(0, 5)
+      .map((j) => ({
+        jobId: j.jobId || "",
+        title: j.title || "",
+        company: j.company || "",
+        matchScore: scoreMap[j.jobId] ?? (typeof j.matchScore === "number" ? j.matchScore : 0),
+        reason: j.reason || "",
+      }));
+
+    res.status(200).json({
+      success: true,
+      message: "AI intelligence analysis complete",
+      data: { atsFeedback, recommendedJobs },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════════════════
+// 4. POST /api/resume-intelligence/:id/ai-feedback  (LEGACY — preserved)
+// ═══════════════════════════════════════════════════════════════════════════
+exports.getAiFeedback = async (req, res, next) => {
+  try {
+    const { jobDescription, atsScore, matchedSkills, missingKeywords } = req.body;
+    if (!jobDescription) return next(new ErrorResponse("Job description is required", 400));
+
+    const resume = await Resume.findOne({ _id: req.params.id, user: req.user._id });
+    if (!resume) return next(new ErrorResponse("Resume not found", 404));
+    if (!resume.parsedData) return next(new ErrorResponse("Resume must be parsed first.", 400));
+
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-    const feedbackPrompt = `You are a senior technical recruiter and career coach. Analyze this candidate's resume against the job description provided.
+    const feedbackPrompt = `You are a senior technical recruiter and career coach. Analyze this candidate's resume against the job description.
 
-Return ONLY valid JSON matching this schema exactly (no markdown, no explanation):
+Return ONLY valid JSON matching this schema (no markdown, no explanation):
 {
-  "matchedSkills": ["list of skills in the resume that successfully match the JD"],
-  "missingSkills": ["exact keywords from the JD that the ATS will look for but are missing"],
-  "strengths": ["2-3 specific strengths you observed in the resume for this role"],
-  "weaknesses": ["Highlight specific mistakes, poor formatting, or weakly phrased sections in the resume that hurt the ATS score"],
-  "suggestions": ["Actionable advice telling the user the EXACT keywords they should add, and where/how to include them"],
-  "companyFit": ["List top tier companies (e.g., Amazon, Flipkart, Startups, specific FAANG) this resume style/skills are best suited for"],
-  "overExplained": ["Highlight any specific bullet points or sections that are too long, fluffy, over-explained, or irrelevant"],
+  "matchedSkills": ["skills in resume that match JD"],
+  "missingSkills": ["exact keywords from JD missing from resume"],
+  "strengths": ["2-3 specific strengths for this role"],
+  "weaknesses": ["specific mistakes or weaknesses that hurt ATS score"],
+  "suggestions": ["actionable advice — exact keywords to add and where"],
+  "companyFit": ["top company types this resume suits"],
+  "overExplained": ["bullet points that are too long or irrelevant"],
   "overallVerdict": "string (one sentence recruiter-style verdict)"
 }
 
-IMPORTANT RULES:
-- Base ALL feedback strictly on what is present in the resume. Do NOT invent skills or experience.
-- For weaknesses, explicitly point out the MISTAKES the user made (e.g., "You failed to include the exact keyword 'React.js' and instead just wrote 'React'").
-- For suggestions, tell them the EXACT keywords to use to pass the ATS parser.
-- Point out whatever is over-explained and needs to be shortened.
-- Do NOT give generic advice like "improve your resume".
+RULES:
+- Base ALL feedback strictly on what is in the resume. Do NOT invent anything.
+- For suggestions, give EXACT keywords to add to pass ATS.
+- Do NOT give generic advice.
 
 ATS Score: ${atsScore || "N/A"}
 Matched Keywords: ${JSON.stringify(matchedSkills || [])}
 Missing Keywords: ${JSON.stringify(missingKeywords || [])}
 
-RESUME PARSED DATA:
-${JSON.stringify(resume.parsedData, null, 2).substring(0, 5000)}
+RESUME:
+${JSON.stringify(resume.parsedData, null, 2).substring(0, 4000)}
 
 JOB DESCRIPTION:
-${jobDescription.substring(0, 3000)}`;
+${jobDescription.substring(0, 2500)}`;
 
     const feedbackResult = await model.generateContent(feedbackPrompt);
     const feedbackText = feedbackResult.response.text().trim();
 
     let feedbackData;
     try {
-      const cleaned = feedbackText.replace(/^```json?\s*/i, "").replace(/```\s*$/i, "").trim();
-      feedbackData = JSON.parse(cleaned);
-    } catch (_) {
+      feedbackData = safeParseJson(feedbackText);
+    } catch {
       return next(new ErrorResponse("AI returned invalid feedback format. Please try again.", 500));
     }
 
