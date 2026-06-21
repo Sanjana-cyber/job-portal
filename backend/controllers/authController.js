@@ -13,6 +13,9 @@ const {
   sanitize,
 } = require("../utils/validators");
 const { ErrorResponse } = require("../middleware/errorHandler");
+const { OAuth2Client } = require("google-auth-library");
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 /**
  * @desc    Register a new user (jobseeker or recruiter only)
@@ -308,13 +311,14 @@ const googleAuth = async (req, res, next) => {
       return next(new ErrorResponse("Google credential is required", 400));
     }
 
-    // Decode the Google JWT token (the ID token from Google Sign-In)
-    // In production, verify with Google's API. Here we decode the JWT payload.
-    const decodedToken = JSON.parse(
-      Buffer.from(credential.split(".")[1], "base64").toString()
-    );
+    // Securely verify the Google ID token
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID, // Specify the CLIENT_ID of the app that accesses the backend
+    });
 
-    const { email, name, email_verified } = decodedToken;
+    const payload = ticket.getPayload();
+    const { email, name, email_verified } = payload;
 
     if (!email) {
       return next(new ErrorResponse("Unable to get email from Google", 400));
