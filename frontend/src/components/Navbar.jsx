@@ -53,6 +53,7 @@ const Navbar = () => {
 
           {/* Navigation Links */}
           <div className="navbar-links">
+            <a href="/jobs" className="nav-link">Find Jobs</a>
             <a href="/#features" className="nav-link">Features</a>
             <a href="/#about" className="nav-link">About</a>
           </div>

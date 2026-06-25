@@ -12,6 +12,7 @@ import SystemManagementConsole from "./pages/SystemManagementConsole";
 import ResetPassword from "./pages/ResetPassword";
 import EmailVerification from "./pages/EmailVerification";
 import ProfileBuilderPage from "./pages/ProfileBuilderPage";
+import JobsPage from "./pages/JobsPage";
 
 function App() {
   return (
@@ -48,6 +49,7 @@ function App() {
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<HomePage />} />
+        <Route path="/jobs" element={<JobsPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/admin/login" element={<AdminLogin />} />
