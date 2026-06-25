@@ -182,12 +182,10 @@ const ResumeUpload = () => {
                 </div>
                 <div className="resume-item-actions">
                   <a 
-                    href={resume.fileUrl} 
-                    target="_blank" 
-                    rel="noreferrer" 
+                    href={`${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/profile/resumes/${resume._id}/download`} 
                     className="resume-action-btn view"
                   >
-                    View
+                    Download
                   </a>
                   {!resume.isActive && (
                     <button 

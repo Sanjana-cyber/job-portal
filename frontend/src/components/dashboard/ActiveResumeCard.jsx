@@ -43,14 +43,12 @@ const ActiveResumeCard = () => {
       <div className="active-resume-actions">
         {activeResume && (
           <a 
-            href={activeResume.fileUrl}
-            target="_blank"
-            rel="noreferrer"
+            href={`${import.meta.env.VITE_API_URL || "http://localhost:5000/api"}/profile/resumes/${activeResume._id}/download`}
             style={{ flex: 1, textAlign: "center", padding: "10px", border: "1.5px solid var(--navy-800)", borderRadius: "10px", color: "var(--navy-800)", textDecoration: "none", fontSize: "13px", fontWeight: "600", transition: "all 0.2s" }}
             onMouseEnter={(e) => { e.currentTarget.style.background = "var(--cream-100)" }}
             onMouseLeave={(e) => { e.currentTarget.style.background = "transparent" }}
           >
-            View
+            Download
           </a>
         )}
         <Link 

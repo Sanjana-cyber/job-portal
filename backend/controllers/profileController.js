@@ -2,6 +2,7 @@ const CandidateProfile = require("../models/CandidateProfile");
 const Resume = require("../models/Resume");
 const { ErrorResponse } = require("../middleware/errorHandler");
 const { uploadToCloudinary, deleteFromCloudinary } = require("../utils/cloudinaryHelper");
+const https = require("https");
 
 // ─── Helper: get or create profile ────────────────────────────────────────
 const getOrCreate = async (userId) => {
@@ -324,4 +325,35 @@ exports.deleteResumeVersion = async (req, res, next) => {
     
     res.status(200).json({ success: true, message: "Resume version deleted", data: { completionScore } });
   } catch (err) { next(err); }
+};
+
+exports.downloadResume = async (req, res, next) => {
+  try {
+    const resumeId = req.params.id;
+    const targetResume = await Resume.findOne({ _id: resumeId, user: req.user._id });
+    if (!targetResume) return next(new ErrorResponse("Resume not found", 404));
+
+    const originalName = targetResume.originalFileName || "resume.pdf";
+    const ext = originalName.split('.').pop().toLowerCase();
+    
+    let contentType = "application/octet-stream";
+    if (ext === "pdf") contentType = "application/pdf";
+    else if (ext === "doc") contentType = "application/msword";
+    else if (ext === "docx") contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+
+    res.setHeader("Content-Disposition", `attachment; filename="${originalName}"`);
+    res.setHeader("Content-Type", contentType);
+
+    // Ensure we are using https if the URL starts with https
+    const protocol = targetResume.fileUrl.startsWith("https") ? https : require("http");
+    
+    protocol.get(targetResume.fileUrl, (stream) => {
+      stream.pipe(res);
+    }).on("error", (err) => {
+      console.error("Error downloading file from Cloudinary:", err);
+      next(new ErrorResponse("Failed to download file from storage", 500));
+    });
+  } catch (err) {
+    next(err);
+  }
 };

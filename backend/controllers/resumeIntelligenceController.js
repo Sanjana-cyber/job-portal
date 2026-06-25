@@ -22,9 +22,11 @@ const Job = require("../models/Job");
 const { ErrorResponse } = require("../middleware/errorHandler");
 const {
   computeAtsScore,
+  computeRoleScore,
   computeJobMatchScore,
   scoreToStatus,
 } = require("../utils/atsScoringService");
+const { getSkillsForRole, looksLikeRoleTitle } = require("../utils/roleSkillsMap");
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
@@ -67,51 +69,97 @@ function buildAiIntelligencePrompt({
   internalJobsList,
   jobMatchScores,
 }) {
-  return `You are an ATS feedback and job recommendation explanation assistant inside a MERN-based ATS job portal.
+  // Extract format analysis stored during parsing
+  const fmt = parsedResumeData.formatAnalysis || {};
 
-IMPORTANT RULES (DO NOT IGNORE):
-1. You are NEVER allowed to calculate or change the ATS score. The ATS score has already been calculated by backend logic using a deterministic formula. Your job is ONLY to explain the score and provide grounded recommendations.
-2. You must NEVER invent skills, experience, tools, projects, certifications, or achievements.
-3. You must NEVER recommend jobs outside the provided internal job list.
-4. You must NEVER change backend match scores for jobs.
-5. You must use ONLY the data provided in this input.
-6. You must output JSON only, no extra text.
+  // Build a plain-English format problem list from the format flags
+  const formatIssues = [];
+  if (fmt.isColorful)         formatIssues.push("COLORFUL_RESUME");
+  if (fmt.hasPhoto)           formatIssues.push("HAS_PHOTO");
+  if (fmt.usesColumns)        formatIssues.push("MULTI_COLUMN_LAYOUT");
+  if (fmt.isOverloaded)       formatIssues.push("TOO_MUCH_INFORMATION");
+  if (fmt.hasPoorAlignment)   formatIssues.push("POOR_ALIGNMENT");
+  if (fmt.usesTableOrGraphic) formatIssues.push("USES_GRAPHICS_OR_TABLES");
+  if (fmt.hasInconsistentFonts) formatIssues.push("INCONSISTENT_FONTS");
+  if ((fmt.pageCount || 1) > 2) formatIssues.push("TOO_MANY_PAGES");
 
-INPUT DATA:
+  const isFormatBad = (fmt.overallFormatScore || 10) < 6 || formatIssues.length >= 2;
 
-1. Candidate Parsed Resume Data:
-${JSON.stringify(parsedResumeData, null, 2).substring(0, 2500)}
+  return `You are a friendly resume coach inside a job portal. Your job is to give simple, easy-to-understand advice.
 
-2. Job Description:
-${jobDescription.substring(0, 1500)}
+IMPORTANT RULES (NEVER BREAK THESE):
+1. NEVER change or recalculate the ATS score. It is fixed.
+2. NEVER invent skills, jobs, or advice not based on the actual data below.
+3. NEVER recommend jobs outside the provided internal list.
+4. NEVER use complicated HR or technical jargon. Write like you are explaining to a college student.
+5. Output JSON only, no extra text, no markdown.
 
-3. Backend ATS Match Data (FIXED AND IMMUTABLE — do NOT recalculate):
-${JSON.stringify({ atsScore, matchedSkills, missingSkills, matchedRequirements, missingRequirements }, null, 2)}
+─── INPUT DATA ───────────────────────────────────────────────────────────────
 
-4. Internal Job List (ONLY recruiter-posted jobs from the database):
+1. Candidate Resume:
+${JSON.stringify({
+  name: parsedResumeData.fullName,
+  headline: parsedResumeData.headline,
+  technicalSkills: parsedResumeData.technicalSkills,
+  tools: parsedResumeData.tools,
+  softSkills: parsedResumeData.softSkills,
+  experienceCount: (parsedResumeData.experience || []).length,
+  projectCount: (parsedResumeData.projects || []).length,
+}, null, 2)}
+
+2. Job Description / Role:
+${jobDescription.substring(0, 1200)}
+
+3. ATS Score (FIXED — do NOT change):
+${JSON.stringify({ atsScore, matchedSkills, missingSkills }, null, 2)}
+
+4. Resume Visual Format Analysis (detected during parsing):
+${JSON.stringify({ ...fmt, detectedIssues: formatIssues, isFormatBad }, null, 2)}
+
+5. Available Jobs (internal list only):
 ${JSON.stringify(internalJobsList, null, 2)}
 
-5. Precomputed Job Match Scores (do NOT change these):
+6. Precomputed Job Match Scores (do NOT change):
 ${JSON.stringify(jobMatchScores, null, 2)}
 
-YOUR TASKS:
+─── YOUR TASKS ───────────────────────────────────────────────────────────────
 
-A. ATS Feedback Task
-- Output atsScore as exactly ${atsScore}. DO NOT change it.
-- matchLevel: 80-100 = "Strong", 60-79 = "Moderate", below 60 = "Weak"
-- strengths: come ONLY from matchedSkills or matchedRequirements (max 5 items)
-- weaknesses: come ONLY from missingSkills or missingRequirements (max 5 items)
-- recommendations: practical, based ONLY on real gaps in missingSkills/missingRequirements (max 5 items)
-- If atsScore < 60, do NOT give overly positive feedback.
+A. ATS SCORE EXPLANATION
+- Use atsScore = ${atsScore} exactly. Do not change it.
+- matchLevel: 80-100 → "Strong", 60-79 → "Moderate", below 60 → "Weak"
+- strengths: list up to 5 skills from matchedSkills only
+- weaknesses: list up to 5 skills from missingSkills only
+- recommendations: give up to 5 simple tips based on the actual skill gaps
 
-B. Job Recommendation Explanation Task
-- Use ONLY the internal job list above. If it is empty, return recommendedJobs: [].
-- Do NOT invent or recommend any job outside that list.
-- Use the precomputed matchScore values — do NOT change them.
-- For each job, write a concise reason explaining the match based on candidate skills and job requirements.
-- Return at most 5 recommended jobs.
+B. RESUME FORMAT AUDIT
+Look at the detectedIssues list and isFormatBad flag above.
+Write simple, friendly advice a student can understand.
 
-OUTPUT (valid JSON only, no markdown, no extra text):
+Use these plain-English messages for each detected issue:
+- COLORFUL_RESUME → "Your resume uses colors. ATS software cannot read colored resumes properly. Use a plain white background with black text only."
+- HAS_PHOTO → "Your resume has a photo. Remove it. ATS systems ignore photos and they waste space."
+- MULTI_COLUMN_LAYOUT → "Your resume uses two columns. ATS systems read left to right and often miss the second column. Use a single column layout instead."
+- TOO_MUCH_INFORMATION → "Your resume has too much text. Keep it to 1 page if you have less than 3 years of experience, or 2 pages maximum. Remove old or irrelevant information."
+- POOR_ALIGNMENT → "Your resume has alignment issues. Text and sections are not lined up properly. Use consistent margins and spacing throughout."
+- USES_GRAPHICS_OR_TABLES → "Your resume uses skill bars, charts, or tables. ATS software cannot read these. Replace them with a simple text list of skills."
+- INCONSISTENT_FONTS → "Your resume uses too many different fonts or sizes. Stick to one simple font like Arial, Calibri, or Times New Roman in 10-12pt size."
+- TOO_MANY_PAGES → "Your resume is more than 2 pages. ATS systems and recruiters prefer shorter resumes. Try to fit everything into 1-2 pages."
+
+If isFormatBad is true, set formatPassed to false and include a clear note.
+If there are no issues (detectedIssues is empty or isFormatBad is false), set formatPassed to true.
+
+Always end formatRecommendations with these 3 golden rules (in simple words):
+- "Use a simple, clean white resume. No colors, no photos, no fancy design."
+- "Write your skills clearly in a Skills section so ATS can find them easily."
+- "Use common section names like Work Experience, Education, Skills, Projects."
+
+C. JOB RECOMMENDATIONS
+- Use ONLY jobs from the internal list. If list is empty, return [].
+- Use the precomputed matchScore values. Do NOT change them.
+- Write a simple 1-sentence reason for each job match.
+- Return max 5 jobs.
+
+─── OUTPUT FORMAT (valid JSON only, no markdown) ─────────────────────────────
 {
   "atsFeedback": {
     "atsScore": ${atsScore},
@@ -122,12 +170,18 @@ OUTPUT (valid JSON only, no markdown, no extra text):
     "weaknesses": [],
     "recommendations": []
   },
+  "formatAudit": {
+    "formatPassed": true,
+    "overallFormatScore": ${fmt.overallFormatScore || 10},
+    "detectedIssues": [],
+    "formatRecommendations": []
+  },
   "recommendedJobs": [
     { "jobId": "", "title": "", "company": "", "matchScore": 0, "reason": "" }
   ]
 }
 
-CRITICAL: The atsScore in your output MUST be exactly ${atsScore}. Do not modify it under any circumstances.`;
+CRITICAL: atsScore in output MUST be exactly ${atsScore}. Do not modify it.`;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -171,7 +225,7 @@ exports.parseResume = async (req, res, next) => {
 
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-    const prompt = `You are a professional resume parser. Extract the following information from the resume and return it as valid JSON only (no markdown, no explanation).
+    const prompt = `You are a professional resume parser AND resume format auditor. Analyze the resume and return a single valid JSON object only (no markdown, no explanation).
 
 Schema:
 {
@@ -190,12 +244,24 @@ Schema:
   "experience": [{ "company": "string", "role": "string", "startDate": "string", "endDate": "string", "description": "string" }],
   "education": [{ "institution": "string", "degree": "string", "field": "string", "startYear": "string", "endYear": "string", "grade": "string" }],
   "projects": [{ "name": "string", "description": "string", "techStack": ["array"], "link": "string" }],
-  "certifications": [{ "name": "string", "issuer": "string", "year": "string" }]
+  "certifications": [{ "name": "string", "issuer": "string", "year": "string" }],
+  "formatAnalysis": {
+    "isColorful": "boolean — true if background colors, colored text, or colored section headers are used",
+    "hasPhoto": "boolean — true if a photo/headshot is present on the resume",
+    "usesColumns": "boolean — true if the layout uses two or more columns",
+    "isOverloaded": "boolean — true if the resume has more than 2 pages OR has very dense/tiny text with almost no white space",
+    "hasPoorAlignment": "boolean — true if text is misaligned, uneven spacing, or inconsistent indentation is visible",
+    "usesTableOrGraphic": "boolean — true if skill bars, pie charts, tables, or graphics are used",
+    "hasInconsistentFonts": "boolean — true if more than 2 different font styles/sizes are mixed irregularly",
+    "pageCount": "number — estimated number of pages (1, 2, or 3+)",
+    "overallFormatScore": "number 1-10 — 10 means perfectly clean ATS-friendly plain format, 1 means very bad for ATS"
+  }
 }
 
 RULES:
-- If a field is not found, use empty string "" or empty array [].
-- Do NOT invent any information. Extract only what is present.
+- If a text field is not found, use empty string \"\" or empty array [].
+- Do NOT invent any information. Extract only what is present in the resume.
+- For formatAnalysis, carefully look at the VISUAL layout, colors, columns, and structure.
 - Return ONLY valid JSON, no markdown code fences.`;
 
     const promptWithText = rawText
@@ -224,7 +290,7 @@ RULES:
       data: { parsedData, resumeId: resume._id },
     });
   } catch (err) {
-    try { await Resume.findByIdAndUpdate(req.params.id, { parsingStatus: "failed" }); } catch (_) {}
+    try { await Resume.findByIdAndUpdate(req.params.id, { parsingStatus: "failed" }); } catch (_) { }
     next(err);
   }
 };
@@ -236,8 +302,8 @@ RULES:
 exports.matchATS = async (req, res, next) => {
   try {
     const { jobDescription } = req.body;
-    if (!jobDescription || jobDescription.trim().length < 20) {
-      return next(new ErrorResponse("A job description (min 20 chars) is required for ATS matching.", 400));
+    if (!jobDescription || jobDescription.trim().length < 3) {
+      return next(new ErrorResponse("A job description or role title is required.", 400));
     }
 
     const resume = await Resume.findOne({ _id: req.params.id, user: req.user._id });
@@ -246,14 +312,35 @@ exports.matchATS = async (req, res, next) => {
       return next(new ErrorResponse("Resume must be parsed before ATS matching.", 400));
     }
 
-    // Pure deterministic scoring — no AI
-    const { atsScore, matchedKeywords, missingKeywords, status } =
-      computeAtsScore(resume.parsedData, jobDescription);
+    let result;
+    let scoringMode;
+
+    // ── Detect if user typed a role title (e.g. "Full Stack Developer")
+    //    vs. a full job description
+    if (looksLikeRoleTitle(jobDescription)) {
+      const roleSkills = getSkillsForRole(jobDescription);
+
+      if (roleSkills) {
+        // Score against predefined role skill set
+        result = computeRoleScore(resume.parsedData, roleSkills);
+        scoringMode = "role";
+      } else {
+        // Unknown role title — fall back to JD keyword extraction
+        result = computeAtsScore(resume.parsedData, jobDescription);
+        scoringMode = "jd";
+      }
+    } else {
+      // Full job description — use keyword extraction
+      result = computeAtsScore(resume.parsedData, jobDescription);
+      scoringMode = "jd";
+    }
+
+    const { atsScore, matchedKeywords, missingKeywords, status } = result;
 
     res.status(200).json({
       success: true,
       message: "ATS match analysis complete",
-      data: { matchScore: atsScore, matchedKeywords, missingKeywords, status },
+      data: { matchScore: atsScore, matchedKeywords, missingKeywords, status, scoringMode },
     });
   } catch (err) {
     next(err);

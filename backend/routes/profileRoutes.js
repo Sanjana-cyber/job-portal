@@ -12,7 +12,8 @@ const {
   addProject, updateProject, deleteProject,
   addCertification, updateCertification, deleteCertification,
   uploadPhoto: uploadPhotoCtrl, deletePhoto,
-  getResumes, uploadResumeVersion, setActiveResume, deleteResumeVersion
+  getResumes, uploadResumeVersion, setActiveResume, deleteResumeVersion,
+  downloadResume
 } = require("../controllers/profileController");
 
 // All profile routes require authentication
@@ -55,6 +56,7 @@ router.delete("/photo", deletePhoto);
 router.get("/resumes", getResumes);
 router.post("/resumes", uploadResume.single("resume"), uploadResumeVersion);
 router.put("/resumes/:id/active", setActiveResume);
+router.get("/resumes/:id/download", downloadResume);
 router.delete("/resumes/:id", deleteResumeVersion);
 
 module.exports = router;

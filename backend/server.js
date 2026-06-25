@@ -13,6 +13,8 @@ const { errorHandler } = require("./middleware/errorHandler");
 const authRoutes = require("./routes/authRoutes");
 const profileRoutes = require("./routes/profileRoutes");
 const resumeIntelligenceRoutes = require("./routes/resumeIntelligenceRoutes");
+const jobRoutes = require("./routes/jobRoutes");
+const applicationRoutes = require("./routes/applicationRoutes");
 
 // Create Express application
 const app = express();
@@ -84,6 +86,12 @@ app.use("/api/profile", profileRoutes);
 
 // Resume intelligence routes (parse, ATS, AI feedback)
 app.use("/api/resume-intelligence", resumeIntelligenceRoutes);
+
+// Job routes
+app.use("/api/jobs", jobRoutes);
+
+// Application routes
+app.use("/api/applications", applicationRoutes);
 
 // 404 handler for unknown routes
 app.use((req, res) => {
