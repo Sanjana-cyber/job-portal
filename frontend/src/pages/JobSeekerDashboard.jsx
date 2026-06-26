@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { Search } from "lucide-react";
 import { ProfileProvider, useProfile } from "../context/ProfileContext";
 import HamburgerMenu from "../components/dashboard/HamburgerMenu";
 import WelcomeBanner from "../components/dashboard/WelcomeBanner";
@@ -50,7 +51,29 @@ const DashboardContent = () => {
           }}>JobPortal</span>
         </Link>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          {/* Find Jobs quick link */}
+          <Link
+            to="/dashboard/jobs"
+            id="header-find-jobs-btn"
+            style={{
+              display: "inline-flex", alignItems: "center", gap: "6px",
+              padding: "7px 16px",
+              background: "var(--navy-800)",
+              color: "#fff",
+              borderRadius: "var(--radius-full)",
+              textDecoration: "none",
+              fontSize: "13px",
+              fontWeight: "600",
+              letterSpacing: "0.01em",
+              transition: "all 0.2s",
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "var(--navy-700)"; e.currentTarget.style.transform = "translateY(-1px)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "var(--navy-800)"; e.currentTarget.style.transform = "translateY(0)"; }}
+          >
+            <Search size={14} /> Find Jobs
+          </Link>
+
           <span style={{
             background: "var(--amber-100)",
             border: "1px solid var(--amber-200)",

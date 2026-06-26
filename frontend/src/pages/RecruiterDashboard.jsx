@@ -1,18 +1,16 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import {
   Users,
   Briefcase,
   Eye,
   UserCheck,
-  Bell,
-  TrendingUp,
   Plus,
-  BarChart3,
   Edit2,
   Trash2,
-  List
+  LogOut
 } from "lucide-react";
 import { getMyJobs, createJob, updateJob, deleteJob } from "../api/jobApi";
 import JobForm from "../components/recruiter/JobForm";
@@ -23,7 +21,8 @@ import ManageApplications from "../components/recruiter/ManageApplications";
  * Displays welcome message, hiring stats, and job management overview
  */
 const RecruiterDashboard = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   
@@ -87,6 +86,16 @@ const RecruiterDashboard = () => {
     setIsAppsOpen(true);
   };
 
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast.success("Logged out successfully");
+      navigate("/");
+    } catch (err) {
+      toast.error("Failed to logout");
+    }
+  };
+
   return (
     <div className="dashboard-page">
       <div className="dashboard-container">
@@ -98,9 +107,15 @@ const RecruiterDashboard = () => {
             </h1>
             <p>Here's your recruiting activity overview.</p>
           </div>
-          <div className="welcome-badge role-recruiter">
-            <Users size={16} />
-            Recruiter
+          <div className="welcome-actions">
+            <div className="welcome-badge role-recruiter">
+              <Users size={16} />
+              Recruiter
+            </div>
+            <button className="btn-logout" onClick={handleLogout} title="Logout">
+              <LogOut size={16} />
+              Logout
+            </button>
           </div>
         </div>
 
@@ -172,13 +187,13 @@ const RecruiterDashboard = () => {
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: "15px", marginTop: "20px" }}>
                 {jobs.map(job => (
-                  <div key={job._id} style={{ padding: "20px", border: "1px solid var(--border-subtle)", borderRadius: "10px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <div>
-                      <h4 style={{ margin: "0 0 5px", fontSize: "18px" }}>{job.title}</h4>
-                      <p style={{ margin: "0 0 10px", color: "var(--text-secondary)", fontSize: "14px" }}>
+                  <div key={job._id} className="job-card">
+                    <div className="job-card-info">
+                      <h4>{job.title}</h4>
+                      <p>
                         {job.company} • {job.location || "Location not specified"} • Posted {new Date(job.createdAt).toLocaleDateString()}
                       </p>
-                      <div style={{ display: "flex", gap: "10px" }}>
+                      <div className="job-card-skills">
                         {job.requiredSkills.slice(0, 3).map((skill, i) => (
                           <span key={i} className="badge badge-navy">{skill}</span>
                         ))}
@@ -188,7 +203,7 @@ const RecruiterDashboard = () => {
                       </div>
                     </div>
                     
-                    <div style={{ display: "flex", gap: "10px" }}>
+                    <div className="job-card-actions">
                       <button 
                         className="btn-secondary" 
                         onClick={() => openManageApps(job)}

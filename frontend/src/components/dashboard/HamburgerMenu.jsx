@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useProfile } from "../../context/ProfileContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 /**
  * HamburgerMenu — ☰ button + slide-in drawer from the right
@@ -155,6 +155,78 @@ const HamburgerMenu = () => {
         </div>
 
         {/* Divider */}
+        <div style={{ height: "1px", background: "rgba(255,255,255,0.08)", margin: "0 -24px" }} />
+
+        {/* Navigation Links */}
+        <nav style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+          <Link
+            to="/dashboard"
+            id="drawer-dashboard-link"
+            onClick={() => setIsOpen(false)}
+            style={{
+              display: "flex", alignItems: "center", gap: "12px",
+              padding: "12px 16px",
+              borderRadius: "10px",
+              color: "var(--cream-100)",
+              textDecoration: "none",
+              fontSize: "14px", fontWeight: "500",
+              transition: "background 0.2s",
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.08)"}
+            onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+              <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+            </svg>
+            Dashboard
+          </Link>
+
+          <Link
+            to="/dashboard/jobs"
+            id="drawer-find-jobs-link"
+            onClick={() => setIsOpen(false)}
+            style={{
+              display: "flex", alignItems: "center", gap: "12px",
+              padding: "12px 16px",
+              borderRadius: "10px",
+              color: "var(--cream-100)",
+              textDecoration: "none",
+              fontSize: "14px", fontWeight: "500",
+              transition: "background 0.2s",
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.08)"}
+            onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            Find Jobs
+          </Link>
+
+          <Link
+            to="/dashboard/profile"
+            id="drawer-profile-link"
+            onClick={() => setIsOpen(false)}
+            style={{
+              display: "flex", alignItems: "center", gap: "12px",
+              padding: "12px 16px",
+              borderRadius: "10px",
+              color: "var(--cream-100)",
+              textDecoration: "none",
+              fontSize: "14px", fontWeight: "500",
+              transition: "background 0.2s",
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.08)"}
+            onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+            </svg>
+            Build Profile
+          </Link>
+        </nav>
+
         <div style={{ height: "1px", background: "rgba(255,255,255,0.08)", margin: "0 -24px" }} />
 
         {/* Spacer */}

@@ -80,7 +80,7 @@ const JobForm = ({ isOpen, onClose, initialData = null, onSubmit }) => {
           <X size={20} />
         </button>
         
-        <div className="modal-header">
+        <div className="modal-header" style={{ display: "flex", alignItems: "center", gap: "16px", textAlign: "left", marginBottom: "24px" }}>
           <div className="modal-icon-wrapper" style={{ background: "rgba(160, 120, 80, 0.15)", color: "var(--amber-700)" }}>
             <Briefcase size={24} />
           </div>
@@ -164,7 +164,7 @@ const JobForm = ({ isOpen, onClose, initialData = null, onSubmit }) => {
             />
           </div>
 
-          <div className="form-actions" style={{ position: "sticky", bottom: -20, background: "white", padding: "10px 0", marginTop: "20px" }}>
+          <div className="form-actions">
             <button type="button" className="btn-secondary" onClick={onClose} disabled={loading}>Cancel</button>
             <button type="submit" className="btn-primary" disabled={loading}>
               {loading ? "Saving..." : (initialData ? "Update Job" : "Post Job")}

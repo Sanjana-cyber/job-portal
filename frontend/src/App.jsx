@@ -13,6 +13,7 @@ import ResetPassword from "./pages/ResetPassword";
 import EmailVerification from "./pages/EmailVerification";
 import ProfileBuilderPage from "./pages/ProfileBuilderPage";
 import JobsPage from "./pages/JobsPage";
+import DashboardJobsPage from "./pages/DashboardJobsPage";
 
 function App() {
   return (
@@ -70,6 +71,14 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={["jobseeker"]}>
               <ProfileBuilderPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/jobs"
+          element={
+            <ProtectedRoute allowedRoles={["jobseeker"]}>
+              <DashboardJobsPage />
             </ProtectedRoute>
           }
         />
