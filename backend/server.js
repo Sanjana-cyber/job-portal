@@ -15,6 +15,7 @@ const profileRoutes = require("./routes/profileRoutes");
 const resumeIntelligenceRoutes = require("./routes/resumeIntelligenceRoutes");
 const jobRoutes = require("./routes/jobRoutes");
 const applicationRoutes = require("./routes/applicationRoutes");
+const verificationRoutes = require("./routes/verificationRoutes");
 
 // Create Express application
 const app = express();
@@ -92,6 +93,9 @@ app.use("/api/jobs", jobRoutes);
 
 // Application routes
 app.use("/api/applications", applicationRoutes);
+
+// Recruiter verification routes
+app.use("/api/verification", verificationRoutes);
 
 // 404 handler for unknown routes
 app.use((req, res) => {

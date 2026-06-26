@@ -54,6 +54,39 @@ const userSchema = new mongoose.Schema(
     verificationTokenExpire: Date,
     resetPasswordToken: String,
     resetPasswordExpire: Date,
+
+    // ── Recruiter company verification ──────────────────────────────
+    companyName: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    workEmail: {
+      type: String,
+      trim: true,
+      lowercase: true,
+      default: "",
+    },
+    companyWebsite: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    /**
+     * none     → recruiter hasn't submitted a request yet
+     * pending  → request submitted, awaiting admin review
+     * approved → admin approved — recruiter is verified
+     * rejected → admin rejected — recruiter can re-submit
+     */
+    companyVerificationStatus: {
+      type: String,
+      enum: ["none", "pending", "approved", "rejected"],
+      default: "none",
+    },
+    companyVerificationNote: {
+      type: String,
+      default: "",
+    },
   },
   {
     timestamps: true, // Adds createdAt and updatedAt automatically

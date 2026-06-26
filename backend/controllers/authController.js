@@ -178,6 +178,12 @@ const getMe = async (req, res, next) => {
         provider: user.provider,
         isVerified: user.isVerified,
         createdAt: user.createdAt,
+        // Recruiter verification
+        companyName: user.companyName,
+        workEmail: user.workEmail,
+        companyWebsite: user.companyWebsite,
+        companyVerificationStatus: user.companyVerificationStatus,
+        companyVerificationNote: user.companyVerificationNote,
       },
     });
   } catch (error) {

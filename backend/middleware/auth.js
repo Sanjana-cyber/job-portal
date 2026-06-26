@@ -81,4 +81,46 @@ const authorize = (...roles) => {
   };
 };
 
-module.exports = { protect, authorize };
+/**
+ * RequireVerified Middleware
+ * Blocks job creation/update if the admin has enabled verification enforcement
+ * AND the recruiter is not yet approved.
+ *
+ * Logic:
+ *   verificationRequired = false → always pass through
+ *   verificationRequired = true  → recruiter must have companyVerificationStatus === "approved"
+ *
+ * Must be used AFTER protect + authorize("recruiter") middleware.
+ */
+const requireVerified = async (req, res, next) => {
+  try {
+    // Only applies to recruiter role
+    if (!req.user || req.user.role !== "recruiter") return next();
+
+    const SiteSettings = require("../models/SiteSettings");
+    const settings = await SiteSettings.getSettings();
+
+    // If admin hasn't enabled enforcement, skip check
+    if (!settings.verificationRequired) return next();
+
+    // Fetch fresh user data (in case status changed since JWT was issued)
+    const User = require("../models/User");
+    const freshUser = await User.findById(req.user._id).select("companyVerificationStatus companyName");
+
+    if (!freshUser || freshUser.companyVerificationStatus !== "approved") {
+      return next(
+        new ErrorResponse(
+          "Your company verification is required before posting jobs. Please submit your company details from the dashboard.",
+          403
+        )
+      );
+    }
+
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { protect, authorize, requireVerified };
+

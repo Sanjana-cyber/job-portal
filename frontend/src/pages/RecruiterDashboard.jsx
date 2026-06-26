@@ -10,23 +10,29 @@ import {
   Plus,
   Edit2,
   Trash2,
-  LogOut
+  LogOut,
+  ShieldCheck,
 } from "lucide-react";
 import { getMyJobs, createJob, updateJob, deleteJob } from "../api/jobApi";
 import JobForm from "../components/recruiter/JobForm";
 import ManageApplications from "../components/recruiter/ManageApplications";
+import RecruiterVerificationPanel from "../components/recruiter/RecruiterVerificationPanel";
 
 /**
  * Recruiter Dashboard
- * Displays welcome message, hiring stats, and job management overview
+ * Displays welcome message, hiring stats, job management, and company verification panel.
  */
 const RecruiterDashboard = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
-  
-  // Modals state
+
+  // Verification state (driven by the panel's callback)
+  const [verifStatus, setVerifStatus] = useState("none");
+  const [verifRequired, setVerifRequired] = useState(false);
+
+  // Modals
   const [isJobFormOpen, setIsJobFormOpen] = useState(false);
   const [editingJob, setEditingJob] = useState(null);
   const [isAppsOpen, setIsAppsOpen] = useState(false);
@@ -71,20 +77,17 @@ const RecruiterDashboard = () => {
     }
   };
 
-  const openEditJob = (job) => {
-    setEditingJob(job);
-    setIsJobFormOpen(true);
-  };
-
+  const openEditJob = (job) => { setEditingJob(job); setIsJobFormOpen(true); };
   const openCreateJob = () => {
+    // Block if verification required and not approved
+    if (verifRequired && verifStatus !== "approved") {
+      toast.error("Company verification required. Please submit your company details below.");
+      return;
+    }
     setEditingJob(null);
     setIsJobFormOpen(true);
   };
-
-  const openManageApps = (job) => {
-    setSelectedJobForApps(job);
-    setIsAppsOpen(true);
-  };
+  const openManageApps = (job) => { setSelectedJobForApps(job); setIsAppsOpen(true); };
 
   const handleLogout = async () => {
     try {
@@ -96,9 +99,18 @@ const RecruiterDashboard = () => {
     }
   };
 
+  // Called by the verification panel when status changes
+  const handleVerifStatusChange = (data) => {
+    setVerifStatus(data.companyVerificationStatus);
+    setVerifRequired(data.verificationRequired);
+  };
+
+  const canPost = !verifRequired || verifStatus === "approved";
+
   return (
     <div className="dashboard-page">
       <div className="dashboard-container">
+
         {/* Welcome Section */}
         <div className="welcome-section animate-fade-in-up">
           <div className="welcome-text">
@@ -112,12 +124,20 @@ const RecruiterDashboard = () => {
               <Users size={16} />
               Recruiter
             </div>
+            {verifStatus === "approved" && (
+              <div className="verif-badge-approved">
+                <ShieldCheck size={14} /> Verified
+              </div>
+            )}
             <button className="btn-logout" onClick={handleLogout} title="Logout">
               <LogOut size={16} />
               Logout
             </button>
           </div>
         </div>
+
+        {/* Verification Panel */}
+        <RecruiterVerificationPanel onStatusChange={handleVerifStatusChange} />
 
         {/* Stats Grid */}
         <div className="stats-grid">
@@ -130,7 +150,6 @@ const RecruiterDashboard = () => {
               <span className="stat-card-label">Active Jobs</span>
             </div>
           </div>
-
           <div className="stat-card glass" style={{ animationDelay: "0.2s" }}>
             <div className="stat-card-icon icon-blue">
               <Users size={22} />
@@ -140,7 +159,6 @@ const RecruiterDashboard = () => {
               <span className="stat-card-label">Total Applicants</span>
             </div>
           </div>
-
           <div className="stat-card glass" style={{ animationDelay: "0.3s" }}>
             <div className="stat-card-icon icon-green">
               <UserCheck size={22} />
@@ -150,7 +168,6 @@ const RecruiterDashboard = () => {
               <span className="stat-card-label">Shortlisted</span>
             </div>
           </div>
-
           <div className="stat-card glass" style={{ animationDelay: "0.4s" }}>
             <div className="stat-card-icon icon-amber">
               <Eye size={22} />
@@ -162,20 +179,32 @@ const RecruiterDashboard = () => {
           </div>
         </div>
 
-        {/* Main Content Grid */}
+        {/* Job Postings */}
         <div className="dashboard-grid" style={{ gridTemplateColumns: "1fr", marginTop: "30px" }}>
-          
           <div className="dashboard-card glass animate-fade-in-up">
             <div className="card-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <h3>
                 <Briefcase size={18} />
                 My Job Postings
               </h3>
-              <button className="btn-primary" onClick={openCreateJob} style={{ padding: "8px 16px" }}>
-                <Plus size={16} /> Post a Job
-              </button>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                {verifRequired && verifStatus !== "approved" && (
+                  <span style={{ fontSize: "12px", color: "var(--warning-500)", display: "flex", alignItems: "center", gap: "5px" }}>
+                    ⚠ Verification required to post
+                  </span>
+                )}
+                <button
+                  className="btn-primary"
+                  onClick={openCreateJob}
+                  disabled={!canPost}
+                  style={{ padding: "8px 16px", opacity: canPost ? 1 : 0.5 }}
+                  title={canPost ? "Post a new job" : "Company verification required"}
+                >
+                  <Plus size={16} /> Post a Job
+                </button>
+              </div>
             </div>
-            
+
             {loading ? (
               <div style={{ padding: "40px", textAlign: "center" }}>Loading jobs...</div>
             ) : jobs.length === 0 ? (
@@ -186,7 +215,7 @@ const RecruiterDashboard = () => {
               </div>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: "15px", marginTop: "20px" }}>
-                {jobs.map(job => (
+                {jobs.map((job) => (
                   <div key={job._id} className="job-card">
                     <div className="job-card-info">
                       <h4>{job.title}</h4>
@@ -202,25 +231,19 @@ const RecruiterDashboard = () => {
                         )}
                       </div>
                     </div>
-                    
                     <div className="job-card-actions">
-                      <button 
-                        className="btn-secondary" 
+                      <button
+                        className="btn-secondary"
                         onClick={() => openManageApps(job)}
                         style={{ padding: "6px 12px", fontSize: "13px" }}
                       >
                         <Users size={16} /> Applications
                       </button>
-                      <button 
-                        className="btn-ghost" 
-                        onClick={() => openEditJob(job)}
-                        title="Edit Job"
-                        style={{ padding: "6px" }}
-                      >
+                      <button className="btn-ghost" onClick={() => openEditJob(job)} title="Edit Job" style={{ padding: "6px" }}>
                         <Edit2 size={16} />
                       </button>
-                      <button 
-                        className="btn-ghost" 
+                      <button
+                        className="btn-ghost"
                         onClick={() => handleDeleteJob(job._id)}
                         style={{ padding: "6px", color: "var(--error-500)" }}
                         title="Delete Job"
@@ -236,13 +259,12 @@ const RecruiterDashboard = () => {
         </div>
       </div>
 
-      <JobForm 
-        isOpen={isJobFormOpen} 
-        onClose={() => setIsJobFormOpen(false)} 
-        initialData={editingJob} 
-        onSubmit={handleCreateOrUpdateJob} 
+      <JobForm
+        isOpen={isJobFormOpen}
+        onClose={() => setIsJobFormOpen(false)}
+        initialData={editingJob}
+        onSubmit={handleCreateOrUpdateJob}
       />
-      
       <ManageApplications
         isOpen={isAppsOpen}
         onClose={() => setIsAppsOpen(false)}
