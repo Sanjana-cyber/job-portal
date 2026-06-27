@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, Search } from "lucide-react";
 import { ProfileProvider } from "../context/ProfileContext";
 import HamburgerMenu from "../components/dashboard/HamburgerMenu";
+import NotificationBell from "../components/dashboard/NotificationBell";
 import JobsPage from "./JobsPage";
 
 /**
@@ -58,6 +59,7 @@ const DashboardJobsPageContent = () => (
           color: "var(--amber-700)", padding: "4px 12px",
           borderRadius: "20px", fontSize: "12px", fontWeight: "600",
         }}>Candidate</span>
+        <NotificationBell />
         <HamburgerMenu />
       </div>
     </header>

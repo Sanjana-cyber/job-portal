@@ -2,6 +2,7 @@ const User = require("../models/User");
 const SiteSettings = require("../models/SiteSettings");
 const { ErrorResponse } = require("../middleware/errorHandler");
 const { sendEmail } = require("../utils/sendEmail");
+const { analyzeCompanyDetails } = require("../utils/companyAnalyzer");
 
 /* ─── Recruiter: Submit / Re-submit Company Details ─────────────────────── */
 /**
@@ -31,18 +32,49 @@ exports.submitVerificationRequest = async (req, res, next) => {
     user.companyName = companyName.trim();
     user.workEmail = workEmail.toLowerCase().trim();
     user.companyWebsite = (companyWebsite || "").trim();
-    user.companyVerificationStatus = "pending";
-    user.companyVerificationNote = "";
+
+    // Check whether the admin has enabled auto-verification via the toggle
+    const settings = await SiteSettings.getSettings();
+
+    if (settings.verificationRequired) {
+      // Toggle is ON → run the full automatic Google Search analysis pipeline
+      console.log("[Verification] Auto-analysis enabled. Running company check for:", user.companyName);
+      const analysisResult = await analyzeCompanyDetails(
+        user.companyName,
+        user.workEmail,
+        user.companyWebsite
+      );
+      user.companyVerificationStatus = analysisResult.status;
+      user.companyVerificationNote = analysisResult.note;
+      console.log(`[Verification] Auto-analysis result for "${user.companyName}": ${analysisResult.status} — ${analysisResult.note}`);
+    } else {
+      // Toggle is OFF → skip analysis, queue for manual admin review
+      user.companyVerificationStatus = "pending";
+      user.companyVerificationNote = "Verification enforcement is currently disabled. Queued for manual admin review.";
+      console.log("[Verification] Auto-analysis skipped (toggle is OFF). Queued as pending.");
+    }
+
     await user.save({ validateBeforeSave: false });
+
+    // Build response message based on the outcome
+    let message = "Verification request submitted successfully.";
+    if (user.companyVerificationStatus === "approved") {
+      message = "Your company has been automatically verified! You can now post jobs.";
+    } else if (user.companyVerificationStatus === "rejected") {
+      message = "Your verification request was rejected. Please check the reason and re-submit with valid details.";
+    } else {
+      message = "Verification request submitted. An admin will review your company details shortly.";
+    }
 
     res.status(200).json({
       success: true,
-      message: "Verification request submitted. The admin will review your company details shortly.",
+      message,
       data: {
         companyName: user.companyName,
         workEmail: user.workEmail,
         companyWebsite: user.companyWebsite,
         companyVerificationStatus: user.companyVerificationStatus,
+        companyVerificationNote: user.companyVerificationNote,
       },
     });
   } catch (error) {

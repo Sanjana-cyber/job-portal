@@ -8,6 +8,7 @@ import ProfileCompletionRing from "../components/dashboard/ProfileCompletionRing
 import ProfileStatusGrid from "../components/dashboard/ProfileStatusGrid";
 import ActiveResumeCard from "../components/dashboard/ActiveResumeCard";
 import AtsAnalysisPanel from "../components/dashboard/AtsAnalysisPanel";
+import NotificationBell from "../components/dashboard/NotificationBell";
 
 const DashboardContent = () => {
   const { resumes } = useProfile();
@@ -83,6 +84,7 @@ const DashboardContent = () => {
             fontSize: "12px",
             fontWeight: "600",
           }}>Candidate</span>
+          <NotificationBell />
           <HamburgerMenu />
         </div>
       </header>

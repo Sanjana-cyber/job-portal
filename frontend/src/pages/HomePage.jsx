@@ -106,7 +106,7 @@ const HomePage = () => {
             <div className="showcase-cta">
               <button
                 className="btn-showcase-primary"
-                onClick={() => handleRoleClick("jobseeker")}
+                onClick={() => navigate("/resume-builder")}
               >
                 Build Your Resume
                 <ArrowRight size={16} />

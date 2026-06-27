@@ -2,6 +2,7 @@ const Application = require("../models/Application");
 const Job = require("../models/Job");
 const Resume = require("../models/Resume");
 const { ErrorResponse } = require("../middleware/errorHandler");
+const { computeAtsScore } = require("../utils/atsScoringService");
 
 // ─── POST /api/applications/:jobId ─────────────────────────────────────────
 // Candidate applies to a job
@@ -31,11 +32,26 @@ exports.applyToJob = async (req, res, next) => {
       return next(new ErrorResponse("You must have an active resume to apply", 400));
     }
 
+    let atsScore = null;
+    let matchedKeywords = [];
+    let missingKeywords = [];
+
+    if (activeResume.parsedData) {
+      const jdText = job.description ? `${job.title} ${job.description}` : job.title;
+      const atsResult = computeAtsScore(activeResume.parsedData, jdText);
+      atsScore = atsResult.atsScore;
+      matchedKeywords = atsResult.matchedKeywords;
+      missingKeywords = atsResult.missingKeywords;
+    }
+
     const application = await Application.create({
       job: jobId,
       applicant: req.user._id,
       resume: activeResume._id,
       coverLetter: coverLetter || "",
+      atsScore,
+      matchedKeywords,
+      missingKeywords,
     });
 
     res.status(201).json({

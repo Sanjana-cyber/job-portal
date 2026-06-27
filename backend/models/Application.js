@@ -26,6 +26,12 @@ const applicationSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    atsScore: {
+      type: Number,
+      default: null,
+    },
+    matchedKeywords: [{ type: String }],
+    missingKeywords: [{ type: String }],
   },
   { timestamps: true }
 );

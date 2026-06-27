@@ -5,6 +5,8 @@ import toast from "react-hot-toast";
 import { Search, MapPin, Briefcase, Clock, FileText, X } from "lucide-react";
 import { getJobs } from "../api/jobApi";
 import { applyToJob } from "../api/applicationApi";
+import { getResumes } from "../api/profileApi";
+import { matchATS } from "../api/analysisApi";
 
 /**
  * JobsPage — Public browsing, auth-gated applying
@@ -25,6 +27,8 @@ const JobsPage = ({ inDashboard = false }) => {
   // State for apply flow (authenticated seekers)
   const [applyingTo, setApplyingTo] = useState(null);
   const [coverLetter, setCoverLetter] = useState("");
+  const [atsData, setAtsData] = useState(null);
+  const [fetchingAts, setFetchingAts] = useState(false);
 
   // State for auth-gate flow (unauthenticated)
   const [authGateJob, setAuthGateJob] = useState(null);
@@ -47,11 +51,26 @@ const JobsPage = ({ inDashboard = false }) => {
   const handleSearch = (e) => { e.preventDefault(); fetchJobs(search); };
 
   /** Central "Apply Now" handler — branches by auth state */
-  const handleApplyClick = (job) => {
+  const handleApplyClick = async (job) => {
     if (!user) {
       setAuthGateJob(job);
     } else if (user.role === "jobseeker") {
       setApplyingTo(job);
+      setFetchingAts(true);
+      setAtsData(null);
+      try {
+        const resumesRes = await getResumes();
+        const activeResume = resumesRes.data.data.find(r => r.isActive);
+        if (activeResume) {
+          const jdText = job.description ? `${job.title} ${job.description}` : job.title;
+          const matchRes = await matchATS(activeResume._id, jdText);
+          setAtsData(matchRes.data.data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch ATS preview", err);
+      } finally {
+        setFetchingAts(false);
+      }
     } else {
       toast.error("Only job seekers can apply for jobs.");
     }
@@ -203,6 +222,42 @@ const JobsPage = ({ inDashboard = false }) => {
               <FileText size={18} />
               Your active resume will be sent to the recruiter automatically.
             </div>
+
+            {fetchingAts ? (
+              <div style={{ padding: "15px", background: "var(--cream-50)", borderRadius: "8px", marginBottom: "20px", textAlign: "center", fontSize: "14px" }}>
+                Calculating ATS Score...
+              </div>
+            ) : atsData ? (
+              <div style={{ padding: "15px", background: "var(--cream-50)", borderRadius: "8px", marginBottom: "20px" }}>
+                <h4 style={{ margin: "0 0 10px", fontSize: "15px" }}>ATS Match Analysis</h4>
+                <div style={{ display: "flex", gap: "20px", marginBottom: "10px" }}>
+                  <div>
+                    <span style={{ fontSize: "13px", color: "var(--text-secondary)" }}>Match Score:</span>
+                    <div style={{ fontSize: "20px", fontWeight: "bold", color: atsData.matchScore >= 80 ? "var(--success-500)" : atsData.matchScore >= 60 ? "var(--warning-500)" : "var(--error-500)" }}>
+                      {atsData.matchScore}%
+                    </div>
+                  </div>
+                </div>
+                
+                {atsData.matchedKeywords?.length > 0 && (
+                  <div style={{ marginBottom: "8px" }}>
+                    <span style={{ fontSize: "12px", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>Matching Keywords:</span>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
+                      {atsData.matchedKeywords.map((k, i) => <span key={i} className="badge badge-navy" style={{ background: "rgba(34, 197, 94, 0.1)", color: "var(--success-600)", border: "1px solid rgba(34, 197, 94, 0.2)" }}>{k}</span>)}
+                    </div>
+                  </div>
+                )}
+                
+                {atsData.missingKeywords?.length > 0 && (
+                  <div>
+                    <span style={{ fontSize: "12px", color: "var(--text-secondary)", display: "block", marginBottom: "4px" }}>Missing Keywords:</span>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
+                      {atsData.missingKeywords.map((k, i) => <span key={i} className="badge badge-navy" style={{ background: "rgba(239, 68, 68, 0.1)", color: "var(--error-600)", border: "1px solid rgba(239, 68, 68, 0.2)" }}>{k}</span>)}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : null}
 
             <form onSubmit={handleApply}>
               <div className="form-group">

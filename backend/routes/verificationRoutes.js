@@ -12,6 +12,8 @@ const {
   getAdminStats,
 } = require("../controllers/verificationController");
 
+const { analyzeCompanyDetails } = require("../utils/companyAnalyzer");
+
 // ── Recruiter routes ────────────────────────────────────────────────────────
 router.post("/submit",  protect, authorize("recruiter"), submitVerificationRequest);
 router.get("/status",   protect, authorize("recruiter"), getVerificationStatus);
@@ -23,5 +25,20 @@ router.get("/settings",        protect, authorize("admin"), getVerificationSetti
 router.put("/settings",        protect, authorize("admin"), updateVerificationSettings);
 router.put("/approve/:id",     protect, authorize("admin"), approveRecruiter);
 router.put("/reject/:id",      protect, authorize("admin"), rejectRecruiter);
+
+// ── DEBUG: Test company analyzer (open, no auth — remove in production) ──────
+// Usage: GET /api/verification/debug-analyze?company=TCS&email=hr@tcs.com&website=https://www.tcs.com
+router.get("/debug-analyze", async (req, res) => {
+  const { company, email, website } = req.query;
+  if (!company || !email) {
+    return res.status(400).json({ error: "Provide ?company=NAME&email=EMAIL&website=URL" });
+  }
+  try {
+    const result = await analyzeCompanyDetails(company, email, website || "");
+    res.json({ input: { company, email, website }, result });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 module.exports = router;

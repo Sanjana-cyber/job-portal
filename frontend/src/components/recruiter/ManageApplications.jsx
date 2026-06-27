@@ -102,6 +102,29 @@ const ManageApplications = ({ isOpen, onClose, job }) => {
                         <strong>Cover Letter:</strong><br/>{app.coverLetter}
                       </div>
                     )}
+                    
+                    {app.atsScore !== undefined && app.atsScore !== null && (
+                      <div style={{ marginTop: "12px", padding: "12px", background: "var(--cream-50)", borderRadius: "6px", borderLeft: "3px solid var(--navy-800)" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                          <strong>ATS Score</strong>
+                          <span style={{ fontWeight: "bold", color: app.atsScore >= 80 ? "var(--success-500)" : app.atsScore >= 60 ? "var(--warning-500)" : "var(--error-500)" }}>
+                            {app.atsScore}%
+                          </span>
+                        </div>
+                        {app.matchedKeywords?.length > 0 && (
+                          <div style={{ marginBottom: "6px" }}>
+                            <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>Matched: </span>
+                            {app.matchedKeywords.map((k, i) => <span key={i} className="badge badge-navy" style={{ background: "rgba(34, 197, 94, 0.1)", color: "var(--success-600)", border: "1px solid rgba(34, 197, 94, 0.2)", fontSize: "11px", padding: "2px 6px" }}>{k}</span>)}
+                          </div>
+                        )}
+                        {app.missingKeywords?.length > 0 && (
+                          <div>
+                            <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>Missing: </span>
+                            {app.missingKeywords.map((k, i) => <span key={i} className="badge badge-navy" style={{ background: "rgba(239, 68, 68, 0.1)", color: "var(--error-600)", border: "1px solid rgba(239, 68, 68, 0.2)", fontSize: "11px", padding: "2px 6px" }}>{k}</span>)}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>

@@ -12,6 +12,7 @@ import SystemManagementConsole from "./pages/SystemManagementConsole";
 import ResetPassword from "./pages/ResetPassword";
 import EmailVerification from "./pages/EmailVerification";
 import ProfileBuilderPage from "./pages/ProfileBuilderPage";
+import ResumeBuilderPage from "./pages/ResumeBuilderPage";
 import JobsPage from "./pages/JobsPage";
 import DashboardJobsPage from "./pages/DashboardJobsPage";
 
@@ -51,6 +52,7 @@ function App() {
         {/* Public Routes */}
         <Route path="/" element={<HomePage />} />
         <Route path="/jobs" element={<JobsPage />} />
+        <Route path="/resume-builder" element={<ResumeBuilderPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/admin/login" element={<AdminLogin />} />
@@ -74,6 +76,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/dashboard/jobs"
           element={

@@ -8,7 +8,7 @@
   justify-content: center;
   min-height: 100vh;
   padding: var(--sp-6);
-  background: var(--navy-900);
+  background: var(--bg-page);
   position: relative;
   overflow: hidden;
 }
@@ -22,9 +22,9 @@
   max-width: 400px;
   padding: var(--sp-10);
   border-radius: var(--radius-xl);
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.08);
-  backdrop-filter: blur(20px);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-xl);
   text-align: center;
 }
 
@@ -34,9 +34,9 @@
   justify-content: center;
   width: 56px;
   height: 56px;
-  background: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
+  background: var(--navy-100);
   border-radius: var(--radius-lg);
-  color: white;
+  color: var(--navy-800);
   margin-bottom: var(--sp-5);
 }
 
@@ -44,14 +44,14 @@
   font-family: var(--font-display);
   font-size: var(--text-2xl);
   font-weight: 500;
-  color: white;
+  color: var(--text-primary);
   margin-bottom: var(--sp-2);
   letter-spacing: -0.02em;
 }
 
 .admin-subtitle {
   font-size: var(--text-sm);
-  color: rgba(255,255,255,0.45);
+  color: var(--text-secondary);
   margin-bottom: var(--sp-6);
   font-weight: 300;
 }
@@ -63,30 +63,7 @@
   text-align: left;
 }
 
-/* Override auth-input for dark context */
-.admin-form .auth-input {
-  background: rgba(255,255,255,0.06);
-  border-color: rgba(255,255,255,0.10);
-  color: white;
-}
-
-.admin-form .auth-input::placeholder {
-  color: rgba(255,255,255,0.30);
-}
-
-.admin-form .auth-input:hover {
-  border-color: rgba(255,255,255,0.18);
-}
-
-.admin-form .auth-input:focus {
-  border-color: rgba(239,68,68,0.6);
-  box-shadow: 0 0 0 3px rgba(239,68,68,0.12);
-  background: rgba(255,255,255,0.08);
-}
-
-.admin-form .input-icon {
-  color: rgba(255,255,255,0.30);
-}
+/* Remove overrides to let auth-input fall back to standard light theme from index.css */
 
 .btn-admin-login {
   display: flex;
@@ -95,7 +72,7 @@
   gap: var(--sp-2);
   width: 100%;
   padding: 0.75rem var(--sp-6);
-  background: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
+  background: var(--navy-800);
   color: white;
   font-family: var(--font-body);
   font-size: var(--text-base);
@@ -109,8 +86,8 @@
 
 .btn-admin-login:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 8px 24px rgba(239, 68, 68, 0.35);
-  filter: brightness(1.05);
+  box-shadow: var(--shadow-md);
+  background: var(--navy-700);
 }
 
 .btn-admin-login:disabled {
@@ -121,6 +98,6 @@
 .admin-notice {
   margin-top: var(--sp-6);
   font-size: var(--text-xs);
-  color: rgba(255,255,255,0.25);
+  color: var(--text-tertiary);
   line-height: 1.65;
 }
