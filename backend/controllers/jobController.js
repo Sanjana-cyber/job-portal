@@ -73,15 +73,13 @@ exports.getRecentJobs = async (req, res, next) => {
 // ─── GET /api/jobs ─────────────────────────────────────────────────────────
 exports.getJobs = async (req, res, next) => {
   try {
-    // Basic filtering: only active jobs by default
     const query = { isActive: true };
-    
-    // Add search by title/company/skills if provided in query string
+
     if (req.query.search) {
       query.$or = [
         { title: { $regex: req.query.search, $options: "i" } },
         { company: { $regex: req.query.search, $options: "i" } },
-        { requiredSkills: { $regex: req.query.search, $options: "i" } }
+        { requiredSkills: { $regex: req.query.search, $options: "i" } },
       ];
     }
 
@@ -116,7 +114,7 @@ exports.getMyJobs = async (req, res, next) => {
 exports.getJobById = async (req, res, next) => {
   try {
     const job = await Job.findById(req.params.id).populate("postedBy", "name email");
-    
+
     if (!job) {
       return next(new ErrorResponse(`Job not found with id of ${req.params.id}`, 404));
     }
@@ -139,7 +137,6 @@ exports.updateJob = async (req, res, next) => {
       return next(new ErrorResponse(`Job not found with id of ${req.params.id}`, 404));
     }
 
-    // Ensure user is job owner
     if (job.postedBy.toString() !== req.user._id.toString() && req.user.role !== "admin") {
       return next(new ErrorResponse(`User not authorized to update this job`, 401));
     }
@@ -168,13 +165,10 @@ exports.deleteJob = async (req, res, next) => {
       return next(new ErrorResponse(`Job not found with id of ${req.params.id}`, 404));
     }
 
-    // Ensure user is job owner
     if (job.postedBy.toString() !== req.user._id.toString() && req.user.role !== "admin") {
       return next(new ErrorResponse(`User not authorized to delete this job`, 401));
     }
 
-    // Deactivate instead of hard delete to preserve applications, or actually delete
-    // We will hard delete here, and also clean up applications
     await Application.deleteMany({ job: req.params.id });
     await job.deleteOne();
 
@@ -209,7 +203,7 @@ const getNewJobEmailTemplate = (seekerName, job) => {
             View All Jobs
           </a>
         </div>
-        <p style="color:#aaa;font-size:12px;">Hello ${seekerName}, this is an automatic notification. To stop receiving these, manage your preferences from your dashboard.</p>
+        <p style="color:#aaa;font-size:12px;">Hello ${seekerName}, this is an automatic notification.</p>
         <hr style="border:none;border-top:1px solid #eee;margin:20px 0;" />
         <p style="color:#ccc;font-size:11px;text-align:center;">© ${new Date().getFullYear()} Job Portal. All rights reserved.</p>
       </div>

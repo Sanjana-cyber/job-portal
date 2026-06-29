@@ -14,6 +14,7 @@ const {
 } = require("../utils/validators");
 const { ErrorResponse } = require("../middleware/errorHandler");
 const { OAuth2Client } = require("google-auth-library");
+const { analyzeCompanyDetails } = require("../utils/companyAnalyzer");
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -24,7 +25,7 @@ const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
  */
 const register = async (req, res, next) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role, companyName, companyWebsite } = req.body;
 
     // Validate input
     const validation = validateRegister({ name, email, password, role });
@@ -34,17 +35,18 @@ const register = async (req, res, next) => {
 
     // Prevent admin registration through public endpoint
     if (role === "admin") {
-      return next(
-        new ErrorResponse("Admin registration is not allowed", 403)
-      );
+      return next(new ErrorResponse("Admin registration is not allowed", 403));
+    }
+
+    // Recruiters must provide a company name
+    if (role === "recruiter" && !companyName?.trim()) {
+      return next(new ErrorResponse("Company name is required for recruiter registration", 400));
     }
 
     // Check if user already exists
     const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser) {
-      return next(
-        new ErrorResponse("An account with this email already exists", 400)
-      );
+      return next(new ErrorResponse("An account with this email already exists", 400));
     }
 
     // Create user with sanitized inputs
@@ -56,6 +58,48 @@ const register = async (req, res, next) => {
       provider: "local",
     });
 
+    // ── Recruiter: Auto web-check at registration ────────────────────────────
+    if (role === "recruiter" && companyName?.trim()) {
+      user.companyName = companyName.trim();
+      user.workEmail = email.toLowerCase().trim();
+      user.companyWebsite = (companyWebsite || "").trim();
+
+      console.log(`[Register] Running auto web-check for recruiter: "${user.companyName}"`);
+      const analysisResult = await analyzeCompanyDetails(
+        user.companyName,
+        user.workEmail,
+        user.companyWebsite
+      );
+      console.log(`[Register] Web-check result: ${analysisResult.status} — ${analysisResult.note}`);
+
+      if (analysisResult.status === "approved") {
+        // ✅ Company found — auto-approve immediately
+        user.companyVerificationStatus = "approved";
+        user.companyVerificationNote = `[Auto-Approved at Registration] ${analysisResult.note}`;
+        console.log(`[Register] ✅ "${user.companyName}" auto-approved.`);
+
+        // Send welcome + approved email (non-blocking)
+        sendEmail({
+          to: user.email,
+          subject: "🎉 Company Verified — Welcome to Job Portal!",
+          html: getRecruiterAutoApprovedEmailTemplate(user.name, user.companyName),
+        }).catch((e) => console.error("Auto-approval email failed:", e.message));
+
+      } else {
+        // ❌ Not found or API error — queue for admin review
+        const warningNote = analysisResult.status === "rejected"
+          ? `[⚠️ Auto-Check: NOT FOUND] "${user.companyName}" could not be found online. Queued for admin manual review.`
+          : `[⚠️ Auto-Check: API ERROR] Could not verify automatically. Queued for manual admin review.`;
+
+        user.companyVerificationStatus = "pending";
+        user.companyVerificationNote = warningNote;
+        console.log(`[Register] ⚠️ "${user.companyName}" not verified — queued for admin review.`);
+      }
+
+      await user.save({ validateBeforeSave: false });
+    }
+    // ─────────────────────────────────────────────────────────────────────────
+
     // Generate email verification token
     const verificationToken = user.getVerificationToken();
     await user.save({ validateBeforeSave: false });
@@ -63,7 +107,7 @@ const register = async (req, res, next) => {
     // Build verification URL
     const verificationUrl = `${process.env.FRONTEND_URL}/verify-email/${verificationToken}`;
 
-    // Send verification email (non-blocking — don't fail registration if email fails)
+    // Send verification email (non-blocking)
     try {
       await sendEmail({
         to: user.email,
@@ -72,7 +116,6 @@ const register = async (req, res, next) => {
       });
     } catch (emailError) {
       console.error("Email sending failed:", emailError.message);
-      // Continue with registration even if email fails
     }
 
     // Send token response with JWT cookie
@@ -80,6 +123,32 @@ const register = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+};
+
+/* ─── Email template: recruiter auto-approved at registration ────────────── */
+const getRecruiterAutoApprovedEmailTemplate = (name, companyName) => {
+  const dashUrl = `${process.env.FRONTEND_URL}/recruiter-dashboard`;
+  return `
+    <div style="max-width:600px;margin:0 auto;padding:20px;font-family:'Segoe UI',Arial,sans-serif;">
+      <div style="background:linear-gradient(135deg,#166534 0%,#22c55e 100%);padding:28px;border-radius:12px 12px 0 0;text-align:center;">
+        <h1 style="color:#fff;margin:0;font-size:26px;">✅ Company Verified!</h1>
+        <p style="color:rgba(255,255,255,0.85);margin:6px 0 0;font-size:14px;">Your account is ready to post jobs</p>
+      </div>
+      <div style="background:#fff;padding:30px;border:1px solid #e0e0e0;border-radius:0 0 12px 12px;">
+        <h2 style="color:#166534;margin-top:0;">Welcome, ${name}! 🎉</h2>
+        <p style="color:#555;font-size:16px;">
+          We automatically verified <strong>${companyName}</strong> via a web search.
+          Your recruiter account is now <strong>fully approved</strong> — you can start posting jobs immediately!
+        </p>
+        <div style="text-align:center;margin:28px 0;">
+          <a href="${dashUrl}" style="background:linear-gradient(135deg,#166534,#22c55e);color:#fff;padding:14px 36px;border-radius:8px;text-decoration:none;font-size:15px;font-weight:600;">
+            Go to Dashboard
+          </a>
+        </div>
+        <hr style="border:none;border-top:1px solid #eee;margin:20px 0;" />
+        <p style="color:#ccc;font-size:11px;text-align:center;">© ${new Date().getFullYear()} Job Portal. All rights reserved.</p>
+      </div>
+    </div>`;
 };
 
 /**

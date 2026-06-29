@@ -30,6 +30,9 @@ export const updateVerificationSettings = (data) => api.put("/verification/setti
 /** Admin: get recruiter counts by status */
 export const getAdminStats = () => api.get("/verification/stats");
 
+/** Admin: trigger Google web check — auto-approves if found, flags if not */
+export const runWebCheck = (id) => api.post(`/verification/webcheck/${id}`);
+
 /** Seeker: get jobs posted in last 48h (for notification bell) */
 export const getRecentJobs = () => api.get("/jobs/recent");
 

@@ -33,38 +33,42 @@ exports.submitVerificationRequest = async (req, res, next) => {
     user.workEmail = workEmail.toLowerCase().trim();
     user.companyWebsite = (companyWebsite || "").trim();
 
-    // Check whether the admin has enabled auto-verification via the toggle
-    const settings = await SiteSettings.getSettings();
+    // Run the full automatic Google Search analysis pipeline
+    console.log("[Verification] Auto-analysis running for re-submission:", user.companyName);
+    const analysisResult = await analyzeCompanyDetails(
+      user.companyName,
+      user.workEmail,
+      user.companyWebsite
+    );
 
-    if (settings.verificationRequired) {
-      // Toggle is ON → run the full automatic Google Search analysis pipeline
-      console.log("[Verification] Auto-analysis enabled. Running company check for:", user.companyName);
-      const analysisResult = await analyzeCompanyDetails(
-        user.companyName,
-        user.workEmail,
-        user.companyWebsite
-      );
-      user.companyVerificationStatus = analysisResult.status;
-      user.companyVerificationNote = analysisResult.note;
-      console.log(`[Verification] Auto-analysis result for "${user.companyName}": ${analysisResult.status} — ${analysisResult.note}`);
+    if (analysisResult.status === "approved") {
+      // ✅ Company found — auto-approve immediately
+      user.companyVerificationStatus = "approved";
+      user.companyVerificationNote = `[Auto-Approved on Re-submission] ${analysisResult.note}`;
+      console.log(`[Verification] ✅ "${user.companyName}" auto-approved on re-submission.`);
+
+      // Send approval email (non-blocking)
+      sendEmail({
+        to: user.email,
+        subject: "🎉 Company Verification Approved — Job Portal",
+        html: getVerificationResultEmailTemplate(user.name, "approved", ""),
+      }).catch((e) => console.error("Approval email failed:", e.message));
+
     } else {
-      // Toggle is OFF → skip analysis, queue for manual admin review
+      // ❌ Not found or API error — queue for admin manual review
+      const warningNote = analysisResult.status === "rejected"
+        ? `[⚠️ Auto-Check: NOT FOUND] "${user.companyName}" could not be found online. Queued for admin manual review.`
+        : `[⚠️ Auto-Check: API ERROR] Could not verify automatically. Queued for manual admin review.`;
       user.companyVerificationStatus = "pending";
-      user.companyVerificationNote = "Verification enforcement is currently disabled. Queued for manual admin review.";
-      console.log("[Verification] Auto-analysis skipped (toggle is OFF). Queued as pending.");
+      user.companyVerificationNote = warningNote;
+      console.log(`[Verification] ⚠️ "${user.companyName}" queued for admin review.`);
     }
 
     await user.save({ validateBeforeSave: false });
 
-    // Build response message based on the outcome
-    let message = "Verification request submitted successfully.";
-    if (user.companyVerificationStatus === "approved") {
-      message = "Your company has been automatically verified! You can now post jobs.";
-    } else if (user.companyVerificationStatus === "rejected") {
-      message = "Your verification request was rejected. Please check the reason and re-submit with valid details.";
-    } else {
-      message = "Verification request submitted. An admin will review your company details shortly.";
-    }
+    const message = user.companyVerificationStatus === "approved"
+      ? "🎉 Your company has been automatically verified! You can now post jobs."
+      : "Verification request submitted. An admin will review your company details shortly.";
 
     res.status(200).json({
       success: true,
@@ -166,6 +170,86 @@ exports.approveRecruiter = async (req, res, next) => {
       message: `${user.name} has been approved.`,
       data: { companyVerificationStatus: "approved" },
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/* ─── Admin: Trigger Web Check for a Recruiter ───────────────────────────── */
+/**
+ * @desc  Admin triggers a Google web search for a recruiter's company.
+ *        If found  → auto-approved immediately.
+ *        If NOT found → stays pending with a "not found" warning note for admin.
+ *        On API error → stays pending with error note.
+ * @route POST /api/verification/webcheck/:id
+ * @access Private — admin
+ */
+exports.runWebCheckForRecruiter = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return next(new ErrorResponse("Recruiter not found", 404));
+    if (user.role !== "recruiter") return next(new ErrorResponse("User is not a recruiter", 400));
+    if (!user.companyName) return next(new ErrorResponse("Recruiter has not submitted company details yet", 400));
+
+    console.log(`[WebCheck] Admin triggered web check for: "${user.companyName}" (${user.email})`);
+
+    const analysisResult = await analyzeCompanyDetails(
+      user.companyName,
+      user.workEmail || "",
+      user.companyWebsite || ""
+    );
+
+    console.log(`[WebCheck] Result: ${analysisResult.status} — ${analysisResult.note}`);
+
+    if (analysisResult.status === "approved") {
+      // Company found on web — auto-approve!
+      user.companyVerificationStatus = "approved";
+      user.companyVerificationNote = `[Auto-Approved via Web Check] ${analysisResult.note}`;
+      await user.save({ validateBeforeSave: false });
+
+      // Send approval email
+      try {
+        await sendEmail({
+          to: user.email,
+          subject: "🎉 Company Verification Approved — Job Portal",
+          html: getVerificationResultEmailTemplate(user.name, "approved", ""),
+        });
+      } catch (e) { console.error("Approval email failed:", e.message); }
+
+      return res.status(200).json({
+        success: true,
+        autoApproved: true,
+        message: `✅ "${user.companyName}" found on the web — automatically approved!`,
+        data: { companyVerificationStatus: "approved", companyVerificationNote: user.companyVerificationNote },
+      });
+    }
+
+    if (analysisResult.status === "rejected") {
+      // Company NOT found — keep pending, flag for admin decision
+      user.companyVerificationStatus = "pending";
+      user.companyVerificationNote = `[⚠️ Web Check: NOT FOUND] "${user.companyName}" has no verifiable web presence. This may be a fake or very new company — please review manually before approving or rejecting.`;
+      await user.save({ validateBeforeSave: false });
+
+      return res.status(200).json({
+        success: true,
+        autoApproved: false,
+        message: `⚠️ "${user.companyName}" was NOT found on the web. Manual review required — check if this is a legitimate company.`,
+        data: { companyVerificationStatus: "pending", companyVerificationNote: user.companyVerificationNote },
+      });
+    }
+
+    // API error / quota exceeded — keep pending, note the issue
+    user.companyVerificationStatus = "pending";
+    user.companyVerificationNote = `[Web Check Error] ${analysisResult.note}`;
+    await user.save({ validateBeforeSave: false });
+
+    return res.status(200).json({
+      success: true,
+      autoApproved: false,
+      message: `⚠️ Web check could not complete (API error or quota exceeded). Manual review required.`,
+      data: { companyVerificationStatus: "pending", companyVerificationNote: user.companyVerificationNote },
+    });
+
   } catch (error) {
     next(error);
   }

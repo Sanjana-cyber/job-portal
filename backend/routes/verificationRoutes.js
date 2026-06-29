@@ -7,6 +7,7 @@ const {
   getVerificationQueue,
   approveRecruiter,
   rejectRecruiter,
+  runWebCheckForRecruiter,
   getVerificationSettings,
   updateVerificationSettings,
   getAdminStats,
@@ -25,6 +26,7 @@ router.get("/settings",        protect, authorize("admin"), getVerificationSetti
 router.put("/settings",        protect, authorize("admin"), updateVerificationSettings);
 router.put("/approve/:id",     protect, authorize("admin"), approveRecruiter);
 router.put("/reject/:id",      protect, authorize("admin"), rejectRecruiter);
+router.post("/webcheck/:id",   protect, authorize("admin"), runWebCheckForRecruiter);
 
 // ── DEBUG: Test company analyzer (open, no auth — remove in production) ──────
 // Usage: GET /api/verification/debug-analyze?company=TCS&email=hr@tcs.com&website=https://www.tcs.com

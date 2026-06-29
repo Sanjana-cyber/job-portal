@@ -318,9 +318,22 @@ const SystemManagementConsole = () => {
                         >
                           {statusLabel[r.companyVerificationStatus] || "Unknown"}
                         </span>
-                        {r.companyVerificationNote && r.companyVerificationStatus === "rejected" && (
-                          <div className="admin-rejection-note" title={r.companyVerificationNote}>
-                            {r.companyVerificationNote.slice(0, 40)}{r.companyVerificationNote.length > 40 ? "…" : ""}
+                        {r.companyVerificationNote && (
+                          <div
+                            className="admin-rejection-note"
+                            title={r.companyVerificationNote}
+                            style={{
+                              color: r.companyVerificationNote.includes("NOT FOUND") ? "#dc2626"
+                                    : r.companyVerificationNote.includes("APPROVED") ? "#16a34a"
+                                    : r.companyVerificationNote.includes("ERROR") ? "#d97706"
+                                    : "#6b7280",
+                              background: r.companyVerificationNote.includes("NOT FOUND") ? "#fef2f2"
+                                         : r.companyVerificationNote.includes("APPROVED") ? "#f0fdf4"
+                                         : r.companyVerificationNote.includes("ERROR") ? "#fffbeb"
+                                         : "transparent",
+                            }}
+                          >
+                            {r.companyVerificationNote.slice(0, 60)}{r.companyVerificationNote.length > 60 ? "…" : ""}
                           </div>
                         )}
                       </td>

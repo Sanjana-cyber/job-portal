@@ -2,7 +2,10 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import GoogleLoginBtn from "../components/GoogleLoginBtn";
-import { User, Mail, Lock, Eye, EyeOff, Loader2, AlertCircle, Briefcase } from "lucide-react";
+import {
+  User, Mail, Lock, Eye, EyeOff, Loader2, AlertCircle,
+  Briefcase, Building2, Globe,
+} from "lucide-react";
 import toast from "react-hot-toast";
 
 /**
@@ -20,21 +23,29 @@ const RegisterPage = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [role, setRole] = useState("jobseeker");
 
+  // Recruiter-only fields
+  const [companyName, setCompanyName] = useState("");
+  const [companyWebsite, setCompanyWebsite] = useState("");
+
   const { register, googleLogin } = useAuth();
   const navigate = useNavigate();
+
+  const isRecruiter = role === "recruiter";
 
   const handleRegister = async (e) => {
     e.preventDefault();
     setErrors({});
 
     const newErrors = {};
-    if (!name.trim())   newErrors.name = "Name is required";
-    if (!email.trim())  newErrors.email = "Email is required";
-    if (!password)      newErrors.password = "Password is required";
+    if (!name.trim())  newErrors.name = "Name is required";
+    if (!email.trim()) newErrors.email = "Email is required";
+    if (!password)     newErrors.password = "Password is required";
     if (password.length < 6)
       newErrors.password = "Password must be at least 6 characters";
     if (password !== confirmPassword)
       newErrors.confirmPassword = "Passwords do not match";
+    if (isRecruiter && !companyName.trim())
+      newErrors.companyName = "Company name is required for recruiters";
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -48,6 +59,10 @@ const RegisterPage = () => {
         email: email.trim(),
         password,
         role,
+        ...(isRecruiter && {
+          companyName: companyName.trim(),
+          companyWebsite: companyWebsite.trim(),
+        }),
       });
       toast.success(data.message || "Registration successful!");
 
@@ -131,6 +146,7 @@ const RegisterPage = () => {
         )}
 
         <form onSubmit={handleRegister} className="auth-form" id="register-form">
+          {/* Name */}
           <div className="input-group">
             <User size={16} className="input-icon" />
             <input
@@ -145,6 +161,7 @@ const RegisterPage = () => {
           </div>
           {errors.name && <span className="field-error">{errors.name}</span>}
 
+          {/* Email */}
           <div className="input-group">
             <Mail size={16} className="input-icon" />
             <input
@@ -187,6 +204,56 @@ const RegisterPage = () => {
             </div>
           </div>
 
+          {/* Recruiter-only company fields */}
+          {isRecruiter && (
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "10px",
+                padding: "14px 16px",
+                background: "var(--bg-card, rgba(99,102,241,0.05))",
+                borderRadius: "var(--radius-md)",
+                border: "1px solid var(--border-subtle)",
+              }}
+            >
+              <p style={{ margin: 0, fontSize: "var(--text-xs)", color: "var(--text-tertiary)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                🏢 Company Details — used for automatic verification
+              </p>
+
+              {/* Company Name */}
+              <div className="input-group">
+                <Building2 size={16} className="input-icon" />
+                <input
+                  type="text"
+                  placeholder="Company name *"
+                  value={companyName}
+                  onChange={(e) => setCompanyName(e.target.value)}
+                  className="auth-input"
+                  id="register-company-name"
+                />
+              </div>
+              {errors.companyName && <span className="field-error">{errors.companyName}</span>}
+
+              {/* Company Website */}
+              <div className="input-group">
+                <Globe size={16} className="input-icon" />
+                <input
+                  type="url"
+                  placeholder="Company website (e.g. https://yourcompany.com)"
+                  value={companyWebsite}
+                  onChange={(e) => setCompanyWebsite(e.target.value)}
+                  className="auth-input"
+                  id="register-company-website"
+                />
+              </div>
+              <p style={{ margin: 0, fontSize: "11px", color: "var(--text-tertiary)" }}>
+                💡 We'll automatically verify your company online. If found, you'll be approved instantly. Otherwise, an admin will review your request.
+              </p>
+            </div>
+          )}
+
+          {/* Password */}
           <div className="input-group">
             <Lock size={16} className="input-icon" />
             <input
@@ -209,6 +276,7 @@ const RegisterPage = () => {
           </div>
           {errors.password && <span className="field-error">{errors.password}</span>}
 
+          {/* Confirm Password */}
           <div className="input-group">
             <Lock size={16} className="input-icon" />
             <input
@@ -243,7 +311,7 @@ const RegisterPage = () => {
             {loading ? (
               <>
                 <Loader2 size={16} className="spin" />
-                Creating account…
+                {isRecruiter ? "Verifying company & creating account…" : "Creating account…"}
               </>
             ) : (
               "Create Account"
