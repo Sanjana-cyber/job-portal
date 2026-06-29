@@ -78,12 +78,25 @@ const register = async (req, res, next) => {
         user.companyVerificationNote = `[Auto-Approved at Registration] ${analysisResult.note}`;
         console.log(`[Register] ✅ "${user.companyName}" auto-approved.`);
 
-        // Send welcome + approved email (non-blocking)
+        // Send welcome + approved email to recruiter (non-blocking)
         sendEmail({
           to: user.email,
           subject: "🎉 Company Verified — Welcome to Job Portal!",
           html: getRecruiterAutoApprovedEmailTemplate(user.name, user.companyName),
         }).catch((e) => console.error("Auto-approval email failed:", e.message));
+
+        // Notify admin that a company was auto-verified
+        sendEmail({
+          to: process.env.ADMIN_EMAIL || "admin@jobportal.com",
+          subject: "⚡ Auto-Verified: New Company Registered",
+          html: `
+            <h3>A new company was automatically verified by the system.</h3>
+            <p><strong>Recruiter Name:</strong> ${user.name}</p>
+            <p><strong>Email:</strong> ${user.email}</p>
+            <p><strong>Company Name:</strong> ${user.companyName}</p>
+            <p><strong>Status:</strong> <span style="color: green;">Verified & Approved (No action required)</span></p>
+          `
+        }).catch((e) => console.error("Admin notification email failed:", e.message));
 
       } else {
         // ❌ Not found or API error — queue for admin review
@@ -118,8 +131,18 @@ const register = async (req, res, next) => {
       console.error("Email sending failed:", emailError.message);
     }
 
+    // Determine the appropriate success message based on auto-verification
+    let successMessage = "Registration successful. Please verify your email.";
+    if (role === "recruiter") {
+      if (user.companyVerificationStatus === "approved") {
+        successMessage = "Account created! Your company was automatically verified and you can start posting jobs immediately.";
+      } else {
+        successMessage = "Account created! Your company verification has been queued for admin review.";
+      }
+    }
+
     // Send token response with JWT cookie
-    sendTokenResponse(user, 201, res, "Registration successful. Please verify your email.");
+    sendTokenResponse(user, 201, res, successMessage);
   } catch (error) {
     next(error);
   }

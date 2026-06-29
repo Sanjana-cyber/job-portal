@@ -9,6 +9,17 @@ exports.createJob = async (req, res, next) => {
   try {
     const { title, company, description, requiredSkills, preferredSkills, location, experienceRequired } = req.body;
 
+    // Ensure recruiter is fully verified before allowing job post
+    const user = await User.findById(req.user._id);
+    if (user.role === "recruiter") {
+      if (user.companyVerificationStatus === "pending" || user.companyVerificationStatus === "none") {
+        return next(new ErrorResponse("Your company verification is under review. You cannot post jobs until an admin approves it.", 403));
+      }
+      if (user.companyVerificationStatus === "rejected") {
+        return next(new ErrorResponse("Your company verification was rejected. Please re-submit your details in your dashboard.", 403));
+      }
+    }
+
     const job = await Job.create({
       title,
       company,

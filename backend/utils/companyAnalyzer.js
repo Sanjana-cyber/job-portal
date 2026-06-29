@@ -1,4 +1,5 @@
 const axios = require("axios");
+const dns = require("dns").promises;
 
 const PUBLIC_DOMAINS = [
   "gmail.com", "yahoo.com", "hotmail.com", "outlook.com",
@@ -31,73 +32,42 @@ const extractDomain = (input) => {
 const isPublicDomain = (domain) => PUBLIC_DOMAINS.includes(domain);
 
 /**
- * Uses Google Custom Search API to check if a company exists on the web.
+ * Uses DNS to verify if a company domain exists and is active on the internet.
+ * Completely free and requires no API keys.
  */
-const verifyCompanyWithGoogle = async (companyName, domain) => {
-  const apiKey = process.env.GOOGLE_SEARCH_API_KEY;
-  const cx = process.env.GOOGLE_SEARCH_CX;
+const verifyCompanyExistence = async (companyName, domain) => {
+  if (!domain) return { exists: false };
 
-  // --- Detailed env debug ---
-  console.log(`[CompanyAnalyzer] API Key loaded: ${apiKey ? "YES (" + apiKey.slice(0, 8) + "...)" : "MISSING"}`);
-  console.log(`[CompanyAnalyzer] CX loaded:      ${cx ? "YES (" + cx + ")" : "MISSING"}`);
-
-  if (!apiKey || !cx || apiKey === "your_google_api_key_here") {
-    console.warn("[CompanyAnalyzer] ❌ API keys not set — falling back to manual review.");
-    return { exists: null };
-  }
-
-  const query = `"${companyName}" "${domain}"`;
-  const fallbackQuery = `${companyName} official website`;
-
-  console.log(`[CompanyAnalyzer] 🔍 Searching Google for: ${query}`);
+  console.log(`[CompanyAnalyzer] 🔍 Checking internet presence for: ${domain}`);
 
   try {
-    const response = await axios.get("https://www.googleapis.com/customsearch/v1", {
-      params: { key: apiKey, cx, q: query, num: 3 },
-      timeout: 8000,
-    });
-
-    const items = response.data?.items;
-    console.log(`[CompanyAnalyzer] Primary search returned ${items ? items.length : 0} result(s).`);
-
-    if (items && items.length > 0) {
-      console.log(`[CompanyAnalyzer] ✅ Company found via primary search.`);
+    // Check if the domain has any IPv4 or IPv6 addresses
+    const addresses = await dns.resolve(domain);
+    if (addresses && addresses.length > 0) {
+      console.log(`[CompanyAnalyzer] ✅ Domain "${domain}" is active and exists online.`);
       return { exists: true };
     }
-
-    // Fallback broader search
-    console.log(`[CompanyAnalyzer] 🔍 No results. Trying fallback: ${fallbackQuery}`);
-    const fallback = await axios.get("https://www.googleapis.com/customsearch/v1", {
-      params: { key: apiKey, cx, q: fallbackQuery, num: 3 },
-      timeout: 8000,
-    });
-
-    const fallbackItems = fallback.data?.items;
-    console.log(`[CompanyAnalyzer] Fallback search returned ${fallbackItems ? fallbackItems.length : 0} result(s).`);
-
-    if (fallbackItems && fallbackItems.length > 0) {
-      console.log(`[CompanyAnalyzer] ✅ Company found via fallback search.`);
-      return { exists: true };
+  } catch (err) {
+    console.log(`[CompanyAnalyzer] DNS check failed for ${domain}: ${err.message}`);
+    
+    // Fallback: Try with 'www.' prefix just in case the bare domain doesn't resolve
+    if (!domain.startsWith("www.")) {
+      try {
+        const wwwDomain = "www." + domain;
+        console.log(`[CompanyAnalyzer] 🔍 Fallback checking: ${wwwDomain}`);
+        const fallbackAddresses = await dns.resolve(wwwDomain);
+        if (fallbackAddresses && fallbackAddresses.length > 0) {
+          console.log(`[CompanyAnalyzer] ✅ Domain "${wwwDomain}" is active.`);
+          return { exists: true };
+        }
+      } catch (fallbackErr) {
+        console.log(`[CompanyAnalyzer] ❌ Fallback check also failed.`);
+      }
     }
-
-    console.log(`[CompanyAnalyzer] ❌ Company NOT found in both searches.`);
-    return { exists: false };
-
-  } catch (error) {
-    const status = error.response?.status;
-    const errMsg = error.response?.data?.error?.message || error.message;
-    console.error(`[CompanyAnalyzer] ❌ Google API error [${status}]: ${errMsg}`);
-
-    if (status === 403) {
-      console.error("[CompanyAnalyzer] 403 = Invalid API key or Custom Search API not enabled.");
-    } else if (status === 429) {
-      console.error("[CompanyAnalyzer] 429 = Daily quota exceeded (100 req/day free limit hit).");
-    } else if (status === 400) {
-      console.error("[CompanyAnalyzer] 400 = Bad request. Check CX engine ID.");
-    }
-
-    return { exists: null }; // Graceful fallback
   }
+
+  console.log(`[CompanyAnalyzer] ❌ Company domain NOT found online.`);
+  return { exists: false };
 };
 
 /**
@@ -138,7 +108,7 @@ const analyzeCompanyDetails = async (companyName, workEmail, companyWebsite) => 
 
   console.log(`[CompanyAnalyzer] Using domain for search: ${targetDomain}`);
 
-  const searchResult = await verifyCompanyWithGoogle(companyName, targetDomain);
+  const searchResult = await verifyCompanyExistence(companyName, targetDomain);
   console.log(`[CompanyAnalyzer] Search result: exists=${searchResult.exists}`);
 
   // Rule 5: API error — safe fallback
@@ -159,14 +129,7 @@ const analyzeCompanyDetails = async (companyName, workEmail, companyWebsite) => 
     };
   }
 
-  // Company found — check email trust level
-  if (isPublicDomain(emailDomain)) {
-    console.log("[CompanyAnalyzer] → PENDING (company found but Gmail used)");
-    return {
-      status: "pending",
-      note: `Company "${companyName}" was found online, but a personal email domain (${emailDomain}) was used. Admin review required to confirm identity.`,
-    };
-  }
+
 
   console.log("[CompanyAnalyzer] → APPROVED (company found + business email)");
   return {
