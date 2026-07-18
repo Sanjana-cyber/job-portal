@@ -41,13 +41,20 @@ import { ApplicationService } from '../../../../core/services/application.servic
                 </div>
 
                 <div class="app-actions">
-                  <a *ngIf="app.resume?.fileUrl"
-                     [href]="app.resume.fileUrl"
-                     target="_blank"
-                     rel="noopener noreferrer"
-                     class="btn-view-resume">
-                    📄 View Resume
-                  </a>
+                  <div class="resume-buttons" *ngIf="app.resume?.fileUrl">
+                    <a [href]="app.resume.fileUrl"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="btn-view-resume">
+                      📄 View
+                    </a>
+                    <a [href]="app.resume.fileUrl"
+                       download
+                       target="_blank"
+                       class="btn-download-resume">
+                      ⬇ Download
+                    </a>
+                  </div>
                   <span *ngIf="!app.resume?.fileUrl" class="no-resume">No resume uploaded</span>
 
                   <div class="status-controls">
@@ -83,25 +90,30 @@ import { ApplicationService } from '../../../../core/services/application.servic
     .modal-body { padding: 24px; overflow-y: auto; }
     .loading-state, .empty-state { padding: 40px; text-align: center; color: #9ca3af; }
     .app-list { display: flex; flex-direction: column; gap: 16px; }
-    .app-card { padding: 18px; border: 1px solid #e5e7eb; border-radius: 12px; background: #fef9f7; }
+    .app-card { padding: 18px; border: 1px solid #e5e7eb; border-radius: 12px; background: #fef9f7; transition: all 0.3s ease; }
     .app-top-row { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; }
     .app-info h4 { margin: 0 0 4px; font-size: 16px; font-weight: 700; color: #111; }
     .app-info p { margin: 0 0 8px; font-size: 14px; color: #6b7280; }
     .app-meta { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-    .status-badge { padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.3s ease; }
     .status-badge.pending { background: #fef3c7; color: #b45309; }
     .status-badge.reviewed { background: #e0f2fe; color: #0369a1; }
-    .status-badge.shortlisted { background: #dcfce7; color: #15803d; }
+    .status-badge.shortlisted { background: #dcfce7; color: #15803d; box-shadow: 0 0 8px rgba(21,128,61,0.2); }
     .status-badge.rejected { background: #fee2e2; color: #b91c1c; }
     .date { font-size: 12px; color: #9ca3af; }
     .ats-score { font-size: 12px; color: #374151; background: #f3f4f6; padding: 2px 8px; border-radius: 20px; }
     .ats-score strong { color: #166534; }
-    .app-actions { display: flex; flex-direction: column; gap: 10px; align-items: flex-end; flex-shrink: 0; }
-    .btn-view-resume { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: #111; color: #fff; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; transition: background 0.2s; white-space: nowrap; }
-    .btn-view-resume:hover { background: #333; }
+    .app-actions { display: flex; flex-direction: column; gap: 12px; align-items: flex-end; flex-shrink: 0; }
+    .resume-buttons { display: flex; gap: 8px; }
+    .btn-view-resume, .btn-download-resume { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; transition: background 0.2s; white-space: nowrap; }
+    .btn-view-resume { background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; }
+    .btn-view-resume:hover { background: #e5e7eb; }
+    .btn-download-resume { background: #111; color: #fff; }
+    .btn-download-resume:hover { background: #333; }
     .no-resume { font-size: 12px; color: #9ca3af; font-style: italic; }
     .status-controls { display: flex; align-items: center; gap: 8px; }
-    select { padding: 6px 10px; border-radius: 6px; border: 1px solid #d1d5db; font-family: inherit; font-size: 13px; background: #fff; }
+    select { padding: 8px 12px; border-radius: 6px; border: 1px solid #d1d5db; font-family: inherit; font-size: 13px; background: #fff; font-weight: 600; cursor: pointer; }
+    select:focus { border-color: #111; outline: none; }
     .updating-text { font-size: 12px; color: #9ca3af; }
     .cover-letter { margin-top: 14px; padding-top: 14px; border-top: 1px solid #f0f0f0; }
     .cover-label { font-size: 12px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.04em; margin: 0 0 4px; }
