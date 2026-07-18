@@ -1,0 +1,137 @@
+:host { display: block; }
+
+.admin-login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #c0c0c0;
+  padding: 20px;
+}
+
+.admin-login-card {
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 20px;
+  padding: 40px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 24px 48px rgba(0,0,0,0.6);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-icon-wrapper {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  background: rgba(239,68,68,0.1);
+  border: 1.5px solid rgba(239,68,68,0.3);
+  display: flex; align-items: center; justify-content: center;
+  color: #ef4444;
+  margin-bottom: 8px;
+}
+
+.admin-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0;
+  text-align: center;
+}
+
+.admin-subtitle {
+  font-size: 13px;
+  color: #666;
+  margin: 0 0 20px;
+  text-align: center;
+}
+
+.error-banner {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.3);
+  color: #ef4444;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.admin-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 4px;
+}
+
+.input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 14px;
+  color: #555;
+  pointer-events: none;
+}
+
+.auth-input {
+  width: 100%;
+  padding: 12px 14px 12px 44px;
+  background: #111;
+  border: 1px solid #333;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.auth-input:focus { border-color: #ef4444; }
+.auth-input::placeholder { color: #555; }
+
+.password-toggle {
+  position: absolute;
+  right: 14px;
+  background: transparent;
+  border: none;
+  color: #555;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.btn-admin-login {
+  width: 100%;
+  padding: 13px;
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+  margin-top: 4px;
+}
+
+.btn-admin-login:hover:not(:disabled) { background: #dc2626; }
+.btn-admin-login:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.admin-notice {
+  font-size: 12px;
+  color: #444;
+  text-align: center;
+  margin: 12px 0 0;
+  line-height: 1.6;
+}

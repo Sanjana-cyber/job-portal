@@ -16,7 +16,7 @@ const Navbar = () => {
   const [showDropdown, setShowDropdown] = useState(false);
 
   // Hide Navbar on dashboard routes, except for /dashboard/jobs
-  if ((location.pathname.startsWith("/dashboard") && location.pathname !== "/dashboard/jobs") || location.pathname.startsWith("/recruiter/dashboard") || location.pathname.startsWith("/admin/dashboard")) {
+  if ((location.pathname.startsWith("/dashboard") && location.pathname !== "/dashboard/jobs") || location.pathname.startsWith("/recruiter/dashboard") || location.pathname.startsWith("/admin")) {
     return null;
   }
 
@@ -61,10 +61,10 @@ const Navbar = () => {
 
         {/* Right Side Actions */}
         <div className="navbar-right">
-          {/* Shield Icon Link for admin login page */}
+          {/* Shield Icon Link for admin login page (Angular) */}
           <button
             className="btn-shield-admin"
-            onClick={() => navigate("/admin/login")}
+            onClick={() => window.location.href = "http://localhost:4200/admin/login"}
             title="Authorized Personnel Only"
             id="admin-portal-link"
           >

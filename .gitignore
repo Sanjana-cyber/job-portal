@@ -3,7 +3,8 @@ node_modules/
 
 # Environment files
 backend/.env
-frontend/.env
+react-frontend/.env
+angular-frontend/src/environments/environment*.ts
 
 # Build files
 dist/

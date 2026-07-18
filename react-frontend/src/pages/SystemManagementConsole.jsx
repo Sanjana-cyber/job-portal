@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
 import {
   Shield, Users, CheckCircle, XCircle, Clock,
   AlertTriangle, ToggleLeft, ToggleRight, Building2,
-  Globe, Mail, Search, RefreshCw, Trash2
+  Globe, Mail, Search, RefreshCw, Trash2, Briefcase
 } from "lucide-react";
 import {
   getAdminStats,
@@ -25,7 +26,14 @@ import {
  * • Rejection modal with reason input
  */
 const SystemManagementConsole = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    toast.success("Logged out successfully");
+    navigate("/");
+  };
 
   const [stats, setStats] = useState({ pending: 0, approved: 0, rejected: 0, total: 0, verificationRequired: false });
   const [queue, setQueue] = useState([]);
@@ -141,84 +149,117 @@ const SystemManagementConsole = () => {
   const statusColor = { none: "#6b7280", pending: "#f59e0b", approved: "#22c55e", rejected: "#ef4444" };
 
   return (
-    <div className="dashboard-page">
-      <div className="dashboard-container">
-
-        {/* ── Header ──────────────────────────────────────────────────────── */}
-        <div className="welcome-section animate-fade-in-up">
-          <div className="welcome-text">
-            <h1>
-              System <span className="gradient-text-admin">Management Console</span>
-            </h1>
-            <p>Welcome back, {user?.name}. Manage recruiter verification and portal settings.</p>
+    <div className="admin-page" style={{ minHeight: "100vh", background: "#c0c0c0", paddingBottom: "40px" }}>
+      
+      {/* ── Black Navigation Bar ── */}
+      <header style={{
+        position: "sticky", top: 0, zIndex: 100, background: "#111111", borderBottom: "1px solid #2a2a2a",
+        display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 28px", height: "64px"
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", cursor: "pointer" }} onClick={() => window.location.href = "/"}>
+            <div style={{ width: "32px", height: "32px", background: "#fff", borderRadius: "8px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Briefcase size={20} color="#111" />
+            </div>
+            <span style={{ fontWeight: 700, fontSize: "18px", color: "#fff" }}>JobPortal</span>
           </div>
-          <div className="welcome-badge role-admin">
-            <Shield size={16} /> Administrator
+          <div style={{ width: "1px", height: "24px", background: "#333", margin: "0 8px" }}></div>
+          <Shield size={20} color="#ef4444" />
+          <h1 style={{ margin: 0, fontSize: "16px", fontWeight: 700, color: "#fff" }}>System Management Console</h1>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+          <div style={{ padding: "5px 14px", background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", borderRadius: "20px", color: "#ef4444", fontSize: "12px", fontWeight: 700 }}>
+            Administrator
+          </div>
+          <button 
+            onClick={handleLogout}
+            style={{ padding: "6px 14px", background: "transparent", color: "#ff7875", border: "1.5px solid rgba(255,120,116,0.4)", borderRadius: "20px", fontSize: "13px", fontWeight: 500, cursor: "pointer", transition: "0.2s" }}
+            onMouseOver={(e) => e.target.style.background = "rgba(255,120,116,0.12)"}
+            onMouseOut={(e) => e.target.style.background = "transparent"}
+          >
+            Logout
+          </button>
+        </div>
+      </header>
+
+      <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "32px 20px", display: "flex", flexDirection: "column", gap: "20px" }}>
+
+        {/* ── Welcome Banner ── */}
+        <div style={{
+          background: "#ffffff", borderRadius: "20px", padding: "28px 32px",
+          display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "16px",
+          border: "1px solid rgba(0,0,0,0.08)", boxShadow: "0 1px 3px rgba(0,0,0,0.06)"
+        }}>
+          <div>
+            <p style={{ color: "#888", fontSize: "16px", margin: "0 0 8px", fontWeight: 600 }}>Admin Panel</p>
+            <h2 style={{ margin: 0, fontSize: "44px", fontWeight: 900, color: "#111", letterSpacing: "-1px" }}>Welcome back, {user?.name}!</h2>
+            <p style={{ color: "#555", fontSize: "18px", margin: "8px 0 0" }}>Manage recruiter verification and portal settings.</p>
           </div>
         </div>
 
-        {/* ── Verification Toggle Card ─────────────────────────────────── */}
-        <div className="admin-toggle-card glass animate-fade-in-up">
-          <div className="admin-toggle-left">
-            <div className="admin-toggle-icon" style={{ background: stats.verificationRequired ? "rgba(34,197,94,0.1)" : "rgba(107,114,128,0.08)" }}>
-              <Shield size={22} style={{ color: stats.verificationRequired ? "#22c55e" : "#6b7280" }} />
+        {/* ── Verification Toggle Card ── */}
+        <div style={{
+          background: "#111111", borderRadius: "16px", padding: "24px 28px",
+          display: "flex", justifyContent: "space-between", alignItems: "center", gap: "20px", flexWrap: "wrap",
+          border: "1px solid #2a2a2a"
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+            <div style={{
+              width: "48px", height: "48px", borderRadius: "12px", border: "1.5px solid",
+              background: stats.verificationRequired ? "rgba(34,197,94,0.1)" : "rgba(255,255,255,0.05)",
+              borderColor: stats.verificationRequired ? "rgba(34,197,94,0.3)" : "rgba(255,255,255,0.1)",
+              display: "flex", alignItems: "center", justifyContent: "center"
+            }}>
+              <Shield size={22} color={stats.verificationRequired ? "#22c55e" : "#888"} />
             </div>
             <div>
-              <h3 className="admin-toggle-title">Recruiter Verification Enforcement</h3>
-              <p className="admin-toggle-desc">
+              <h3 style={{ margin: "0 0 4px", fontSize: "16px", fontWeight: 700, color: "#fff" }}>Recruiter Verification Enforcement</h3>
+              <p style={{ margin: 0, fontSize: "13px", color: "#888" }}>
                 {stats.verificationRequired
                   ? "Recruiters must be approved before posting jobs."
                   : "Recruiters can post jobs without company verification."}
               </p>
             </div>
           </div>
-          <div className="admin-toggle-right">
-            <span className="admin-toggle-state" style={{ color: stats.verificationRequired ? "#22c55e" : "#6b7280" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+            <span style={{ fontSize: "14px", fontWeight: 800, color: stats.verificationRequired ? "#22c55e" : "#888" }}>
               {stats.verificationRequired ? "ON" : "OFF"}
             </span>
             <button
-              className="admin-toggle-btn"
               onClick={handleToggle}
               disabled={toggling || loading}
-              title={stats.verificationRequired ? "Disable verification enforcement" : "Enable verification enforcement"}
+              style={{
+                width: "52px", height: "28px", borderRadius: "14px", background: stats.verificationRequired ? "#22c55e" : "#333",
+                position: "relative", transition: "background 0.3s", border: "none", cursor: "pointer", display: "flex", alignItems: "center"
+              }}
             >
-              {stats.verificationRequired
-                ? <ToggleRight size={42} style={{ color: "#22c55e" }} />
-                : <ToggleLeft  size={42} style={{ color: "#9ca3af" }} />}
+              <div style={{
+                position: "absolute", left: stats.verificationRequired ? "28px" : "4px", width: "20px", height: "20px",
+                borderRadius: "50%", background: "#fff", transition: "left 0.3s", boxShadow: "0 1px 4px rgba(0,0,0,0.3)"
+              }}></div>
             </button>
           </div>
         </div>
 
-        {/* ── Stats Strip ─────────────────────────────────────────────── */}
-        {loading ? (
-          <div className="admin-stats-strip">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="admin-stat-item glass" style={{ opacity: 0.4 }}>
-                <span className="admin-stat-value">—</span>
-                <span className="admin-stat-label">Loading…</span>
-              </div>
-            ))}
+        {/* ── Stats Strip (Black) ── */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "16px" }}>
+          <div style={{ background: "#111111", border: "1px solid #2a2a2a", borderRadius: "14px", padding: "20px", display: "flex", flexDirection: "column", gap: "4px", alignItems: "center", textAlign: "center" }}>
+            <span style={{ fontSize: "28px", fontWeight: 800, color: "#f59e0b", lineHeight: 1 }}>{loading ? "—" : stats.pending}</span>
+            <span style={{ fontSize: "12px", color: "#888", fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.5px" }}>Pending</span>
           </div>
-        ) : (
-          <div className="admin-stats-strip">
-            <div className="admin-stat-item glass">
-              <span className="admin-stat-value" style={{ color: "#f59e0b" }}>{stats.pending}</span>
-              <span className="admin-stat-label"><Clock size={13} /> Pending</span>
-            </div>
-            <div className="admin-stat-item glass">
-              <span className="admin-stat-value" style={{ color: "#22c55e" }}>{stats.approved}</span>
-              <span className="admin-stat-label"><CheckCircle size={13} /> Approved</span>
-            </div>
-            <div className="admin-stat-item glass">
-              <span className="admin-stat-value" style={{ color: "#ef4444" }}>{stats.rejected}</span>
-              <span className="admin-stat-label"><XCircle size={13} /> Rejected</span>
-            </div>
-            <div className="admin-stat-item glass">
-              <span className="admin-stat-value" style={{ color: "var(--text-primary)" }}>{stats.total}</span>
-              <span className="admin-stat-label"><Users size={13} /> Total Recruiters</span>
-            </div>
+          <div style={{ background: "#111111", border: "1px solid #2a2a2a", borderRadius: "14px", padding: "20px", display: "flex", flexDirection: "column", gap: "4px", alignItems: "center", textAlign: "center" }}>
+            <span style={{ fontSize: "28px", fontWeight: 800, color: "#22c55e", lineHeight: 1 }}>{loading ? "—" : stats.approved}</span>
+            <span style={{ fontSize: "12px", color: "#888", fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.5px" }}>Approved</span>
           </div>
-        )}
+          <div style={{ background: "#111111", border: "1px solid #2a2a2a", borderRadius: "14px", padding: "20px", display: "flex", flexDirection: "column", gap: "4px", alignItems: "center", textAlign: "center" }}>
+            <span style={{ fontSize: "28px", fontWeight: 800, color: "#ef4444", lineHeight: 1 }}>{loading ? "—" : stats.rejected}</span>
+            <span style={{ fontSize: "12px", color: "#888", fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.5px" }}>Rejected</span>
+          </div>
+          <div style={{ background: "#111111", border: "1px solid #2a2a2a", borderRadius: "14px", padding: "20px", display: "flex", flexDirection: "column", gap: "4px", alignItems: "center", textAlign: "center" }}>
+            <span style={{ fontSize: "28px", fontWeight: 800, color: "#fff", lineHeight: 1 }}>{loading ? "—" : stats.total}</span>
+            <span style={{ fontSize: "12px", color: "#888", fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.5px" }}>Total Recruiters</span>
+          </div>
+        </div>
 
         {/* ── Recruiter Queue ──────────────────────────────────────────── */}
         <div className="dashboard-card glass animate-fade-in-up" style={{ marginTop: "24px" }}>

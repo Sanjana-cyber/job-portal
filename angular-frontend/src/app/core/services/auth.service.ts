@@ -164,10 +164,12 @@ export class AuthService {
     if (role === 'jobseeker') {
       return { isAngular: true, path: '/dashboard' };
     }
-    const reactRoutes: Record<string, string> = {
-      recruiter: '/recruiter/dashboard',
-      admin: '/admin'
-    };
-    return { isAngular: false, path: reactRoutes[role] || '/' };
+    if (role === 'recruiter') {
+      return { isAngular: true, path: '/recruiter/dashboard' };
+    }
+    if (role === 'admin') {
+      return { isAngular: true, path: '/admin' };
+    }
+    return { isAngular: false, path: '/' };
   }
 }

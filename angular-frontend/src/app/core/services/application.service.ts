@@ -90,4 +90,25 @@ export class ApplicationService {
       payload
     );
   }
+
+  // ── Recruiter Endpoints ──
+
+  /**
+   * GET /api/applications/job/:jobId
+   * Requires auth — recruiter only
+   */
+  getJobApplications(jobId: string): Observable<{ success: boolean; data: any[] }> {
+    return this.http.get<{ success: boolean; data: any[] }>(`${this.apiUrl}/applications/job/${jobId}`);
+  }
+
+  /**
+   * PUT /api/applications/:appId/status
+   * Requires auth — recruiter only
+   */
+  updateApplicationStatus(appId: string, status: string): Observable<{ success: boolean; data: any }> {
+    return this.http.put<{ success: boolean; data: any }>(
+      `${this.apiUrl}/applications/${appId}/status`,
+      { status }
+    );
+  }
 }

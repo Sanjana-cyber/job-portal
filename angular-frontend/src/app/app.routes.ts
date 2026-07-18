@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { adminGuard } from './core/guards/admin.guard';
 
 /**
  * Application Routes
@@ -46,11 +47,34 @@ export const routes: Routes = [
     title: 'Find Jobs — TalentBridge'
   },
   {
+    // Protected Recruiter Dashboard
+    path: 'recruiter/dashboard',
+    loadComponent: () =>
+      import('./features/recruiter/dashboard/recruiter-dashboard.component').then(m => m.RecruiterDashboardComponent),
+    canActivate: [authGuard],
+    title: 'Recruiter Dashboard — TalentBridge'
+  },
+  {
     // Public landing page
     path: '',
     loadComponent: () =>
       import('./features/home/home.component').then(m => m.HomeComponent),
     title: 'TalentBridge — Where Talent Meets Opportunity'
+  },
+  {
+    // Admin Login page (no guard — accessible to anyone)
+    path: 'admin/login',
+    loadComponent: () =>
+      import('./features/admin/login/admin-login.component').then(m => m.AdminLoginComponent),
+    title: 'Admin Login — TalentBridge'
+  },
+  {
+    // Protected Admin Console — admin role required
+    path: 'admin',
+    loadComponent: () =>
+      import('./features/admin/console/admin-console.component').then(m => m.AdminConsoleComponent),
+    canActivate: [adminGuard],
+    title: 'System Management Console — TalentBridge'
   },
   {
     // Catch-all: redirect unknown Angular routes to landing page

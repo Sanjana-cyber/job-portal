@@ -1,0 +1,135 @@
+<!-- ═══════════════════════ RECRUITER DASHBOARD ═══════════════════════ -->
+<div class="dashboard-page">
+
+  <!-- ── Sticky Header ── -->
+  <header class="dashboard-header">
+    <a class="dashboard-logo" (click)="router.navigate(['/'])">
+      <div class="dashboard-logo-icon"></div>
+      <span class="dashboard-logo-text">TalentBridge</span>
+    </a>
+    <div class="dashboard-header-actions">
+      <button class="btn-logout-sm" (click)="logout()">Logout</button>
+    </div>
+  </header>
+
+  <!-- ── Main Content ── -->
+  <main class="dashboard-main">
+
+    <!-- Welcome Banner -->
+    <div class="welcome-banner" *ngIf="user">
+      <div class="welcome-bg-glow"></div>
+      <div class="welcome-text">
+        <p class="welcome-greeting">Good afternoon</p>
+        <h1 class="welcome-name">Welcome back, {{ user?.name }}!</h1>
+        <p class="welcome-sub">Here's your recruiting activity overview.</p>
+      </div>
+      <div class="welcome-badge-area">
+        <div class="welcome-role-badge">
+          <p class="welcome-role-label">Recruiter</p>
+        </div>
+        <div class="welcome-role-badge verified-badge" *ngIf="verifStatus === 'approved'">
+          <p class="welcome-role-label">Verified</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Verification Panel Component -->
+    <app-verification-panel (statusChange)="handleVerifStatusChange($event)"></app-verification-panel>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-card-icon"></div>
+        <div class="stat-card-info">
+          <span class="stat-card-value">{{ jobs.length }}</span>
+          <span class="stat-card-label">Active Jobs</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon"></div>
+        <div class="stat-card-info">
+          <span class="stat-card-value">--</span>
+          <span class="stat-card-label">Total Applicants</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon"></div>
+        <div class="stat-card-info">
+          <span class="stat-card-value">--</span>
+          <span class="stat-card-label">Shortlisted</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-icon"></div>
+        <div class="stat-card-info">
+          <span class="stat-card-value">--</span>
+          <span class="stat-card-label">Profile Views</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Job Postings -->
+    <div class="jobs-section">
+      <div class="jobs-header">
+        <h3 class="jobs-title">My Job Postings</h3>
+        <div class="jobs-header-actions">
+          <span class="verif-warning" *ngIf="verifRequired && verifStatus !== 'approved'">
+            ⚠ Verification required to post
+          </span>
+          <button class="btn-post-job" [disabled]="!canPost" (click)="openCreateJob()">
+            + Post a Job
+          </button>
+        </div>
+      </div>
+
+      <div class="jobs-content">
+        <div *ngIf="loading" class="loading-state">Loading jobs...</div>
+        
+        <div *ngIf="!loading && jobs.length === 0" class="empty-state">
+          <div class="empty-icon"></div>
+          <p>No jobs posted yet</p>
+          <span>Click "Post a Job" to start receiving applications.</span>
+        </div>
+
+        <div *ngIf="!loading && jobs.length > 0" class="job-list">
+          <div class="job-card" *ngFor="let job of jobs">
+            <div class="job-info">
+              <h4 class="job-title">{{ job.title }}</h4>
+              <p class="job-meta">
+                {{ job.company }} • {{ job.location || 'Location not specified' }} • Posted {{ job.createdAt | date:'d MMM y' }}
+              </p>
+              <div class="job-skills">
+                <span class="skill-badge" *ngFor="let skill of job.requiredSkills?.slice(0, 3)">{{ skill }}</span>
+                <span class="skill-badge" *ngIf="job.requiredSkills && job.requiredSkills.length > 3">
+                  +{{ job.requiredSkills.length - 3 }} more
+                </span>
+              </div>
+            </div>
+            <div class="job-actions">
+              <button class="btn-manage-apps" (click)="openManageApps(job)">
+                Applications
+              </button>
+              <button class="btn-edit" (click)="openEditJob(job)">Edit</button>
+              <button class="btn-delete" (click)="handleDeleteJob(job._id)">Delete</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Modals -->
+<app-job-form
+  *ngIf="isJobFormOpen"
+  [jobData]="editingJob"
+  (closeModal)="onJobFormClosed()"
+  (saved)="onJobSaved()">
+</app-job-form>
+
+<app-manage-applications
+  *ngIf="isAppsOpen && selectedJobForApps"
+  [job]="selectedJobForApps"
+  (closeModal)="onAppsClosed()">
+</app-manage-applications>

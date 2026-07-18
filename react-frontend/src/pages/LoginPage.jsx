@@ -81,7 +81,7 @@ const LoginPage = () => {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        background: "var(--bg-page)",
+        background: "#c0c0c0",
       }}
     >
       <div

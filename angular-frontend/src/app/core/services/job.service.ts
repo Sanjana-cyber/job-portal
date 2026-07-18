@@ -40,4 +40,26 @@ export class JobService {
   getJobById(id: string): Observable<{ success: boolean; data: Job }> {
     return this.http.get<{ success: boolean; data: Job }>(`${this.apiUrl}/jobs/${id}`);
   }
+
+  // ── Recruiter Endpoints ──
+
+  /** GET /api/jobs/recruiter/me */
+  getMyJobs(): Observable<JobsResponse> {
+    return this.http.get<JobsResponse>(`${this.apiUrl}/jobs/recruiter/me`);
+  }
+
+  /** POST /api/jobs */
+  createJob(jobData: any): Observable<{ success: boolean; data: Job }> {
+    return this.http.post<{ success: boolean; data: Job }>(`${this.apiUrl}/jobs`, jobData);
+  }
+
+  /** PUT /api/jobs/:id */
+  updateJob(id: string, jobData: any): Observable<{ success: boolean; data: Job }> {
+    return this.http.put<{ success: boolean; data: Job }>(`${this.apiUrl}/jobs/${id}`, jobData);
+  }
+
+  /** DELETE /api/jobs/:id */
+  deleteJob(id: string): Observable<{ success: boolean }> {
+    return this.http.delete<{ success: boolean }>(`${this.apiUrl}/jobs/${id}`);
+  }
 }
