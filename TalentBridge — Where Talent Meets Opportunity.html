@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<!-- saved from url=(0022)http://localhost:4200/ -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <script type="module" src="./TalentBridge — Where Talent Meets Opportunity_files/client"></script>
+
+  
+  <title>TalentBridge — Where Talent Meets Opportunity</title>
+  <!--<base href="/">--><base href=".">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="http://localhost:4200/favicon.ico">
+<link rel="stylesheet" href="./TalentBridge — Where Talent Meets Opportunity_files/styles.css"><style>
+
+.navbar[_ngcontent-ng-c1556872635] {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  padding: 0;
+  background: #111111;
+  border-bottom: 1px solid #2a2a2a;
+  transition: all var(--ease-normal);
+}
+.navbar.scrolled[_ngcontent-ng-c1556872635] {
+  background: #111111;
+  border-bottom-color: #2a2a2a;
+  box-shadow: var(--shadow-sm);
+}
+.navbar-container[_ngcontent-ng-c1556872635] {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--sp-6);
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.navbar-logo[_ngcontent-ng-c1556872635] {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: opacity var(--ease-fast);
+}
+.navbar-logo[_ngcontent-ng-c1556872635]:hover {
+  opacity: 0.8;
+}
+.logo-icon[_ngcontent-ng-c1556872635] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  background: #ffffff;
+  border-radius: var(--radius-sm);
+  color: #111111;
+  flex-shrink: 0;
+}
+.logo-text[_ngcontent-ng-c1556872635] {
+  font-family: var(--font-display);
+  font-size: 1.1875rem;
+  font-weight: 600;
+  color: #ffffff;
+  letter-spacing: -0.03em;
+}
+.logo-text[_ngcontent-ng-c1556872635]   em[_ngcontent-ng-c1556872635] {
+  font-style: italic;
+  color: var(--amber-600);
+}
+.navbar-links[_ngcontent-ng-c1556872635] {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-6);
+}
+.nav-link[_ngcontent-ng-c1556872635] {
+  color: var(--slate-300);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  text-decoration: none;
+  padding: var(--sp-1) 0;
+  position: relative;
+  transition: color var(--ease-fast);
+  cursor: pointer;
+}
+.nav-link[_ngcontent-ng-c1556872635]::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #ffffff;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--ease-normal);
+}
+.nav-link[_ngcontent-ng-c1556872635]:hover {
+  color: #ffffff;
+}
+.nav-link[_ngcontent-ng-c1556872635]:hover::after {
+  transform: scaleX(1);
+}
+.navbar-right[_ngcontent-ng-c1556872635] {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+.btn-get-started[_ngcontent-ng-c1556872635] {
+  padding: 0.5rem 1.25rem;
+  background: var(--amber-600);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  transition: all var(--ease-normal);
+  letter-spacing: 0.01em;
+  cursor: pointer;
+}
+.btn-get-started[_ngcontent-ng-c1556872635]:hover {
+  background: var(--navy-900);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+.btn-shield-admin[_ngcontent-ng-c1556872635] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  background: transparent;
+  color: var(--text-tertiary);
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--ease-fast);
+}
+.btn-shield-admin[_ngcontent-ng-c1556872635]:hover {
+  color: var(--error-500);
+  background: #fdf2f2;
+}
+.user-menu[_ngcontent-ng-c1556872635] {
+  position: relative;
+}
+.user-menu-trigger[_ngcontent-ng-c1556872635] {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 5px 12px 5px 5px;
+  background: var(--cream-200);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+  color: var(--text-primary);
+  transition: all var(--ease-fast);
+  cursor: pointer;
+  outline: none;
+  border: 1px solid var(--border-subtle);
+}
+.user-menu-trigger[_ngcontent-ng-c1556872635]:hover {
+  background: var(--cream-300);
+  border-color: var(--border-default);
+}
+.user-avatar[_ngcontent-ng-c1556872635] {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--navy-800);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 11px;
+  color: white;
+  letter-spacing: 0.02em;
+  flex-shrink: 0;
+}
+.user-name[_ngcontent-ng-c1556872635] {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.chevron[_ngcontent-ng-c1556872635] {
+  transition: transform var(--ease-fast);
+  color: var(--text-tertiary);
+}
+.chevron.rotated[_ngcontent-ng-c1556872635] {
+  transform: rotate(180deg);
+}
+.dropdown-menu[_ngcontent-ng-c1556872635] {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 240px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--sp-2);
+  box-shadow: var(--shadow-lg);
+  animation: slideInDown 0.18s ease;
+  z-index: 1010;
+}
+.dropdown-header[_ngcontent-ng-c1556872635] {
+  padding: var(--sp-3) var(--sp-3) var(--sp-2);
+}
+.dropdown-user-name[_ngcontent-ng-c1556872635] {
+  font-weight: 600;
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+}
+.dropdown-user-email[_ngcontent-ng-c1556872635] {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+.dropdown-role-badge[_ngcontent-ng-c1556872635] {
+  display: inline-block;
+  margin-top: var(--sp-2);
+  padding: 2px 10px;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  text-transform: capitalize;
+  background: var(--navy-100);
+  color: var(--navy-700);
+  border-radius: var(--radius-full);
+}
+.dropdown-divider[_ngcontent-ng-c1556872635] {
+  height: 1px;
+  background: var(--border-faint);
+  margin: var(--sp-1) 0;
+}
+.dropdown-item[_ngcontent-ng-c1556872635] {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: 400;
+  border-radius: var(--radius-sm);
+  transition: all var(--ease-fast);
+  text-align: left;
+  border: none;
+  cursor: pointer;
+}
+.dropdown-item[_ngcontent-ng-c1556872635]:hover {
+  background: var(--cream-200);
+  color: var(--text-primary);
+}
+.dropdown-item-danger[_ngcontent-ng-c1556872635]:hover {
+  background: #fdf2f2;
+  color: var(--error-500);
+}
+.dropdown-overlay[_ngcontent-ng-c1556872635] {
+  position: fixed;
+  inset: 0;
+  z-index: 1005;
+}
+@media (max-width: 768px) {
+  .navbar-links[_ngcontent-ng-c1556872635] {
+    display: none;
+  }
+  .user-name[_ngcontent-ng-c1556872635] {
+    display: none;
+  }
+}
+@media (max-width: 480px) {
+  .navbar-container[_ngcontent-ng-c1556872635] {
+    padding: 0 var(--sp-4);
+  }
+}
+/*# sourceMappingURL=/navbar.component.css.map */</style><style>
+
+.role-selector[_ngcontent-ng-c2622620487] {
+  display: flex;
+  background: var(--cream-200);
+  border-radius: var(--radius-md);
+  padding: 4px;
+  margin-bottom: var(--sp-2);
+}
+.role-option[_ngcontent-ng-c2622620487] {
+  flex: 1;
+  text-align: center;
+  padding: 8px 12px;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text-secondary);
+  border-radius: calc(var(--radius-md) - 2px);
+  cursor: pointer;
+  transition: all var(--ease-fast);
+}
+.role-option[_ngcontent-ng-c2622620487]   input[type=radio][_ngcontent-ng-c2622620487] {
+  display: none;
+}
+.role-option.active[_ngcontent-ng-c2622620487] {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
+}
+.spinner[_ngcontent-ng-c2622620487] {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+  vertical-align: middle;
+}
+/*# sourceMappingURL=/auth-modal.component.css.map */</style><script src="./TalentBridge — Where Talent Meets Opportunity_files/client(1)" async="" defer=""></script><style id="googleidentityservice_button_styles">.qJTHM{-moz-user-select:none;-webkit-user-select:none;-ms-user-select:none;color:#202124;direction:ltr;-webkit-touch-callout:none;font-family:Roboto-Regular,arial,sans-serif;-webkit-font-smoothing:antialiased;font-weight:400;margin:0;overflow:hidden;-webkit-text-size-adjust:100%}.ynRLnc{left:-9999px;position:absolute;top:-9999px}.L6cTce{display:none}.bltWBb{overflow-wrap:break-word;word-break:break-word}.hSRGPd{color:#1a73e8;cursor:pointer;font-weight:500;text-decoration:none}.Bz112c-W3lGp{height:16px;width:16px}.Bz112c-E3DyYd{height:20px;width:20px}.Bz112c-r9oPif{height:24px;width:24px}.Bz112c-u2z5K{height:36px;width:36px}.Bz112c-uaxL4e{border-radius:10px}.LgbsSe-Bz112c{display:block}.S9gUrf-YoZ4jf{border:none;margin:0;padding:0}.S9gUrf-YoZ4jf *{border:none;margin:0;padding:0}.fFW7wc-ibnC6b>.aZ2wEe>div{border-color:#4285f4}.P1ekSe-ZMv3u{-webkit-transition:height .2s linear;transition:height .2s linear}.P1ekSe-ZMv3u>div:first-child{background-color:#1a73e8!important;-webkit-transition:width .3s linear;transition:width .3s linear}.P1ekSe-ZMv3u>div:nth-child(2){background-image:-webkit-gradient(linear,left top,right top,from(rgba(255,255,255,.7)),to(rgba(255,255,255,.7))),-webkit-gradient(linear,left top,right top,from(#1a73e8),to(#1a73e8))!important;background-image:-webkit-linear-gradient(left,rgba(255,255,255,.7),rgba(255,255,255,.7)),-webkit-linear-gradient(left,#1a73e8,#1a73e8)!important;background-image:linear-gradient(90deg,rgba(255,255,255,.7),rgba(255,255,255,.7)),linear-gradient(90deg,#1a73e8,#1a73e8)!important}.P1ekSe-ZMv3u>div:nth-child(3){background-image:-webkit-gradient(linear,left top,right top,from(rgba(255,255,255,.7)),to(rgba(255,255,255,.7))),-webkit-gradient(linear,left top,right top,from(#1a73e8),to(#1a73e8))!important;background-image:-webkit-linear-gradient(left,rgba(255,255,255,.7),rgba(255,255,255,.7)),-webkit-linear-gradient(left,#1a73e8,#1a73e8)!important;background-image:linear-gradient(90deg,rgba(255,255,255,.7),rgba(255,255,255,.7)),linear-gradient(90deg,#1a73e8,#1a73e8)!important}.haAclf{display:inline-block}.nsm7Bb-HzV7m-LgbsSe{border-radius:4px;box-sizing:border-box;-webkit-transition:background-color .218s,border-color .218s;transition:background-color .218s,border-color .218s;-moz-user-select:none;-webkit-user-select:none;-ms-user-select:none;-webkit-appearance:none;background-color:#fff;background-image:none;border:1px solid #dadce0;color:#3c4043;cursor:pointer;font-family:Google Sans,arial,sans-serif;font-size:.875rem;height:40px;letter-spacing:.25px;outline:none;overflow:hidden;padding:0 12px;position:relative;text-align:center;vertical-align:middle;white-space:nowrap;width:auto}@media screen and (-ms-high-contrast:active){.nsm7Bb-HzV7m-LgbsSe{border:2px solid windowText;color:windowText}}@media screen and (preferes-contrast:more){.nsm7Bb-HzV7m-LgbsSe{color:#000}}.nsm7Bb-HzV7m-LgbsSe.pSzOP-SxQuSe{font-size:.875rem;height:32px;letter-spacing:.25px;padding:0 10px}.nsm7Bb-HzV7m-LgbsSe.purZT-SxQuSe{font-size:.6875rem;height:20px;letter-spacing:.3px;padding:0 8px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe{padding:0;width:40px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe.pSzOP-SxQuSe{width:32px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe.purZT-SxQuSe{width:20px}.nsm7Bb-HzV7m-LgbsSe.JGcpL-RbRzK{border-radius:20px}.nsm7Bb-HzV7m-LgbsSe.JGcpL-RbRzK.pSzOP-SxQuSe{border-radius:16px}.nsm7Bb-HzV7m-LgbsSe.JGcpL-RbRzK.purZT-SxQuSe{border-radius:10px}.nsm7Bb-HzV7m-LgbsSe.i5vt6e-to915-Ia7Qfc{border:1px solid #8e918f;background-color:#131314;color:#e3e3e3}.nsm7Bb-HzV7m-LgbsSe.MFS4be-Ia7Qfc{border:none;color:#fff}.nsm7Bb-HzV7m-LgbsSe.MFS4be-v3pZbf-Ia7Qfc{background-color:#1a73e8}.nsm7Bb-HzV7m-LgbsSe.MFS4be-JaPV2b-Ia7Qfc{background-color:#202124;color:#e8eaed}@media screen and (prefers-contrast:more){.nsm7Bb-HzV7m-LgbsSe.MFS4be-JaPV2b-Ia7Qfc{color:#fff}}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{height:18px;margin-right:8px;min-width:18px;width:18px}.nsm7Bb-HzV7m-LgbsSe.pSzOP-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{height:14px;min-width:14px;width:14px}.nsm7Bb-HzV7m-LgbsSe.purZT-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{height:10px;min-width:10px;width:10px}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-Bz112c{margin-left:8px;margin-right:-4px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{margin:0;padding:10px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe.pSzOP-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{padding:8px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe.purZT-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c{padding:4px}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-top-left-radius:3px;border-bottom-left-radius:3px;display:-webkit-box;display:-webkit-flex;display:flex;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center;-webkit-box-align:center;-webkit-align-items:center;align-items:center;background-color:#fff;height:36px;margin-left:-10px;margin-right:12px;min-width:36px;width:36px}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf .nsm7Bb-HzV7m-LgbsSe-Bz112c,.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf .nsm7Bb-HzV7m-LgbsSe-Bz112c{margin:0;padding:0}.nsm7Bb-HzV7m-LgbsSe.pSzOP-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{height:28px;margin-left:-8px;margin-right:10px;min-width:28px;width:28px}.nsm7Bb-HzV7m-LgbsSe.purZT-SxQuSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{height:16px;margin-left:-6px;margin-right:8px;min-width:16px;width:16px}.nsm7Bb-HzV7m-LgbsSe.Bz112c-LgbsSe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-radius:3px;margin-left:2px;margin-right:0;padding:0}.nsm7Bb-HzV7m-LgbsSe.JGcpL-RbRzK .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-radius:18px}.nsm7Bb-HzV7m-LgbsSe.pSzOP-SxQuSe.JGcpL-RbRzK .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-radius:14px}.nsm7Bb-HzV7m-LgbsSe.purZT-SxQuSe.JGcpL-RbRzK .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-radius:8px}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-bN97Pc-sM5MNb{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-align-items:center;-webkit-box-align:center;align-items:center;-webkit-flex-direction:row;-webkit-box-orient:horizontal;-webkit-box-direction:normal;flex-direction:row;-webkit-box-pack:justify;-webkit-justify-content:space-between;justify-content:space-between;-webkit-flex-wrap:nowrap;flex-wrap:nowrap;height:100%;position:relative;width:100%}.nsm7Bb-HzV7m-LgbsSe .oXtfBe-l4eHX{-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-BPrWId{-webkit-flex-grow:1;-webkit-box-flex:1;flex-grow:1;font-family:Google Sans,arial,sans-serif;font-weight:500;overflow:hidden;text-overflow:ellipsis;vertical-align:top}.nsm7Bb-HzV7m-LgbsSe.purZT-SxQuSe .nsm7Bb-HzV7m-LgbsSe-BPrWId{font-weight:300}.nsm7Bb-HzV7m-LgbsSe .oXtfBe-l4eHX .nsm7Bb-HzV7m-LgbsSe-BPrWId{-webkit-flex-grow:0;-webkit-box-flex:0;flex-grow:0}.nsm7Bb-HzV7m-LgbsSe .nsm7Bb-HzV7m-LgbsSe-MJoBVe{-webkit-transition:background-color .218s;transition:background-color .218s;bottom:0;left:0;position:absolute;right:0;top:0}.nsm7Bb-HzV7m-LgbsSe:focus,.nsm7Bb-HzV7m-LgbsSe:hover{box-shadow:none;border-color:rgb(210,227,252);outline:none}.nsm7Bb-HzV7m-LgbsSe:focus-within{outline:2px solid #00639b;border-color:transparent}.nsm7Bb-HzV7m-LgbsSe:hover .nsm7Bb-HzV7m-LgbsSe-MJoBVe{background:rgba(66,133,244,.08)}.nsm7Bb-HzV7m-LgbsSe:active .nsm7Bb-HzV7m-LgbsSe-MJoBVe,.nsm7Bb-HzV7m-LgbsSe:focus .nsm7Bb-HzV7m-LgbsSe-MJoBVe{background:rgba(66,133,244,.1)}.nsm7Bb-HzV7m-LgbsSe.i5vt6e-to915-Ia7Qfc:hover .nsm7Bb-HzV7m-LgbsSe-MJoBVe{background:rgba(255,255,255,.08)}.nsm7Bb-HzV7m-LgbsSe.i5vt6e-to915-Ia7Qfc:active .nsm7Bb-HzV7m-LgbsSe-MJoBVe,.nsm7Bb-HzV7m-LgbsSe.i5vt6e-to915-Ia7Qfc:focus .nsm7Bb-HzV7m-LgbsSe-MJoBVe{background:rgba(255,255,255,.12)}.nsm7Bb-HzV7m-LgbsSe.MFS4be-Ia7Qfc:hover .nsm7Bb-HzV7m-LgbsSe-MJoBVe{background:rgba(255,255,255,.24)}.nsm7Bb-HzV7m-LgbsSe.MFS4be-Ia7Qfc:active .nsm7Bb-HzV7m-LgbsSe-MJoBVe,.nsm7Bb-HzV7m-LgbsSe.MFS4be-Ia7Qfc:focus .nsm7Bb-HzV7m-LgbsSe-MJoBVe{background:rgba(255,255,255,.32)}.nsm7Bb-HzV7m-LgbsSe .n1UuX-DkfjY{border-radius:50%;display:-webkit-box;display:-webkit-flex;display:flex;height:20px;margin-left:-4px;margin-right:8px;min-width:20px;width:20px}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-BPrWId{font-family:Roboto;font-size:12px;text-align:left}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff .fmcmS,.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-BPrWId .ssJRIf{overflow:hidden;text-overflow:ellipsis}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-align-items:center;-webkit-box-align:center;align-items:center;color:#5f6368;fill:#5f6368;font-size:11px;font-weight:400}.nsm7Bb-HzV7m-LgbsSe.jVeSEe.i5vt6e-to915-Ia7Qfc .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff{color:#c4c7c5;fill:#c4c7c5}.nsm7Bb-HzV7m-LgbsSe.jVeSEe.MFS4be-Ia7Qfc .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff{color:#e8eaed;fill:#e8eaed}@media screen and (prefers-contrast:more){.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff,.nsm7Bb-HzV7m-LgbsSe.jVeSEe.MFS4be-Ia7Qfc .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff{color:#000;fill:#000}}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-BPrWId .K4efff .Bz112c{height:18px;margin:-3px -3px -3px 2px;min-width:18px;width:18px}.nsm7Bb-HzV7m-LgbsSe.jVeSEe .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-top-left-radius:0;border-bottom-left-radius:0;border-top-right-radius:3px;border-bottom-right-radius:3px;margin-left:12px;margin-right:-10px}.nsm7Bb-HzV7m-LgbsSe.jVeSEe.JGcpL-RbRzK .nsm7Bb-HzV7m-LgbsSe-Bz112c-haAclf{border-radius:18px}.L5Fo6c-sM5MNb{border:0;display:block;left:0;position:relative;top:0}.L5Fo6c-bF1uUb{border-radius:4px;bottom:0;cursor:pointer;left:0;position:absolute;right:0;top:0}.L5Fo6c-bF1uUb:focus{border:none;outline:none}sentinel{}</style><link id="googleidentityservice" type="text/css" media="all" href="./TalentBridge — Where Talent Meets Opportunity_files/style" rel="stylesheet"><style>
+
+.home-page[_ngcontent-ng-c1578253187] {
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+.hero-section[_ngcontent-ng-c1578253187] {
+  position: relative;
+  background: var(--gradient-hero);
+  padding: 160px var(--sp-6) 180px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 520px;
+}
+.hero-waves[_ngcontent-ng-c1578253187] {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  pointer-events: none;
+}
+.wave[_ngcontent-ng-c1578253187] {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+.wave-1[_ngcontent-ng-c1578253187]   path[_ngcontent-ng-c1578253187] {
+  fill: #ffffff;
+}
+.wave-2[_ngcontent-ng-c1578253187]   path[_ngcontent-ng-c1578253187] {
+  fill: #0c0d0d;
+}
+.hero-shimmer[_ngcontent-ng-c1578253187] {
+  position: absolute;
+  bottom: 35%;
+  left: 5%;
+  right: 5%;
+  height: 2px;
+  background:
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(160, 154, 148, 0.2) 20%,
+      rgba(194, 163, 126, 0.5) 40%,
+      rgba(213, 197, 177, 0.7) 50%,
+      rgba(194, 163, 126, 0.5) 60%,
+      rgba(160, 154, 148, 0.2) 80%,
+      transparent 100%);
+  filter: blur(0.5px);
+  animation: _ngcontent-ng-c1578253187_shimmer 4s ease-in-out infinite;
+}
+@keyframes _ngcontent-ng-c1578253187_shimmer {
+  0%, 100% {
+    opacity: 0.5;
+    transform: scaleX(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+.hero-center[_ngcontent-ng-c1578253187] {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-5);
+}
+.hero-brand-name[_ngcontent-ng-c1578253187] {
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 7vw, 5.5rem);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #ffffff;
+  text-transform: uppercase;
+  line-height: 1.1;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+}
+.hero-tagline[_ngcontent-ng-c1578253187] {
+  font-size: var(--text-lg);
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 300;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-family: var(--font-body);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+.hero-cta[_ngcontent-ng-c1578253187] {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: var(--sp-4);
+}
+.btn-hero-primary[_ngcontent-ng-c1578253187] {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 0.9rem 2.25rem;
+  background: #0c0d0d;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  transition: all var(--ease-normal);
+  cursor: pointer;
+}
+.btn-hero-primary[_ngcontent-ng-c1578253187]:hover {
+  background: #382c29;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(12, 13, 13, 0.35);
+}
+.btn-hero-secondary[_ngcontent-ng-c1578253187] {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 0.9rem 2.25rem;
+  background: #382c29;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  transition: all var(--ease-normal);
+  cursor: pointer;
+}
+.btn-hero-secondary[_ngcontent-ng-c1578253187]:hover {
+  background: #574641;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(56, 44, 41, 0.3);
+}
+.features-section[_ngcontent-ng-c1578253187] {
+  position: relative;
+  z-index: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--sp-20) var(--sp-6);
+  text-align: center;
+}
+.features-section[_ngcontent-ng-c1578253187]   .section-title[_ngcontent-ng-c1578253187] {
+  margin-bottom: var(--sp-3);
+}
+.features-section[_ngcontent-ng-c1578253187]    > p[_ngcontent-ng-c1578253187] {
+  font-size: var(--text-lg);
+  color: var(--text-secondary);
+  max-width: 520px;
+  margin: 0 auto var(--sp-12);
+  font-weight: 300;
+  line-height: 1.7;
+}
+.features-grid[_ngcontent-ng-c1578253187] {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--sp-5);
+}
+.feature-card[_ngcontent-ng-c1578253187] {
+  padding: var(--sp-6) var(--sp-5);
+  border-radius: var(--radius-lg);
+  text-align: left;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-faint);
+  transition: all var(--ease-normal);
+  box-shadow: var(--shadow-xs);
+}
+.feature-card[_ngcontent-ng-c1578253187]:hover {
+  transform: translateY(-4px);
+  border-color: var(--border-subtle);
+  box-shadow: var(--shadow-md);
+}
+.feature-icon[_ngcontent-ng-c1578253187] {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--navy-50);
+  border-radius: var(--radius-md);
+  color: var(--navy-700);
+  margin-bottom: var(--sp-4);
+  transition: all var(--ease-normal);
+}
+.feature-card[_ngcontent-ng-c1578253187]:hover   .feature-icon[_ngcontent-ng-c1578253187] {
+  background: var(--navy-800);
+  color: white;
+}
+.feature-card[_ngcontent-ng-c1578253187]   h4[_ngcontent-ng-c1578253187] {
+  font-size: var(--text-base);
+  font-weight: 600;
+  margin-bottom: var(--sp-2);
+  color: var(--text-primary);
+}
+.feature-card[_ngcontent-ng-c1578253187]   p[_ngcontent-ng-c1578253187] {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  line-height: 1.65;
+  font-weight: 300;
+}
+.about-section[_ngcontent-ng-c1578253187] {
+  background: var(--navy-900);
+  padding: var(--sp-20) var(--sp-6);
+  text-align: center;
+}
+.about-section[_ngcontent-ng-c1578253187]   .section-title[_ngcontent-ng-c1578253187] {
+  color: white;
+  max-width: 700px;
+  margin: 0 auto var(--sp-5);
+}
+.about-section[_ngcontent-ng-c1578253187]   .gradient-text[_ngcontent-ng-c1578253187] {
+  background: var(--gradient-amber);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.about-section[_ngcontent-ng-c1578253187]   p[_ngcontent-ng-c1578253187] {
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.8;
+  font-size: var(--text-base);
+  max-width: 700px;
+  margin: 0 auto;
+  font-weight: 300;
+}
+.home-footer[_ngcontent-ng-c1578253187] {
+  background: #ffffff;
+  border-top: 1px solid var(--border-subtle);
+  padding: var(--sp-16) var(--sp-6) var(--sp-8);
+  color: var(--navy-600);
+}
+.footer-container[_ngcontent-ng-c1578253187] {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1.5fr;
+  gap: var(--sp-12);
+  padding-bottom: var(--sp-12);
+}
+.footer-brand-col[_ngcontent-ng-c1578253187] {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+.footer-logo[_ngcontent-ng-c1578253187] {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.footer-logo[_ngcontent-ng-c1578253187]   .logo-icon[_ngcontent-ng-c1578253187] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: var(--amber-600);
+  border-radius: var(--radius-sm);
+  color: white;
+}
+.footer-logo[_ngcontent-ng-c1578253187]   .logo-text[_ngcontent-ng-c1578253187] {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--navy-900);
+  letter-spacing: -0.02em;
+}
+.footer-logo[_ngcontent-ng-c1578253187]   .logo-text[_ngcontent-ng-c1578253187]   em[_ngcontent-ng-c1578253187] {
+  font-style: italic;
+  color: var(--amber-500);
+}
+.footer-brand-description[_ngcontent-ng-c1578253187] {
+  font-size: var(--text-sm);
+  color: var(--navy-600);
+  line-height: 1.6;
+  font-weight: 300;
+  max-width: 380px;
+}
+.footer-links-col[_ngcontent-ng-c1578253187], 
+.footer-contact-col[_ngcontent-ng-c1578253187] {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+.footer-col-title[_ngcontent-ng-c1578253187] {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--navy-900);
+}
+.footer-links-list[_ngcontent-ng-c1578253187], 
+.footer-contact-list[_ngcontent-ng-c1578253187] {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.footer-links-list[_ngcontent-ng-c1578253187]   a[_ngcontent-ng-c1578253187] {
+  font-size: var(--text-sm);
+  color: var(--navy-600);
+  font-weight: 300;
+  transition: all var(--ease-fast);
+}
+.footer-links-list[_ngcontent-ng-c1578253187]   a[_ngcontent-ng-c1578253187]:hover {
+  color: var(--amber-500);
+  padding-left: 2px;
+}
+.footer-link-dummy[_ngcontent-ng-c1578253187] {
+  font-size: var(--text-sm);
+  color: var(--navy-600);
+  font-weight: 300;
+  cursor: pointer;
+  transition: all var(--ease-fast);
+}
+.footer-link-dummy[_ngcontent-ng-c1578253187]:hover {
+  color: var(--amber-500);
+  padding-left: 2px;
+}
+.contact-person[_ngcontent-ng-c1578253187] {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 2px;
+}
+.contact-person[_ngcontent-ng-c1578253187]   strong[_ngcontent-ng-c1578253187] {
+  font-size: var(--text-base);
+  color: var(--navy-900);
+}
+.contact-person[_ngcontent-ng-c1578253187]   .person-role[_ngcontent-ng-c1578253187] {
+  font-size: var(--text-xs);
+  color: var(--navy-500);
+}
+.contact-item[_ngcontent-ng-c1578253187] {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--text-sm);
+  color: var(--navy-600) !important;
+  font-weight: 300;
+  transition: color var(--ease-fast);
+}
+.contact-item[_ngcontent-ng-c1578253187]:hover {
+  color: var(--amber-500) !important;
+}
+.contact-item[_ngcontent-ng-c1578253187]   svg[_ngcontent-ng-c1578253187] {
+  color: var(--amber-500);
+  flex-shrink: 0;
+}
+.whatsapp-link[_ngcontent-ng-c1578253187]:hover   svg[_ngcontent-ng-c1578253187] {
+  color: #25d366;
+}
+.footer-bottom-bar[_ngcontent-ng-c1578253187] {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-top: var(--sp-8);
+  border-top: 1px solid var(--border-subtle);
+  text-align: center;
+  font-size: var(--text-xs);
+  color: var(--navy-500);
+}
+.resume-showcase-section[_ngcontent-ng-c1578253187] {
+  padding: var(--sp-20) var(--sp-6);
+  background-color: #ffffff;
+  border-top: 1px solid var(--border-faint);
+  border-bottom: 1px solid var(--border-faint);
+  position: relative;
+  z-index: 1;
+}
+.showcase-container[_ngcontent-ng-c1578253187] {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: var(--sp-12);
+  align-items: center;
+}
+.showcase-content[_ngcontent-ng-c1578253187] {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+.showcase-title[_ngcontent-ng-c1578253187] {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1.15;
+  margin-bottom: var(--sp-4);
+  letter-spacing: -0.02em;
+}
+.showcase-description[_ngcontent-ng-c1578253187] {
+  font-size: var(--text-lg);
+  color: var(--text-secondary);
+  font-weight: 300;
+  line-height: 1.7;
+  margin-bottom: var(--sp-8);
+}
+.btn-showcase-primary[_ngcontent-ng-c1578253187] {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: 0.9rem 2.25rem;
+  background: var(--navy-900);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  transition: all var(--ease-normal);
+  cursor: pointer;
+}
+.btn-showcase-primary[_ngcontent-ng-c1578253187]:hover {
+  background: var(--navy-800);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(12, 13, 13, 0.15);
+}
+.showcase-visual[_ngcontent-ng-c1578253187] {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.resume-drawing-container[_ngcontent-ng-c1578253187] {
+  position: relative;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  padding: var(--sp-8);
+  box-shadow: var(--shadow-xl);
+  transition: all var(--ease-slow);
+}
+.resume-drawing-container[_ngcontent-ng-c1578253187]:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 48px rgba(10, 8, 8, 0.12);
+}
+.resume-svg-drawing[_ngcontent-ng-c1578253187] {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+.resume-document-group[_ngcontent-ng-c1578253187] {
+  transition: transform var(--ease-spring);
+}
+.resume-drawing-container[_ngcontent-ng-c1578253187]:hover   .resume-document-group[_ngcontent-ng-c1578253187] {
+  transform: scale(1.02);
+}
+.resume-pencil-group[_ngcontent-ng-c1578253187] {
+  transform-origin: 176px 208px;
+  animation: _ngcontent-ng-c1578253187_pencilFloat 4s ease-in-out infinite;
+  transition: transform var(--ease-spring);
+}
+.resume-drawing-container[_ngcontent-ng-c1578253187]:hover   .resume-pencil-group[_ngcontent-ng-c1578253187] {
+  animation: _ngcontent-ng-c1578253187_pencilWrite 2.5s ease-in-out infinite alternate;
+}
+@keyframes _ngcontent-ng-c1578253187_pencilFloat {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate(-3px, -5px) rotate(-1.5deg);
+  }
+}
+@keyframes _ngcontent-ng-c1578253187_pencilWrite {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate(-10px, -4px) rotate(-3deg);
+  }
+  50% {
+    transform: translate(-5px, 2px) rotate(1deg);
+  }
+  75% {
+    transform: translate(-15px, -2px) rotate(-2deg);
+  }
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+}
+@media (max-width: 1024px) {
+  .features-grid[_ngcontent-ng-c1578253187] {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .footer-container[_ngcontent-ng-c1578253187] {
+    gap: var(--sp-8);
+  }
+}
+@media (max-width: 992px) {
+  .showcase-container[_ngcontent-ng-c1578253187] {
+    grid-template-columns: 1fr;
+    gap: var(--sp-8);
+    text-align: center;
+  }
+  .showcase-content[_ngcontent-ng-c1578253187] {
+    align-items: center;
+    text-align: center;
+  }
+}
+@media (max-width: 768px) {
+  .hero-section[_ngcontent-ng-c1578253187] {
+    padding: 120px var(--sp-6) 140px;
+    min-height: 420px;
+  }
+  .hero-brand-name[_ngcontent-ng-c1578253187] {
+    letter-spacing: 0.03em;
+  }
+  .features-grid[_ngcontent-ng-c1578253187] {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--sp-4);
+  }
+  .footer-container[_ngcontent-ng-c1578253187] {
+    grid-template-columns: 1fr;
+    gap: var(--sp-8);
+  }
+  .resume-showcase-section[_ngcontent-ng-c1578253187] {
+    padding: var(--sp-12) var(--sp-6);
+  }
+}
+@media (max-width: 480px) {
+  .hero-section[_ngcontent-ng-c1578253187] {
+    padding: 100px var(--sp-4) 120px;
+    min-height: 380px;
+  }
+  .features-grid[_ngcontent-ng-c1578253187] {
+    grid-template-columns: 1fr;
+  }
+  .hero-cta[_ngcontent-ng-c1578253187] {
+    flex-direction: column;
+    align-items: center;
+  }
+  .resume-drawing-container[_ngcontent-ng-c1578253187] {
+    padding: var(--sp-4);
+  }
+}
+/*# sourceMappingURL=/home.component.css.map */</style></head>
+<body style="">
+  <app-root ng-version="19.2.25"><app-navbar _nghost-ng-c1556872635=""><nav _ngcontent-ng-c1556872635="" id="main-navbar" class="navbar glass"><div _ngcontent-ng-c1556872635="" class="navbar-container"><div _ngcontent-ng-c1556872635="" style="display: flex; align-items: center; gap: var(--space-8);"><div _ngcontent-ng-c1556872635="" id="navbar-logo" class="navbar-logo"><div _ngcontent-ng-c1556872635="" class="logo-icon"><svg _ngcontent-ng-c1556872635="" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect _ngcontent-ng-c1556872635="" x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path _ngcontent-ng-c1556872635="" d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg></div><span _ngcontent-ng-c1556872635="" class="logo-text">JobPortal</span></div><div _ngcontent-ng-c1556872635="" class="navbar-links"><a _ngcontent-ng-c1556872635="" class="nav-link">Find Jobs</a><a _ngcontent-ng-c1556872635="" href="http://localhost:4200/#features" class="nav-link">Features</a><a _ngcontent-ng-c1556872635="" href="http://localhost:4200/#about" class="nav-link">About</a></div></div><div _ngcontent-ng-c1556872635="" class="navbar-right"><button _ngcontent-ng-c1556872635="" title="Authorized Personnel Only" id="admin-portal-link" class="btn-shield-admin"><svg _ngcontent-ng-c1556872635="" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path _ngcontent-ng-c1556872635="" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></button><button _ngcontent-ng-c1556872635="" id="btn-get-started" class="btn-get-started"> Login </button><!--bindings={
+  "ng-reflect-ng-if-else": "[object Object]"
+}--><!--container--></div></div><!--bindings={
+  "ng-reflect-ng-if": "false"
+}--></nav><!--bindings={
+  "ng-reflect-ng-if": "true"
+}--></app-navbar><router-outlet></router-outlet><app-home _nghost-ng-c1578253187=""><div _ngcontent-ng-c1578253187="" class="home-page"><section _ngcontent-ng-c1578253187="" id="hero-section" class="hero-section"><div _ngcontent-ng-c1578253187="" class="hero-waves"><svg _ngcontent-ng-c1578253187="" viewBox="0 0 1440 320" preserveAspectRatio="none" class="wave wave-1"><path _ngcontent-ng-c1578253187="" d="M0,224L60,213.3C120,203,240,181,360,186.7C480,192,600,224,720,234.7C840,245,960,235,1080,213.3C1200,192,1320,160,1380,144L1440,128L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z"></path></svg><svg _ngcontent-ng-c1578253187="" viewBox="0 0 1440 320" preserveAspectRatio="none" class="wave wave-2"><path _ngcontent-ng-c1578253187="" d="M0,288L48,272C96,256,192,224,288,213.3C384,203,480,213,576,229.3C672,245,768,267,864,261.3C960,256,1056,224,1152,208C1248,192,1344,192,1392,192L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg><div _ngcontent-ng-c1578253187="" class="hero-shimmer"></div></div><div _ngcontent-ng-c1578253187="" class="hero-center animate-fade-in-up"><h1 _ngcontent-ng-c1578253187="" class="hero-brand-name"> TalentBridge </h1><p _ngcontent-ng-c1578253187="" class="hero-tagline">Where talent meets opportunity</p><div _ngcontent-ng-c1578253187="" class="hero-cta"><button _ngcontent-ng-c1578253187="" id="hero-find-jobs-btn" class="btn-hero-primary"> Find Jobs <svg _ngcontent-ng-c1578253187="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 6px;"><line _ngcontent-ng-c1578253187="" x1="5" y1="12" x2="19" y2="12"></line><polyline _ngcontent-ng-c1578253187="" points="12 5 19 12 12 19"></polyline></svg></button><button _ngcontent-ng-c1578253187="" id="hero-hire-talent-btn" class="btn-hero-secondary"> Hire Talent </button></div></div></section><section _ngcontent-ng-c1578253187="" class="resume-showcase-section"><div _ngcontent-ng-c1578253187="" class="showcase-container"><div _ngcontent-ng-c1578253187="" class="showcase-content"><div _ngcontent-ng-c1578253187="" class="section-label"><svg _ngcontent-ng-c1578253187="" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><path _ngcontent-ng-c1578253187="" d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline _ngcontent-ng-c1578253187="" points="22 4 12 14.01 9 11.01"></polyline></svg> Resume Builder </div><h2 _ngcontent-ng-c1578253187="" class="showcase-title"> Craft a standout <span _ngcontent-ng-c1578253187="" class="gradient-text-amber">resume</span> in minutes </h2><p _ngcontent-ng-c1578253187="" class="showcase-description"> Our smart builder formats your resume according to recruiter standards. Focus on your story while we take care of the design, ensuring alignment with ATS requirements. </p><div _ngcontent-ng-c1578253187="" class="showcase-cta"><button _ngcontent-ng-c1578253187="" class="btn-showcase-primary"> Build Your Resume <svg _ngcontent-ng-c1578253187="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: 6px;"><line _ngcontent-ng-c1578253187="" x1="5" y1="12" x2="19" y2="12"></line><polyline _ngcontent-ng-c1578253187="" points="12 5 19 12 12 19"></polyline></svg></button></div></div><div _ngcontent-ng-c1578253187="" class="showcase-visual"><div _ngcontent-ng-c1578253187="" class="resume-drawing-container"><svg _ngcontent-ng-c1578253187="" width="320" height="320" viewBox="0 0 320 320" fill="none" xmlns="http://www.w3.org/2000/svg" class="resume-svg-drawing"><circle _ngcontent-ng-c1578253187="" cx="160" cy="160" r="120" fill="url(#glow-gradient)" opacity="0.15"></circle><g _ngcontent-ng-c1578253187="" class="resume-document-group"><rect _ngcontent-ng-c1578253187="" x="64" y="44" width="160" height="220" rx="16" fill="black" opacity="0.04"></rect><rect _ngcontent-ng-c1578253187="" x="62" y="42" width="160" height="220" rx="16" fill="black" opacity="0.06"></rect><rect _ngcontent-ng-c1578253187="" x="60" y="40" width="160" height="220" rx="16" fill="#FFFFFF" stroke="var(--border-subtle)" stroke-width="1.5"></rect><path _ngcontent-ng-c1578253187="" d="M204 40.75 H214 C216.5 40.75 220 44 220 46.5 V56" stroke="var(--border-subtle)" stroke-width="1.5"></path><path _ngcontent-ng-c1578253187="" d="M204 40.75 V56 H220 L204 40.75 Z" fill="#F5EFE9" stroke="var(--border-subtle)" stroke-width="1.5"></path><circle _ngcontent-ng-c1578253187="" cx="88" cy="72" r="14" fill="#F5EFE9"></circle><circle _ngcontent-ng-c1578253187="" cx="88" cy="72" r="6" fill="var(--navy-600)"></circle><rect _ngcontent-ng-c1578253187="" x="112" y="64" width="64" height="6" rx="3" fill="var(--navy-800)"></rect><rect _ngcontent-ng-c1578253187="" x="112" y="74" width="44" height="4" rx="2" fill="var(--navy-400)"></rect><line _ngcontent-ng-c1578253187="" x1="76" y1="96" x2="204" y2="96" stroke="var(--border-subtle)" stroke-width="1" stroke-dasharray="2 2"></line><rect _ngcontent-ng-c1578253187="" x="76" y="106" width="50" height="5" rx="2.5" fill="var(--navy-800)"></rect><rect _ngcontent-ng-c1578253187="" x="76" y="116" width="30" height="3" rx="1.5" fill="var(--navy-400)"></rect><rect _ngcontent-ng-c1578253187="" x="76" y="126" width="128" height="3.5" rx="1.75" fill="var(--navy-200)"></rect><rect _ngcontent-ng-c1578253187="" x="76" y="134" width="118" height="3.5" rx="1.75" fill="var(--navy-200)"></rect><rect _ngcontent-ng-c1578253187="" x="76" y="142" width="88" height="3.5" rx="1.75" fill="var(--navy-200)"></rect><line _ngcontent-ng-c1578253187="" x1="76" y1="156" x2="204" y2="156" stroke="var(--border-subtle)" stroke-width="1" stroke-dasharray="2 2"></line><rect _ngcontent-ng-c1578253187="" x="76" y="166" width="35" height="5" rx="2.5" fill="var(--navy-800)"></rect><rect _ngcontent-ng-c1578253187="" x="76" y="176" width="36" height="10" rx="5" fill="#F5EFE9"></rect><rect _ngcontent-ng-c1578253187="" x="116" y="176" width="44" height="10" rx="5" fill="#F5EFE9"></rect><rect _ngcontent-ng-c1578253187="" x="164" y="176" width="32" height="10" rx="5" fill="#F5EFE9"></rect><rect _ngcontent-ng-c1578253187="" x="76" y="190" width="42" height="10" rx="5" fill="#F5EFE9"></rect><rect _ngcontent-ng-c1578253187="" x="122" y="190" width="36" height="10" rx="5" fill="#F5EFE9"></rect><line _ngcontent-ng-c1578253187="" x1="76" y1="210" x2="204" y2="210" stroke="var(--border-subtle)" stroke-width="1" stroke-dasharray="2 2"></line><rect _ngcontent-ng-c1578253187="" x="76" y="222" width="60" height="4" rx="2" fill="var(--amber-400)"></rect><path _ngcontent-ng-c1578253187="" d="M184 220 L204 225" stroke="var(--navy-400)" stroke-width="1.5" stroke-linecap="round"></path></g><g _ngcontent-ng-c1578253187="" class="resume-pencil-group"><path _ngcontent-ng-c1578253187="" d="M192 192 L234 150 L242 158 L200 200 Z" fill="black" opacity="0.06"></path><path _ngcontent-ng-c1578253187="" d="M176 208 L185 197 L193 205 Z" fill="var(--navy-900)"></path><path _ngcontent-ng-c1578253187="" d="M185 197 L195 187 L203 195 L193 205 Z" fill="#EAD5C3"></path><path _ngcontent-ng-c1578253187="" d="M195 187 L235 147 C237.5 144.5 241.5 144.5 244 147 L249 152 C251.5 154.5 251.5 158.5 249 161 L209 201 Z" fill="var(--amber-400)"></path><path _ngcontent-ng-c1578253187="" d="M201 181 L238 144 C239 143 241 143 242 144 L244 146 C245 147 245 149 244 150 L207 187 Z" fill="var(--navy-800)"></path><path _ngcontent-ng-c1578253187="" d="M239 143 L245 137 C247 135 250 135 252 137 L255 140 C257 142 257 145 255 147 L249 153 Z" fill="var(--navy-300)"></path><path _ngcontent-ng-c1578253187="" d="M248 134 L251 131 C252.5 129.5 255.5 129.5 257 131 L260 134 C261.5 135.5 261.5 138.5 260 140 L257 143 Z" fill="#F4A261"></path></g><defs _ngcontent-ng-c1578253187=""><radialgradient _ngcontent-ng-c1578253187="" id="glow-gradient" cx="50%" cy="50%" r="50%" fx="50%" fy="50%"><stop _ngcontent-ng-c1578253187="" offset="0%" stop-color="var(--amber-400)"></stop><stop _ngcontent-ng-c1578253187="" offset="100%" stop-color="var(--amber-100)" stop-opacity="0"></stop></radialgradient></defs></svg></div></div></div></section><section _ngcontent-ng-c1578253187="" id="features" class="features-section"><div _ngcontent-ng-c1578253187="" class="section-label"><svg _ngcontent-ng-c1578253187="" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;"><rect _ngcontent-ng-c1578253187="" x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path _ngcontent-ng-c1578253187="" d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg> Why TalentBridge </div><h2 _ngcontent-ng-c1578253187="" class="section-title"> Built for modern hiring </h2><p _ngcontent-ng-c1578253187=""> Everything you need to find the right role or the right person — without the noise. </p><div _ngcontent-ng-c1578253187="" class="features-grid"><div _ngcontent-ng-c1578253187="" class="feature-card"><div _ngcontent-ng-c1578253187="" class="feature-icon"><svg _ngcontent-ng-c1578253187="" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path _ngcontent-ng-c1578253187="" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg></div><h4 _ngcontent-ng-c1578253187="">Enterprise Security</h4><p _ngcontent-ng-c1578253187="">End-to-end encryption and SOC 2-compliant infrastructure protect every interaction.</p></div><div _ngcontent-ng-c1578253187="" class="feature-card"><div _ngcontent-ng-c1578253187="" class="feature-icon"><svg _ngcontent-ng-c1578253187="" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon _ngcontent-ng-c1578253187="" points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg></div><h4 _ngcontent-ng-c1578253187="">Instant Matching</h4><p _ngcontent-ng-c1578253187="">Semantic AI surfaces the most relevant roles and candidates in seconds, not hours.</p></div><div _ngcontent-ng-c1578253187="" class="feature-card"><div _ngcontent-ng-c1578253187="" class="feature-icon"><svg _ngcontent-ng-c1578253187="" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle _ngcontent-ng-c1578253187="" cx="12" cy="12" r="10"></circle><line _ngcontent-ng-c1578253187="" x1="2" y1="12" x2="22" y2="12"></line><path _ngcontent-ng-c1578253187="" d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg></div><h4 _ngcontent-ng-c1578253187="">Global Reach</h4><p _ngcontent-ng-c1578253187="">Access remote-first and location-based roles across every major industry and market.</p></div><div _ngcontent-ng-c1578253187="" class="feature-card"><div _ngcontent-ng-c1578253187="" class="feature-icon"><svg _ngcontent-ng-c1578253187="" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect _ngcontent-ng-c1578253187="" x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path _ngcontent-ng-c1578253187="" d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg></div><h4 _ngcontent-ng-c1578253187="">ATS-Optimized</h4><p _ngcontent-ng-c1578253187="">Resume parsing and scoring tools ensure candidates pass automated screening with confidence.</p></div></div></section><section _ngcontent-ng-c1578253187="" id="about" class="about-section"><h2 _ngcontent-ng-c1578253187="" class="section-title"> About <span _ngcontent-ng-c1578253187="" class="gradient-text">TalentBridge</span></h2><p _ngcontent-ng-c1578253187=""> TalentBridge is an AI-driven Applicant Tracking System and job board designed to make hiring human again. We give job seekers the tools to present themselves effectively and recruiters the intelligence to hire with confidence — all in one streamlined platform. </p></section><footer _ngcontent-ng-c1578253187="" class="home-footer"><div _ngcontent-ng-c1578253187="" class="footer-container"><div _ngcontent-ng-c1578253187="" class="footer-brand-col"><div _ngcontent-ng-c1578253187="" class="footer-logo"><span _ngcontent-ng-c1578253187="" class="logo-icon"><svg _ngcontent-ng-c1578253187="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect _ngcontent-ng-c1578253187="" x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path _ngcontent-ng-c1578253187="" d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg></span><span _ngcontent-ng-c1578253187="" class="logo-text">Talent<em _ngcontent-ng-c1578253187="">Bridge</em></span></div><p _ngcontent-ng-c1578253187="" class="footer-brand-description"> Next-generation Applicant Tracking System and recruitment engine, bringing clarity, speed, and precision to the hiring ecosystem. </p></div><div _ngcontent-ng-c1578253187="" class="footer-links-col"><h4 _ngcontent-ng-c1578253187="" class="footer-col-title">Quick Links</h4><ul _ngcontent-ng-c1578253187="" class="footer-links-list"><li _ngcontent-ng-c1578253187=""><a _ngcontent-ng-c1578253187="" href="http://localhost:4200/#hero-section">Home</a></li><li _ngcontent-ng-c1578253187=""><a _ngcontent-ng-c1578253187="" href="http://localhost:4200/#features">Features</a></li><li _ngcontent-ng-c1578253187=""><a _ngcontent-ng-c1578253187="" href="http://localhost:4200/#about">About Us</a></li><li _ngcontent-ng-c1578253187=""><span _ngcontent-ng-c1578253187="" class="footer-link-dummy">Find a Job</span></li><li _ngcontent-ng-c1578253187=""><span _ngcontent-ng-c1578253187="" class="footer-link-dummy">Post a Job</span></li></ul></div><div _ngcontent-ng-c1578253187="" class="footer-contact-col"><h4 _ngcontent-ng-c1578253187="" class="footer-col-title">Contact Information</h4><ul _ngcontent-ng-c1578253187="" class="footer-contact-list"><li _ngcontent-ng-c1578253187="" class="contact-person"><strong _ngcontent-ng-c1578253187="">Sanjana Pandey</strong><span _ngcontent-ng-c1578253187="" class="person-role">Platform Administrator</span></li><li _ngcontent-ng-c1578253187=""><a _ngcontent-ng-c1578253187="" href="mailto:sanjanpandey29256@gmail.com" class="contact-item"><svg _ngcontent-ng-c1578253187="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path _ngcontent-ng-c1578253187="" d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline _ngcontent-ng-c1578253187="" points="22,6 12,13 2,6"></polyline></svg><span _ngcontent-ng-c1578253187="">sanjanpandey29256@gmail.com</span></a></li><li _ngcontent-ng-c1578253187=""><a _ngcontent-ng-c1578253187="" href="tel:9877932989" class="contact-item"><svg _ngcontent-ng-c1578253187="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path _ngcontent-ng-c1578253187="" d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg><span _ngcontent-ng-c1578253187="">+91 98779 32989</span></a></li><li _ngcontent-ng-c1578253187=""><a _ngcontent-ng-c1578253187="" href="https://wa.me/919877932989" target="_blank" rel="noopener noreferrer" class="contact-item whatsapp-link"><svg _ngcontent-ng-c1578253187="" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path _ngcontent-ng-c1578253187="" d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg><span _ngcontent-ng-c1578253187="">WhatsApp: +91 98779 32989</span></a></li></ul></div></div><div _ngcontent-ng-c1578253187="" class="footer-bottom-bar"><p _ngcontent-ng-c1578253187="">© 2026 TalentBridge. All rights reserved.</p></div></footer></div></app-home><!--container--><app-auth-modal _nghost-ng-c2622620487=""><!--bindings={
+  "ng-reflect-ng-if": "false"
+}--></app-auth-modal></app-root>
+<script src="./TalentBridge — Where Talent Meets Opportunity_files/polyfills.js.download" type="module"></script><script src="./TalentBridge — Where Talent Meets Opportunity_files/main.js.download" type="module"></script>
+
+</body></html>
