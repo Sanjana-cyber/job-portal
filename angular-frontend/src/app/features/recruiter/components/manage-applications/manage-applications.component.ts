@@ -27,27 +27,45 @@ import { ApplicationService } from '../../../../core/services/application.servic
 
           <div *ngIf="!loading && applications.length > 0" class="app-list">
             <div class="app-card" *ngFor="let app of applications">
-              <div class="app-info">
-                <h4>{{ app.applicant?.name || 'Unknown User' }}</h4>
-                <p>{{ app.applicant?.email }}</p>
-                <div class="app-meta">
-                  <span class="status-badge" [ngClass]="app.status">{{ app.status }}</span>
-                  <span class="date">Applied: {{ app.createdAt | date:'shortDate' }}</span>
+              <div class="app-top-row">
+                <div class="app-info">
+                  <h4>{{ app.applicant?.name || 'Unknown User' }}</h4>
+                  <p>{{ app.applicant?.email }}</p>
+                  <div class="app-meta">
+                    <span class="status-badge" [ngClass]="app.status">{{ app.status | titlecase }}</span>
+                    <span class="date">Applied: {{ app.createdAt | date:'mediumDate' }}</span>
+                    <span *ngIf="app.atsScore !== null && app.atsScore !== undefined" class="ats-score">
+                      🎯 ATS Score: <strong>{{ app.atsScore }}%</strong>
+                    </span>
+                  </div>
+                </div>
+
+                <div class="app-actions">
+                  <a *ngIf="app.resume?.fileUrl"
+                     [href]="app.resume.fileUrl"
+                     target="_blank"
+                     rel="noopener noreferrer"
+                     class="btn-view-resume">
+                    📄 View Resume
+                  </a>
+                  <span *ngIf="!app.resume?.fileUrl" class="no-resume">No resume uploaded</span>
+
+                  <div class="status-controls">
+                    <select [value]="app.status" (change)="updateStatus(app._id, $event)" [disabled]="updatingId === app._id">
+                      <option value="pending">Pending</option>
+                      <option value="reviewed">Reviewed</option>
+                      <option value="shortlisted">Shortlisted</option>
+                      <option value="rejected">Rejected</option>
+                    </select>
+                    <span *ngIf="updatingId === app._id" class="updating-text">Saving...</span>
+                  </div>
                 </div>
               </div>
-              
-              <div class="app-actions">
-                <a *ngIf="app.resume?.url" [href]="app.resume.url" target="_blank" class="btn-view-resume">View Resume</a>
-                
-                <div class="status-controls">
-                  <select [value]="app.status" (change)="updateStatus(app._id, $event)" [disabled]="updatingId === app._id">
-                    <option value="pending">Pending</option>
-                    <option value="reviewed">Reviewed</option>
-                    <option value="shortlisted">Shortlisted</option>
-                    <option value="rejected">Rejected</option>
-                  </select>
-                  <span *ngIf="updatingId === app._id" class="updating-text">Saving...</span>
-                </div>
+
+              <!-- Cover Letter -->
+              <div *ngIf="app.coverLetter" class="cover-letter">
+                <p class="cover-label">Cover Letter:</p>
+                <p class="cover-text">{{ app.coverLetter }}</p>
               </div>
             </div>
           </div>
@@ -57,30 +75,37 @@ import { ApplicationService } from '../../../../core/services/application.servic
   `,
   styles: [`
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; backdrop-filter: blur(4px); }
-    .modal-content { background: var(--bg-surface); width: 100%; max-width: 700px; border-radius: 16px; box-shadow: var(--shadow-lg); display: flex; flex-direction: column; max-height: 90vh; overflow: hidden; border: 1px solid var(--border-subtle); }
-    .modal-header { padding: 20px 24px; border-bottom: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: flex-start; }
-    .modal-header h2 { margin: 0; font-size: 20px; color: var(--navy-900); font-family: var(--font-display); }
-    .subtitle { margin: 4px 0 0; font-size: 14px; color: var(--text-secondary); }
-    .btn-close { background: transparent; border: none; font-size: 24px; color: var(--text-secondary); cursor: pointer; }
+    .modal-content { background: #fff; width: 100%; max-width: 760px; border-radius: 16px; box-shadow: 0 24px 48px rgba(0,0,0,0.18); display: flex; flex-direction: column; max-height: 90vh; overflow: hidden; border: 1px solid #e5e7eb; }
+    .modal-header { padding: 20px 24px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: flex-start; background: #fafafa; }
+    .modal-header h2 { margin: 0; font-size: 20px; color: #111; font-weight: 700; }
+    .subtitle { margin: 4px 0 0; font-size: 14px; color: #6b7280; }
+    .btn-close { background: transparent; border: none; font-size: 24px; color: #9ca3af; cursor: pointer; }
     .modal-body { padding: 24px; overflow-y: auto; }
-    .loading-state, .empty-state { padding: 40px; text-align: center; color: var(--text-tertiary); }
+    .loading-state, .empty-state { padding: 40px; text-align: center; color: #9ca3af; }
     .app-list { display: flex; flex-direction: column; gap: 16px; }
-    .app-card { display: flex; justify-content: space-between; align-items: center; padding: 16px; border: 1px solid var(--border-default); border-radius: 12px; flex-wrap: wrap; gap: 16px; background: var(--bg-page); }
-    .app-info h4 { margin: 0 0 4px; font-size: 16px; color: var(--navy-900); }
-    .app-info p { margin: 0 0 8px; font-size: 14px; color: var(--text-secondary); }
-    .app-meta { display: flex; gap: 12px; align-items: center; }
-    .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; text-transform: capitalize; }
+    .app-card { padding: 18px; border: 1px solid #e5e7eb; border-radius: 12px; background: #fef9f7; }
+    .app-top-row { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; }
+    .app-info h4 { margin: 0 0 4px; font-size: 16px; font-weight: 700; color: #111; }
+    .app-info p { margin: 0 0 8px; font-size: 14px; color: #6b7280; }
+    .app-meta { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .status-badge { padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
     .status-badge.pending { background: #fef3c7; color: #b45309; }
     .status-badge.reviewed { background: #e0f2fe; color: #0369a1; }
     .status-badge.shortlisted { background: #dcfce7; color: #15803d; }
     .status-badge.rejected { background: #fee2e2; color: #b91c1c; }
-    .date { font-size: 12px; color: var(--text-tertiary); }
-    .app-actions { display: flex; flex-direction: column; gap: 10px; align-items: flex-end; }
-    .btn-view-resume { font-size: 13px; font-weight: 600; color: var(--navy-600); text-decoration: none; }
-    .btn-view-resume:hover { text-decoration: underline; }
+    .date { font-size: 12px; color: #9ca3af; }
+    .ats-score { font-size: 12px; color: #374151; background: #f3f4f6; padding: 2px 8px; border-radius: 20px; }
+    .ats-score strong { color: #166534; }
+    .app-actions { display: flex; flex-direction: column; gap: 10px; align-items: flex-end; flex-shrink: 0; }
+    .btn-view-resume { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: #111; color: #fff; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; transition: background 0.2s; white-space: nowrap; }
+    .btn-view-resume:hover { background: #333; }
+    .no-resume { font-size: 12px; color: #9ca3af; font-style: italic; }
     .status-controls { display: flex; align-items: center; gap: 8px; }
-    select { padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-default); font-family: inherit; font-size: 13px; }
-    .updating-text { font-size: 12px; color: var(--text-tertiary); }
+    select { padding: 6px 10px; border-radius: 6px; border: 1px solid #d1d5db; font-family: inherit; font-size: 13px; background: #fff; }
+    .updating-text { font-size: 12px; color: #9ca3af; }
+    .cover-letter { margin-top: 14px; padding-top: 14px; border-top: 1px solid #f0f0f0; }
+    .cover-label { font-size: 12px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.04em; margin: 0 0 4px; }
+    .cover-text { font-size: 14px; color: #374151; margin: 0; line-height: 1.6; }
   `]
 })
 export class ManageApplicationsComponent implements OnInit {

@@ -77,6 +77,28 @@ export const routes: Routes = [
     title: 'System Management Console — TalentBridge'
   },
   {
+    // Reset Password (link from email)
+    path: 'reset-password/:token',
+    loadComponent: () =>
+      import('./features/auth/reset-password/reset-password.component').then(m => m.ResetPasswordComponent),
+    title: 'Reset Password — TalentBridge'
+  },
+  {
+    // Email Verification (link from email)
+    path: 'verify-email/:token',
+    loadComponent: () =>
+      import('./features/auth/verify-email/verify-email.component').then(m => m.VerifyEmailComponent),
+    title: 'Verify Email — TalentBridge'
+  },
+  {
+    // Profile Builder — jobseeker profile editing
+    path: 'dashboard/profile',
+    loadComponent: () =>
+      import('./features/dashboard/profile-builder/profile-builder.component').then(m => m.ProfileBuilderComponent),
+    canActivate: [authGuard],
+    title: 'Profile Builder — TalentBridge'
+  },
+  {
     // Catch-all: redirect unknown Angular routes to landing page
     path: '**',
     redirectTo: ''

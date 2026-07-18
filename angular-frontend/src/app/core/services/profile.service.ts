@@ -54,8 +54,30 @@ export class ProfileService {
     return this.http.get<ProfileResponse>(`${this.apiUrl}/profile/me`);
   }
 
+  /** PUT /api/profile — save any profile section */
+  updateProfile(data: Partial<Profile>): Observable<ProfileResponse> {
+    return this.http.put<ProfileResponse>(`${this.apiUrl}/profile`, data);
+  }
+
   /** GET /api/profile/resumes — requires auth cookie */
   getResumes(): Observable<ResumesResponse> {
     return this.http.get<ResumesResponse>(`${this.apiUrl}/profile/resumes`);
+  }
+
+  /** POST /api/profile/resumes — upload a resume PDF */
+  uploadResume(file: File): Observable<any> {
+    const form = new FormData();
+    form.append('resume', file);
+    return this.http.post(`${this.apiUrl}/profile/resumes`, form);
+  }
+
+  /** PUT /api/profile/resumes/:id/activate — set active resume */
+  activateResume(id: string): Observable<any> {
+    return this.http.put(`${this.apiUrl}/profile/resumes/${id}/activate`, {});
+  }
+
+  /** DELETE /api/profile/resumes/:id — delete a resume */
+  deleteResume(id: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/profile/resumes/${id}`);
   }
 }

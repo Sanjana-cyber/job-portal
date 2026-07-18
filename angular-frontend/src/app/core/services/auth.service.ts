@@ -157,19 +157,11 @@ export class AuthService {
 
   /**
    * Helper: returns the post-login destination.
-   * jobseeker → stays in Angular (navigates to /jobs)
-   * recruiter/admin → goes back to React app (use window.location.href)
    */
   getDashboardRoute(role: string): { isAngular: boolean; path: string } {
-    if (role === 'jobseeker') {
-      return { isAngular: true, path: '/dashboard' };
-    }
-    if (role === 'recruiter') {
-      return { isAngular: true, path: '/recruiter/dashboard' };
-    }
-    if (role === 'admin') {
-      return { isAngular: true, path: '/admin' };
-    }
-    return { isAngular: false, path: '/' };
+    if (role === 'jobseeker') return { isAngular: true, path: '/dashboard' };
+    if (role === 'recruiter') return { isAngular: true, path: '/recruiter/dashboard' };
+    if (role === 'admin') return { isAngular: true, path: '/admin' };
+    return { isAngular: true, path: '/' };
   }
 }
