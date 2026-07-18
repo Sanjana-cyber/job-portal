@@ -126,11 +126,7 @@ export class RegisterComponent implements OnInit {
     this.authService.register(payload).subscribe({
       next: (res) => {
         const dest = this.authService.getDashboardRoute(res.user.role);
-        if (dest.isAngular) {
-          this.router.navigate([dest.path]);
-        } else {
-          window.location.href = `${environment.reactAppUrl}${dest.path}`;
-        }
+        this.router.navigate([dest.path]);
       },
       error: (err) => {
         this.errorMessage = err.error?.message || 'Registration failed. Please try again.';
@@ -147,11 +143,7 @@ export class RegisterComponent implements OnInit {
     this.authService.googleLogin(credential, role).subscribe({
       next: (res) => {
         const dest = this.authService.getDashboardRoute(res.user.role);
-        if (dest.isAngular) {
-          this.router.navigate([dest.path]);
-        } else {
-          window.location.href = `${environment.reactAppUrl}${dest.path}`;
-        }
+        this.router.navigate([dest.path]);
       },
       error: (err) => {
         this.errorMessage = err.error?.message || 'Google authentication failed.';

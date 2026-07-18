@@ -109,7 +109,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.user = currentUser;
       const u = currentUser as { role?: string };
       if (u.role && u.role !== 'jobseeker') {
-        window.location.href = `${environment.reactAppUrl}${this.authService.getDashboardRoute(u.role).path}`;
+        this.router.navigate([this.authService.getDashboardRoute(u.role).path]);
         return;
       }
     }
@@ -120,7 +120,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         const u = user as { role?: string } | null;
         if (u && u.role && u.role !== 'jobseeker') {
           const dest = this.authService.getDashboardRoute(u.role);
-          window.location.href = `${environment.reactAppUrl}${dest.path}`;
+          this.router.navigate([dest.path]);
         }
       })
     );
@@ -155,13 +155,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   navigateToSection(key: string): void {
-    window.location.href = `${environment.reactAppUrl}/dashboard/profile?tab=${key}`;
+    this.router.navigate(['/dashboard/profile'], { queryParams: { tab: key } });
   }
 
   menuOpen = false;
   toggleMenu(): void { this.menuOpen = !this.menuOpen; }
   goToFindJobs(): void { this.router.navigate(['/dashboard/jobs']); }
-  goToBuildProfile(): void { window.location.href = `${environment.reactAppUrl}/dashboard/profile`; }
+  goToBuildProfile(): void { this.router.navigate(['/dashboard/profile']); }
 
   handleAnalyze(): void {
     if (!this.jd.trim() || this.jd.trim().length < 30) {

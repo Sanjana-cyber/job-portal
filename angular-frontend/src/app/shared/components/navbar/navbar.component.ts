@@ -99,11 +99,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   handleDashboard(): void {
     if (!this.user) return;
     const dest = this.authService.getDashboardRoute(this.user.role);
-    if (dest.isAngular) {
-      this.router.navigate([dest.path]);
-    } else {
-      window.location.href = `${environment.reactAppUrl}${dest.path}`;
-    }
+    this.router.navigate([dest.path]);
     this.showDropdown = false;
   }
 
@@ -122,6 +118,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   goToAdminLogin(): void {
-    window.location.href = `${environment.reactAppUrl}/admin/login`;
+    this.router.navigate(['/admin/login']);
   }
 }

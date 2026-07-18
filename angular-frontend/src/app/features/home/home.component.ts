@@ -24,11 +24,7 @@ export class HomeComponent implements OnInit {
     const user = this.authService.currentUser;
     if (user) {
       const dest = this.authService.getDashboardRoute(user.role);
-      if (dest.isAngular) {
-        this.router.navigate([dest.path]);
-      } else {
-        window.location.href = `${environment.reactAppUrl}${dest.path}`;
-      }
+      this.router.navigate([dest.path]);
     }
   }
 

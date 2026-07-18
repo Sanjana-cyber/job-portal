@@ -294,11 +294,7 @@ export class AuthModalComponent implements OnInit, OnDestroy, AfterViewInit {
   private handleSuccess(role: string): void {
     this.close();
     const dest = this.authService.getDashboardRoute(role);
-    if (dest.isAngular) {
-      this.router.navigate([dest.path]);
-    } else {
-      window.location.href = `${environment.reactAppUrl}${dest.path}`;
-    }
+    this.router.navigate([dest.path]);
   }
 
   private resetForms(): void {

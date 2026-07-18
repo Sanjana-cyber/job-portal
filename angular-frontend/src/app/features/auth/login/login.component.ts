@@ -86,11 +86,7 @@ export class LoginComponent implements OnInit {
     this.authService.login(email!, password!).subscribe({
       next: (res) => {
         const dest = this.authService.getDashboardRoute(res.user.role);
-        if (dest.isAngular) {
-          this.router.navigate([dest.path]);
-        } else {
-          window.location.href = `${environment.reactAppUrl}${dest.path}`;
-        }
+        this.router.navigate([dest.path]);
       },
       error: (err) => {
         this.errorMessage = err.error?.message || 'Login failed. Please try again.';
@@ -106,11 +102,7 @@ export class LoginComponent implements OnInit {
     this.authService.googleLogin(credential, 'jobseeker').subscribe({
       next: (res) => {
         const dest = this.authService.getDashboardRoute(res.user.role);
-        if (dest.isAngular) {
-          this.router.navigate([dest.path]);
-        } else {
-          window.location.href = `${environment.reactAppUrl}${dest.path}`;
-        }
+        this.router.navigate([dest.path]);
       },
       error: (err) => {
         this.errorMessage = err.error?.message || 'Google authentication failed.';
