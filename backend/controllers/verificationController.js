@@ -294,6 +294,38 @@ exports.rejectRecruiter = async (req, res, next) => {
   }
 };
 
+/* ─── Admin: Delete Verification Request ─────────────────────────────────── */
+/**
+ * @desc  Delete a recruiter's verification request (resets it to 'none')
+ * @route DELETE /api/verification/delete/:id
+ * @access Private — admin
+ */
+exports.deleteVerificationRequest = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id);
+
+    if (!user) return next(new ErrorResponse("Recruiter not found", 404));
+    if (user.role !== "recruiter") return next(new ErrorResponse("User is not a recruiter", 400));
+
+    // Reset the verification details
+    user.companyVerificationStatus = "none";
+    user.companyVerificationNote = "";
+    user.companyName = "";
+    user.workEmail = user.email; // reset to registration email
+    user.companyWebsite = "";
+    
+    await user.save({ validateBeforeSave: false });
+
+    res.status(200).json({
+      success: true,
+      message: `Verification request for ${user.name} deleted successfully.`,
+      data: { companyVerificationStatus: "none" },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 /* ─── Admin: Get / Update Global Verification Toggle ─────────────────────── */
 /**
  * @desc  Get current site-wide verification setting

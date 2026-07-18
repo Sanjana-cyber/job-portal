@@ -1,0 +1,222 @@
+<!-- Toast Notification -->
+<div class="toast-container" *ngIf="toastVisible">
+  <div class="toast" [class.toast-success]="toastType === 'success'" [class.toast-error]="toastType === 'error'">
+    <span *ngIf="toastType === 'success'">✓</span>
+    <span *ngIf="toastType === 'error'">✕</span>
+    {{ toastMessage }}
+  </div>
+</div>
+
+<!-- ═══════════════════════ JOBS PAGE ═══════════════════════ -->
+<div class="jobs-page">
+
+  <!-- ── Header ── -->
+  <div class="jobs-header">
+    <h1 class="jobs-page-title">Find Your Next Role</h1>
+    <p class="jobs-page-subtitle">Browse open positions and apply directly with your active profile.</p>
+
+    <!-- Search Form -->
+    <form class="jobs-search-form" (ngSubmit)="handleSearch()">
+      <div class="input-group jobs-search-input">
+        <svg class="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input
+          type="text"
+          class="auth-input"
+          placeholder="Search by title, company, or skills..."
+          [(ngModel)]="search"
+          name="search"
+          id="jobs-search-input"
+        />
+      </div>
+      <button type="submit" class="btn-primary" id="jobs-search-btn">Search</button>
+    </form>
+  </div>
+
+  <!-- ── Job Listings ── -->
+  <div class="jobs-list">
+
+    <!-- Loading State -->
+    <div class="jobs-loading" *ngIf="loading">
+      <div class="loading-spinner"></div>
+      <span>Loading jobs...</span>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="!loading && jobs.length === 0">
+      <div class="empty-icon">💼</div>
+      <p>No jobs found</p>
+      <span>Try adjusting your search terms.</span>
+    </div>
+
+    <!-- Job Cards -->
+    <ng-container *ngIf="!loading && jobs.length > 0">
+      <div class="job-listing-card glass-strong" *ngFor="let job of jobs" [id]="'job-' + job._id">
+
+        <div class="job-listing-top">
+          <div class="job-listing-info">
+            <h3 class="job-listing-title">{{ job.title }}</h3>
+            <div class="job-listing-meta">
+              <span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                {{ job.company }}
+              </span>
+              <span *ngIf="job.location">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                {{ job.location }}
+              </span>
+              <span *ngIf="job.experienceRequired">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                {{ job.experienceRequired }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Apply Button — role-aware (mirrors React exactly) -->
+          <!-- Authenticated Jobseeker -->
+          <button
+            *ngIf="user?.role === 'jobseeker'"
+            class="btn-primary job-apply-btn"
+            (click)="handleApplyClick(job)"
+            [id]="'apply-btn-' + job._id"
+          >Apply Now</button>
+
+          <!-- Authenticated non-jobseeker (recruiter/admin) -->
+          <button
+            *ngIf="user && user.role !== 'jobseeker'"
+            class="btn-secondary job-apply-btn"
+            disabled
+            title="Only job seekers can apply"
+          >Apply Now</button>
+
+          <!-- Unauthenticated visitor -->
+          <button
+            *ngIf="!user"
+            class="btn-apply-gate job-apply-btn"
+            (click)="handleApplyClick(job)"
+            [id]="'apply-gate-btn-' + job._id"
+          >Apply Now</button>
+        </div>
+
+        <!-- Description -->
+        <p class="job-listing-desc" *ngIf="job.description">{{ job.description }}</p>
+
+        <!-- Skills Badges -->
+        <div class="job-listing-skills" *ngIf="job.requiredSkills && job.requiredSkills.length > 0">
+          <span class="skills-label">Required Skills</span>
+          <div class="skills-list">
+            <span class="badge badge-navy" *ngFor="let skill of job.requiredSkills">{{ skill }}</span>
+          </div>
+        </div>
+
+      </div>
+    </ng-container>
+  </div>
+
+  <!-- ── Auth Gate Modal (unauthenticated user) ── -->
+  <div class="modal-overlay" *ngIf="authGateJob" (click)="closeAuthGate()">
+    <div class="auth-gate-modal animate-scale-in" (click)="$event.stopPropagation()">
+      <div class="auth-gate-icon">🔐</div>
+      <h2 class="auth-gate-title">Join to Apply</h2>
+      <p class="auth-gate-job">Applying for <strong>{{ authGateJob.title }}</strong></p>
+      <p class="auth-gate-company">at {{ authGateJob.company }}</p>
+      <p class="auth-gate-body">
+        Create a free job seeker account or log in to submit your application along with your profile and resume.
+      </p>
+      <div class="auth-gate-actions">
+        <button class="btn-secondary" (click)="closeAuthGate()" id="auth-gate-later-btn">Maybe Later</button>
+        <button class="btn-primary" (click)="goToLogin()" id="auth-gate-login-btn">Sign In</button>
+        <button class="btn-apply-gate" (click)="goToRegister()" id="auth-gate-register-btn">Sign Up</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Apply Modal (authenticated jobseeker) ── -->
+  <div class="modal-overlay" *ngIf="applyingTo">
+    <div class="apply-modal animate-scale-in">
+
+      <!-- Close Button -->
+      <button class="modal-close" (click)="closeApplyModal()" id="apply-modal-close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+
+      <h2 class="apply-modal-title">Apply to {{ applyingTo.title }}</h2>
+      <p class="apply-modal-company">at {{ applyingTo.company }}</p>
+
+      <!-- Resume Notice -->
+      <div class="apply-resume-notice">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        Your active resume will be sent to the recruiter automatically.
+      </div>
+
+      <!-- ATS Score Section -->
+      <div class="ats-loading" *ngIf="fetchingAts">
+        <div class="loading-spinner"></div>
+        <span>Calculating ATS Score...</span>
+      </div>
+
+      <div class="ats-panel" *ngIf="!fetchingAts && atsData">
+        <h4 class="ats-panel-title">ATS Match Analysis</h4>
+
+        <div class="ats-score-row">
+          <span class="ats-score-label">Match Score:</span>
+          <span class="ats-score-value" [style.color]="getAtsScoreColor(atsData.matchScore)">
+            {{ atsData.matchScore }}%
+          </span>
+        </div>
+
+        <div class="ats-keywords" *ngIf="atsData && atsData.matchedKeywords && atsData.matchedKeywords.length > 0">
+          <span class="ats-keywords-label">Matching Keywords:</span>
+          <div class="ats-keywords-list">
+            <span class="badge ats-badge-match" *ngFor="let kw of atsData.matchedKeywords">{{ kw }}</span>
+          </div>
+        </div>
+
+        <div class="ats-keywords" *ngIf="atsData && atsData.missingKeywords && atsData.missingKeywords.length > 0">
+          <span class="ats-keywords-label">Missing Keywords:</span>
+          <div class="ats-keywords-list">
+            <span class="badge ats-badge-miss" *ngFor="let kw of atsData.missingKeywords">{{ kw }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Success State -->
+      <div class="apply-success" *ngIf="applySuccess">
+        <div class="apply-success-icon">✓</div>
+        <p>Application submitted successfully!</p>
+      </div>
+
+      <!-- Apply Form -->
+      <form (ngSubmit)="handleApply()" *ngIf="!applySuccess">
+
+        <div class="error-banner" *ngIf="applyError">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          {{ applyError }}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">
+            Cover Letter <span class="optional-label">(Optional)</span>
+          </label>
+          <textarea
+            class="form-textarea"
+            rows="5"
+            placeholder="Why are you a good fit for this role?"
+            [(ngModel)]="coverLetter"
+            name="coverLetter"
+            id="cover-letter-input"
+          ></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" (click)="closeApplyModal()" id="apply-cancel-btn">
+            Cancel
+          </button>
+          <button type="submit" class="btn-primary" [disabled]="submittingApplication" id="apply-submit-btn">
+            <span class="spinner" *ngIf="submittingApplication"></span>
+            {{ submittingApplication ? 'Submitting...' : 'Submit Application' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,155 @@
+<div class="auth-page">
+  <div class="auth-card animate-scale-in">
+
+    <!-- Header -->
+    <div class="auth-header">
+      <h2 class="auth-title">Create account</h2>
+      <p class="auth-subtitle">Join TalentBridge to find your next opportunity</p>
+    </div>
+
+    <!-- Error Banner -->
+    <div class="error-banner" *ngIf="errorMessage">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span>{{ errorMessage }}</span>
+    </div>
+
+    <!-- Register Form -->
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="auth-form" id="register-form">
+
+      <!-- Name -->
+      <div class="input-group">
+        <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <input
+          formControlName="name"
+          type="text"
+          class="auth-input"
+          placeholder="Full name"
+          id="register-name"
+        />
+      </div>
+      <span class="field-error" *ngIf="hasError('name', 'required')">Name is required</span>
+
+      <!-- Email -->
+      <div class="input-group">
+        <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+        <input
+          formControlName="email"
+          type="email"
+          class="auth-input"
+          placeholder="Email address"
+          id="register-email"
+        />
+      </div>
+      <span class="field-error" *ngIf="hasError('email', 'required')">Email is required</span>
+      <span class="field-error" *ngIf="hasError('email', 'email')">Please enter a valid email</span>
+
+      <!-- Role Selector -->
+      <div class="role-selector">
+        <label class="field-label">I am a</label>
+        <div class="input-group">
+          <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+          <select formControlName="role" class="auth-input auth-select" id="register-role">
+            <option value="jobseeker">Job Seeker</option>
+            <option value="recruiter">Recruiter / Employer</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Recruiter Company Fields (conditional) -->
+      <div class="company-fields" *ngIf="isRecruiter">
+        <p class="company-label">🏢 Company Details — used for automatic verification</p>
+
+        <div class="input-group">
+          <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"/><path d="M6 6h.01M6 10h.01M6 14h.01M6 18h.01M10 6h.01M10 10h.01M10 14h.01M10 18h.01M14 6h.01M14 10h.01M14 14h.01M14 18h.01M18 6h.01M18 10h.01M18 14h.01M18 18h.01"/></svg>
+          <input
+            formControlName="companyName"
+            type="text"
+            class="auth-input"
+            placeholder="Company name *"
+            id="register-company-name"
+          />
+        </div>
+        <span class="field-error" *ngIf="hasError('companyName', 'required')">Company name is required for recruiters</span>
+
+        <div class="input-group">
+          <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          <input
+            formControlName="companyWebsite"
+            type="url"
+            class="auth-input"
+            placeholder="Company website (e.g. https://yourcompany.com)"
+            id="register-company-website"
+          />
+        </div>
+
+        <p class="company-hint">
+          💡 We'll automatically verify your company online. If found, you'll be approved instantly.
+          Otherwise, an admin will review your request.
+        </p>
+      </div>
+
+      <!-- Password -->
+      <div class="input-group">
+        <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <input
+          formControlName="password"
+          [type]="showPassword ? 'text' : 'password'"
+          class="auth-input"
+          placeholder="Password (min. 6 characters)"
+          id="register-password"
+        />
+        <button type="button" class="password-toggle" (click)="togglePassword()" id="register-toggle-password">
+          <svg *ngIf="!showPassword" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          <svg *ngIf="showPassword" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+        </button>
+      </div>
+      <span class="field-error" *ngIf="hasError('password', 'required')">Password is required</span>
+      <span class="field-error" *ngIf="hasError('password', 'minlength')">Password must be at least 6 characters</span>
+
+      <!-- Confirm Password -->
+      <div class="input-group">
+        <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <input
+          formControlName="confirmPassword"
+          [type]="showConfirmPassword ? 'text' : 'password'"
+          class="auth-input"
+          placeholder="Confirm password"
+          id="register-confirm-password"
+        />
+        <button type="button" class="password-toggle" (click)="toggleConfirmPassword()" id="register-toggle-confirm">
+          <svg *ngIf="!showConfirmPassword" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          <svg *ngIf="showConfirmPassword" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+        </button>
+      </div>
+      <span class="field-error" *ngIf="hasError('confirmPassword', 'passwordMismatch')">Passwords do not match</span>
+
+      <!-- Submit Button -->
+      <button
+        type="submit"
+        class="btn-primary btn-full"
+        [disabled]="isLoading"
+        id="register-submit-btn"
+      >
+        <ng-container *ngIf="isLoading">
+          <span class="spinner"></span>
+          {{ isRecruiter ? 'Verifying company & creating account…' : 'Creating account…' }}
+        </ng-container>
+        <ng-container *ngIf="!isLoading">Create Account</ng-container>
+      </button>
+    </form>
+
+    <!-- Divider -->
+    <div class="divider">
+      <span>or continue with</span>
+    </div>
+
+    <!-- Google Sign-Up Button -->
+    <div id="google-signup-btn" class="google-btn-container"></div>
+
+    <!-- Login Link -->
+    <div class="auth-footer">
+      Already have an account?
+      <a routerLink="/login" class="auth-link">Sign in</a>
+    </div>
+  </div>
+</div>

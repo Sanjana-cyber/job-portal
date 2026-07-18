@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 import {
   Shield, Users, CheckCircle, XCircle, Clock,
   AlertTriangle, ToggleLeft, ToggleRight, Building2,
-  Globe, Mail, Search, RefreshCw,
+  Globe, Mail, Search, RefreshCw, Trash2
 } from "lucide-react";
 import {
   getAdminStats,
@@ -12,6 +12,7 @@ import {
   approveRecruiter,
   rejectRecruiter,
   updateVerificationSettings,
+  deleteVerificationRequest
 } from "../api/verificationApi";
 
 /**
@@ -119,6 +120,20 @@ const SystemManagementConsole = () => {
       toast.error(err?.response?.data?.message || "Failed to reject");
     } finally {
       setRejecting(false);
+    }
+  };
+
+  /* ─── Delete Request ─────────────────────────────────────────────────── */
+  const handleDeleteRequest = async (id, name) => {
+    if (!window.confirm(`Are you sure you want to delete the verification request for ${name}? This will reset their verification status.`)) {
+      return;
+    }
+    try {
+      await deleteVerificationRequest(id);
+      toast.success(`Verification request for ${name} deleted.`);
+      await fetchAll();
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Failed to delete request");
     }
   };
 
@@ -356,6 +371,27 @@ const SystemManagementConsole = () => {
                               onClick={() => openReject(r)}
                             >
                               <XCircle size={13} /> Reject
+                            </button>
+                          )}
+                          {r.companyName && (
+                            <button
+                              style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "4px",
+                                padding: "6px 12px",
+                                background: "#fee2e2",
+                                color: "#dc2626",
+                                border: "none",
+                                borderRadius: "6px",
+                                fontSize: "12px",
+                                fontWeight: "600",
+                                cursor: "pointer",
+                                transition: "all 0.2s"
+                              }}
+                              onClick={() => handleDeleteRequest(r._id, r.name)}
+                            >
+                              <Trash2 size={13} /> Delete
                             </button>
                           )}
                           {!r.companyName && (

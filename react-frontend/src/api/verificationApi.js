@@ -33,6 +33,9 @@ export const getAdminStats = () => api.get("/verification/stats");
 /** Admin: trigger Google web check — auto-approves if found, flags if not */
 export const runWebCheck = (id) => api.post(`/verification/webcheck/${id}`);
 
+/** Admin: delete verification request */
+export const deleteVerificationRequest = (id) => api.delete(`/verification/delete/${id}`);
+
 /** Seeker: get jobs posted in last 48h (for notification bell) */
 export const getRecentJobs = () => api.get("/jobs/recent");
 

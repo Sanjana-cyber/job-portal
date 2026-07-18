@@ -29,7 +29,8 @@ app.use(
   cors({
     origin: [
       process.env.FRONTEND_URL || "http://localhost:5173",
-      "http://localhost:5174"
+      "http://localhost:5174",
+      "http://localhost:4200" // New Angular Auth Frontend
     ],
     credentials: true, // Allow cookies to be sent cross-origin
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],

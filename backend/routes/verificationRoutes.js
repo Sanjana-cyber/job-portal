@@ -10,7 +10,8 @@ const {
   runWebCheckForRecruiter,
   getVerificationSettings,
   updateVerificationSettings,
-  getAdminStats,
+    getAdminStats,
+  deleteVerificationRequest,
 } = require("../controllers/verificationController");
 
 const { analyzeCompanyDetails } = require("../utils/companyAnalyzer");
@@ -26,6 +27,7 @@ router.get("/settings",        protect, authorize("admin"), getVerificationSetti
 router.put("/settings",        protect, authorize("admin"), updateVerificationSettings);
 router.put("/approve/:id",     protect, authorize("admin"), approveRecruiter);
 router.put("/reject/:id",      protect, authorize("admin"), rejectRecruiter);
+router.delete("/delete/:id",   protect, authorize("admin"), deleteVerificationRequest);
 router.post("/webcheck/:id",   protect, authorize("admin"), runWebCheckForRecruiter);
 
 // ── DEBUG: Test company analyzer (open, no auth — remove in production) ──────
