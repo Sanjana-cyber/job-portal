@@ -6,6 +6,7 @@ import { JobService, Job } from '../../../core/services/job.service';
 import { ApplicationService, AtsData } from '../../../core/services/application.service';
 import { ProfileService } from '../../../core/services/profile.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { AuthModalService } from '../../../shared/services/auth-modal.service';
 import { environment } from '../../../../environments/environment';
 
 /**
@@ -31,6 +32,7 @@ export class JobsComponent implements OnInit {
   private applicationService = inject(ApplicationService);
   private profileService = inject(ProfileService);
   private authService = inject(AuthService);
+  private modalService = inject(AuthModalService);
   private router = inject(Router);
 
   // ── State (mirrors React useState) ──
@@ -59,10 +61,9 @@ export class JobsComponent implements OnInit {
   get user() { return this.authService.currentUser; }
 
   ngOnInit(): void {
-    // Load current user session first, then fetch jobs
-    this.authService.loadCurrentUser().subscribe(() => {
-      this.fetchJobs();
-    });
+    // Jobs is a public endpoint — no auth needed. Fetch immediately.
+    // User state is already populated by APP_INITIALIZER, no loadCurrentUser() needed here.
+    this.fetchJobs();
   }
 
   fetchJobs(query = ''): void {
@@ -162,13 +163,13 @@ export class JobsComponent implements OnInit {
   /** Redirect unauthenticated user to Angular register page */
   goToRegister(): void {
     this.authGateJob = null;
-    this.router.navigate(['/register']);
+    this.modalService.open('register');
   }
 
   /** Redirect to login */
   goToLogin(): void {
     this.authGateJob = null;
-    this.router.navigate(['/login']);
+    this.modalService.open('login');
   }
 
   getAtsScoreColor(score: number): string {

@@ -10,6 +10,30 @@ export interface AtsData {
   status: string;
 }
 
+export interface AiFeedback {
+  atsScore: number;
+  matchLevel: 'Strong' | 'Moderate' | 'Weak';
+  strengths: string[];
+  weaknesses: string[];
+  recommendations: string[];
+}
+
+export interface RecommendedJob {
+  jobId: string;
+  title: string;
+  company: string;
+  matchScore: number;
+  reason?: string;
+}
+
+export interface AiIntelligenceResponse {
+  success: boolean;
+  data: {
+    atsFeedback: AiFeedback;
+    recommendedJobs: RecommendedJob[];
+  };
+}
+
 export interface ApplicationResponse {
   success: boolean;
   message: string;
@@ -46,6 +70,24 @@ export class ApplicationService {
     return this.http.post<{ success: boolean; data: AtsData }>(
       `${this.apiUrl}/resume-intelligence/${resumeId}/ats-match`,
       { jobDescription }
+    );
+  }
+
+  /**
+   * POST /api/resume-intelligence/:resumeId/ai-intelligence
+   * Gemini AI explanation of ATS score + job recommendations
+   */
+  getAiIntelligence(resumeId: string, payload: {
+    jobDescription: string;
+    atsScore: number;
+    matchedSkills: string[];
+    missingSkills: string[];
+    matchedRequirements: string[];
+    missingRequirements: string[];
+  }): Observable<AiIntelligenceResponse> {
+    return this.http.post<AiIntelligenceResponse>(
+      `${this.apiUrl}/resume-intelligence/${resumeId}/ai-intelligence`,
+      payload
     );
   }
 }

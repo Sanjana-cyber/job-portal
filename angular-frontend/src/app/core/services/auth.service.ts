@@ -162,7 +162,7 @@ export class AuthService {
    */
   getDashboardRoute(role: string): { isAngular: boolean; path: string } {
     if (role === 'jobseeker') {
-      return { isAngular: true, path: '/jobs' };
+      return { isAngular: true, path: '/dashboard' };
     }
     const reactRoutes: Record<string, string> = {
       recruiter: '/recruiter/dashboard',

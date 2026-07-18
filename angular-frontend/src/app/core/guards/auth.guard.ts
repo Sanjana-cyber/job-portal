@@ -1,53 +1,43 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
-import { map, take, tap } from 'rxjs';
+import { filter, take, switchMap } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 /**
- * Auth Guard — Angular equivalent of React's <ProtectedRoute> component.
+ * AuthGuard — Protects routes that require authentication.
  *
- * Usage in routes:
- *   { path: 'dashboard', canActivate: [authGuard] }
- *
- * For role-based protection (like React's allowedRoles prop):
- *   { path: 'admin', canActivate: [roleGuard('admin')] }
+ * Fast path  : already authenticated → allow immediately (no HTTP call, no delay).
+ * Wait path  : loading in progress   → wait until settled, then check.
+ * Restore path: not loading, not auth → call loadCurrentUser() once, then check.
  */
 export const authGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  return authService.isAuthenticated$.pipe(
+  // ── Fast path: already authenticated (e.g. navigating between protected pages) ──
+  if (authService.isAuthenticated) {
+    return of(true);
+  }
+
+  // ── Wait for loading to settle, then check / restore session ──
+  return authService.loading$.pipe(
+    filter(loading => !loading),   // wait until loading === false
     take(1),
-    tap(isAuth => {
-      if (!isAuth) {
-        router.navigate(['/login']);
+    switchMap(() => {
+      if (authService.isAuthenticated) {
+        return of(true);
       }
+      // Not authenticated after load completed — try one restore call
+      return authService.loadCurrentUser().pipe(
+        switchMap(() => {
+          if (authService.isAuthenticated) {
+            return of(true);
+          }
+          router.navigate(['/']);
+          return of(false);
+        })
+      );
     })
   );
 };
-
-/**
- * Role Guard Factory — Restricts routes to specific roles.
- * Mirrors React's <ProtectedRoute allowedRoles={['recruiter']}>
- */
-export function roleGuard(...allowedRoles: string[]): CanActivateFn {
-  return () => {
-    const authService = inject(AuthService);
-    const router = inject(Router);
-
-    return authService.currentUser$.pipe(
-      take(1),
-      map(user => {
-        if (!user) {
-          router.navigate(['/login']);
-          return false;
-        }
-        if (!allowedRoles.includes(user.role)) {
-          router.navigate(['/']);
-          return false;
-        }
-        return true;
-      })
-    );
-  };
-}

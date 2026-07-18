@@ -15,8 +15,8 @@ const Navbar = () => {
   const location = useLocation();
   const [showDropdown, setShowDropdown] = useState(false);
 
-  // Hide Navbar on dashboard routes
-  if (location.pathname.startsWith("/dashboard") || location.pathname.startsWith("/recruiter/dashboard") || location.pathname.startsWith("/admin/dashboard")) {
+  // Hide Navbar on dashboard routes, except for /dashboard/jobs
+  if ((location.pathname.startsWith("/dashboard") && location.pathname !== "/dashboard/jobs") || location.pathname.startsWith("/recruiter/dashboard") || location.pathname.startsWith("/admin/dashboard")) {
     return null;
   }
 

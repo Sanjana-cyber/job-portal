@@ -1,0 +1,40 @@
+.role-selector {
+  display: flex;
+  background: var(--cream-200);
+  border-radius: var(--radius-md);
+  padding: 4px;
+  margin-bottom: var(--sp-2);
+}
+
+.role-option {
+  flex: 1;
+  text-align: center;
+  padding: 8px 12px;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text-secondary);
+  border-radius: calc(var(--radius-md) - 2px);
+  cursor: pointer;
+  transition: all var(--ease-fast);
+}
+
+.role-option input[type="radio"] {
+  display: none;
+}
+
+.role-option.active {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+  vertical-align: middle;
+}

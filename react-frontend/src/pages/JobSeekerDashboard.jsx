@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Search } from "lucide-react";
 import { ProfileProvider, useProfile } from "../context/ProfileContext";
+import { useAuth } from "../context/AuthContext";
 import HamburgerMenu from "../components/dashboard/HamburgerMenu";
 import WelcomeBanner from "../components/dashboard/WelcomeBanner";
 import ProfileCompletionRing from "../components/dashboard/ProfileCompletionRing";
@@ -12,11 +13,12 @@ import NotificationBell from "../components/dashboard/NotificationBell";
 
 const DashboardContent = () => {
   const { resumes } = useProfile();
+  const { logout } = useAuth();
   const activeResume = resumes?.find((r) => r.isActive) || null;
   return (
     <div style={{
       minHeight: "100vh",
-      background: "var(--bg-page)",
+      background: "#f3f4f6",
       fontFamily: "var(--font-body)",
     }}>
       {/* ── Fixed Top Bar ── */}
@@ -53,6 +55,24 @@ const DashboardContent = () => {
         </Link>
 
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          {/* Dashboard link */}
+          <Link
+            to="/dashboard"
+            style={{
+              display: "inline-flex", alignItems: "center", gap: "6px",
+              padding: "7px 14px",
+              color: "var(--text-secondary)",
+              border: "1px solid var(--border-default)",
+              borderRadius: "var(--radius-full)",
+              textDecoration: "none", fontSize: "13px", fontWeight: "500",
+              transition: "all 0.2s",
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "var(--cream-200)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+          >
+            Dashboard
+          </Link>
+
           {/* Find Jobs quick link */}
           <Link
             to="/dashboard/jobs"
@@ -75,16 +95,24 @@ const DashboardContent = () => {
             <Search size={14} /> Find Jobs
           </Link>
 
-          <span style={{
-            background: "var(--amber-100)",
-            border: "1px solid var(--amber-200)",
-            color: "var(--amber-700)",
-            padding: "4px 12px",
-            borderRadius: "20px",
-            fontSize: "12px",
-            fontWeight: "600",
-          }}>Candidate</span>
-          <NotificationBell />
+          {/* Logout button */}
+          <button
+            onClick={() => {
+              logout();
+            }}
+            style={{
+              display: "inline-flex", alignItems: "center", gap: "6px",
+              padding: "7px 16px", background: "transparent",
+              border: "1.5px solid rgba(192, 80, 74, 0.35)", color: "var(--error-500)",
+              borderRadius: "var(--radius-full)", cursor: "pointer",
+              fontSize: "13px", fontWeight: "500", transition: "all 0.2s"
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(192, 80, 74, 0.08)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+          >
+            Logout
+          </button>
+
           <HamburgerMenu />
         </div>
       </header>

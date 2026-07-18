@@ -42,7 +42,7 @@ const ProfileBuilderContent = () => {
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--bg-page)", fontFamily: "var(--font-body)" }}>
+    <div style={{ minHeight: "100vh", background: "#f3f4f6", fontFamily: "var(--font-body)" }}>
 
       {/* ── Fixed Top Bar ── */}
       <header style={{

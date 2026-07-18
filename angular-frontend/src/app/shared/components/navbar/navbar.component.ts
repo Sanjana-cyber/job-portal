@@ -2,6 +2,7 @@ import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, NavigationEnd } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { AuthModalService } from '../../services/auth-modal.service';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
@@ -15,6 +16,7 @@ import { environment } from '../../../../environments/environment';
 })
 export class NavbarComponent implements OnInit, OnDestroy {
   authService = inject(AuthService);
+  modalService = inject(AuthModalService);
   router = inject(Router);
 
   user: any = null;
@@ -83,7 +85,11 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   navigateTo(path: string): void {
-    this.router.navigate([path]);
+    if (path === '/login') {
+      this.modalService.open('login');
+    } else {
+      this.router.navigate([path]);
+    }
   }
 
   handleLogoClick(): void {

@@ -2,6 +2,7 @@ import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
+import { AuthModalService } from '../../shared/services/auth-modal.service';
 import { environment } from '../../../environments/environment';
 
 @Component({
@@ -13,22 +14,22 @@ import { environment } from '../../../environments/environment';
 })
 export class HomeComponent implements OnInit {
   authService = inject(AuthService);
+  modalService = inject(AuthModalService);
   router = inject(Router);
 
   currentYear = new Date().getFullYear();
 
   ngOnInit(): void {
-    // If authenticated, perform same redirect as React context:
-    this.authService.currentUser$.subscribe((user: any) => {
-      if (user) {
-        const dest = this.authService.getDashboardRoute(user.role);
-        if (dest.isAngular) {
-          this.router.navigate([dest.path]);
-        } else {
-          window.location.href = `${environment.reactAppUrl}${dest.path}`;
-        }
+    // APP_INITIALIZER already resolved auth state. Just snapshot-check here.
+    const user = this.authService.currentUser;
+    if (user) {
+      const dest = this.authService.getDashboardRoute(user.role);
+      if (dest.isAngular) {
+        this.router.navigate([dest.path]);
+      } else {
+        window.location.href = `${environment.reactAppUrl}${dest.path}`;
       }
-    });
+    }
   }
 
   handleFindJobs(): void {
@@ -37,10 +38,10 @@ export class HomeComponent implements OnInit {
 
   handleHireTalent(): void {
     // Replicate role click -> recruiter signup/login flow
-    this.router.navigate(['/register'], { queryParams: { role: 'recruiter' } });
+    this.modalService.open('register', 'recruiter');
   }
 
   handleRegisterResume(): void {
-    this.router.navigate(['/register']);
+    this.modalService.open('register', 'jobseeker');
   }
 }

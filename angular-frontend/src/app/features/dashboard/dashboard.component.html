@@ -1,0 +1,267 @@
+<!-- ═══════════════════════ DASHBOARD ═══════════════════════ -->
+<div class="dashboard-page">
+
+  <!-- ── Sticky Header ── -->
+  <header class="dashboard-header">
+    <a class="dashboard-logo" (click)="router.navigate(['/'])">
+      <div class="dashboard-logo-icon">💼</div>
+      <span class="dashboard-logo-text">TalentBridge</span>
+    </a>
+    <div class="dashboard-header-actions">
+      <button class="btn-nav-dashboard" (click)="router.navigate(['/dashboard'])">
+        🏠 Dashboard
+      </button>
+      <button class="btn-find-jobs" (click)="goToFindJobs()">
+        🔍 Find Jobs
+      </button>
+      <button class="btn-logout-sm" (click)="logout()">Logout</button>
+      <!-- Hamburger menu -->
+      <button class="btn-hamburger" (click)="toggleMenu()" title="Menu">
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ── Main Content ── -->
+  <main class="dashboard-main">
+
+    <!-- Welcome Banner -->
+    <div class="welcome-banner" *ngIf="user">
+      <div class="welcome-bg-glow"></div>
+      <div class="welcome-text">
+        <p class="welcome-greeting">{{ greeting }} 👋</p>
+        <h1 class="welcome-name">Welcome back, {{ firstName }}!</h1>
+        <p class="welcome-sub">Build your profile to attract the best opportunities.</p>
+      </div>
+      <div class="welcome-badge-area">
+        <img *ngIf="profile?.photo?.url" [src]="profile!.photo!.url" alt="Profile photo" class="welcome-photo" />
+        <div class="welcome-role-badge">
+          <p class="welcome-role-icon">🚀</p>
+          <p class="welcome-role-label">Job Seeker</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Middle Row: Completion Ring + Status Grid -->
+    <div class="dashboard-mid-row">
+
+      <!-- Profile Completion Ring -->
+      <div class="completion-card">
+        <h2 class="completion-title">Profile Completion</h2>
+        <div *ngIf="profileLoading" class="completion-spinner"></div>
+        <div *ngIf="!profileLoading" class="completion-ring-wrapper">
+          <svg class="completion-svg" viewBox="0 0 108 108">
+            <circle class="ring-bg" cx="54" cy="54" r="46"/>
+            <circle class="ring-fill"
+              cx="54" cy="54" r="46"
+              [attr.stroke]="completionColor"
+              [attr.stroke-dasharray]="ringCircumference"
+              [attr.stroke-dashoffset]="ringOffset"/>
+          </svg>
+          <span class="ring-score" [style.color]="completionColor">{{ completionScore }}%</span>
+        </div>
+        <div *ngIf="!profileLoading">
+          <span class="completion-label" [style.color]="completionColor"
+                [style.border-color]="completionColor">{{ completionLabel }}</span>
+        </div>
+      </div>
+
+      <!-- Profile Status Grid -->
+      <div class="status-grid-card">
+        <h2 class="status-grid-title">Profile Sections</h2>
+        <p class="status-grid-sub">Click any section to view or update it.</p>
+        <div class="status-grid">
+          <button *ngFor="let sec of sections"
+                  class="section-chip"
+                  [class.done]="sec.check(profile)"
+                  (click)="navigateToSection(sec.key)">
+            <span class="chip-icon">{{ sec.icon }}</span>
+            <div class="chip-info">
+              <p class="chip-label" [class.done-label]="sec.check(profile)">{{ sec.label }}</p>
+              <p class="chip-sub">{{ getSectionSubtitle(sec) }}</p>
+            </div>
+            <span class="chip-status">{{ sec.check(profile) ? '✅' : '⚠️' }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Third Row: Active Resume + Build Profile CTA -->
+    <div class="dashboard-bottom-row">
+
+      <!-- Active Resume Card -->
+      <div class="resume-card" *ngIf="!profileLoading">
+        <div class="resume-card-header">
+          <h2 class="resume-card-title">Active Resume</h2>
+          <span *ngIf="resumes.length > 0" class="resume-count">
+            {{ resumes.length }} {{ resumes.length === 1 ? 'version' : 'versions' }} saved
+          </span>
+        </div>
+        <div class="resume-card-body" *ngIf="activeResume; else noResume">
+          <div class="resume-icon-box">📄</div>
+          <div class="resume-info">
+            <p class="resume-title">
+              <span class="resume-version">v{{ activeResume.versionNumber }}</span>
+              {{ activeResume.title }}
+            </p>
+            <p class="resume-date">Updated {{ activeResume.createdAt | date:'d MMM y' }}</p>
+          </div>
+        </div>
+        <ng-template #noResume>
+          <div class="resume-empty"><p>No active resume selected.</p></div>
+        </ng-template>
+        <div class="resume-actions">
+          <a *ngIf="activeResume"
+             [href]="apiUrl + '/profile/resumes/' + activeResume._id + '/download'"
+             class="btn-resume-download">Download</a>
+          <a class="btn-resume-manage" (click)="goToBuildProfile()">Manage Resumes</a>
+        </div>
+      </div>
+
+      <!-- Build Profile CTA -->
+      <div class="build-profile-cta">
+        <div>
+          <h2 class="build-cta-title">Ready to build your profile?</h2>
+          <p class="build-cta-sub">Complete your profile to get discovered by top recruiters.</p>
+        </div>
+        <button class="btn-build-profile" (click)="goToBuildProfile()">Build Profile →</button>
+      </div>
+    </div>
+
+    <!-- ATS Analysis Panel -->
+    <div class="ats-panel">
+      <div class="ats-panel-header">
+        <h3>🎯 ATS Match Analyzer</h3>
+        <div *ngIf="activeResume" class="ats-resume-info">
+          Using: <strong>{{ activeResume.title }}</strong>
+          <span *ngIf="activeResume.parsingStatus !== 'done'" class="ats-not-parsed">⚠ Not parsed yet</span>
+        </div>
+      </div>
+
+      <!-- JD Input -->
+      <div class="ats-jd-section">
+        <label class="ats-jd-label">Paste Job Description</label>
+        <textarea class="ats-jd-textarea"
+          placeholder="Paste the full job description here to analyze how well your resume matches..."
+          [(ngModel)]="jd" rows="6"></textarea>
+        <div *ngIf="atsError" class="ats-error-msg">{{ atsError }}</div>
+        <button class="ats-analyze-btn" [disabled]="isLoading" (click)="handleAnalyze()">
+          <span *ngIf="isLoading" class="ats-spinner"></span>
+          {{ loadingAts ? 'Scoring resume...' : loadingAi ? 'Generating AI insights...' : '🚀 Analyze My Resume' }}
+        </button>
+      </div>
+
+      <!-- Step 1: Score + Keywords -->
+      <ng-container *ngIf="atsResult">
+        <div class="ats-score-row">
+          <!-- Score Ring -->
+          <div class="ats-score-ring">
+            <div class="ats-gauge-wrapper">
+              <svg class="ats-gauge-svg" viewBox="0 0 108 108">
+                <circle class="ats-gauge-bg" cx="54" cy="54" r="46"/>
+                <circle [class]="'ats-gauge-fill ' + atsScoreClass"
+                  cx="54" cy="54" r="46"
+                  [attr.stroke-dasharray]="atsCircumference"
+                  [attr.stroke-dashoffset]="atsRingOffset"/>
+              </svg>
+              <span class="ats-score-number">{{ atsResult.matchScore }}</span>
+            </div>
+            <span class="ats-score-label">ATS Score</span>
+            <span [class]="'ats-status-badge ' + atsScoreClass">{{ atsResult.status }}</span>
+          </div>
+          <div class="ats-score-desc">
+            <p>Your resume scored <strong>{{ atsResult.matchScore }}/100</strong> against this job description.
+              {{ atsResult.matchScore >= 65 ? ' Strong match — you\'re a competitive candidate.' : ' There is room to improve.' }}
+            </p>
+            <p class="ats-formula-note">✓ Score calculated by backend formula — consistent every run</p>
+          </div>
+        </div>
+
+        <!-- Keyword Chips -->
+        <div class="ats-keywords-grid">
+          <div class="ats-keyword-card">
+            <div class="ats-keyword-card-title matched">✓ Matched Keywords</div>
+            <div class="ats-keyword-chips">
+              <span *ngIf="!atsResult.matchedKeywords?.length" class="ats-none">None detected</span>
+              <span *ngFor="let kw of atsResult.matchedKeywords" class="ats-chip matched">{{ kw }}</span>
+            </div>
+          </div>
+          <div class="ats-keyword-card">
+            <div class="ats-keyword-card-title missing">✗ Missing Keywords</div>
+            <div class="ats-keyword-chips">
+              <span *ngIf="!atsResult.missingKeywords?.length" class="ats-none">Great — no critical gaps!</span>
+              <span *ngFor="let kw of atsResult.missingKeywords" class="ats-chip missing">{{ kw }}</span>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- AI Loading -->
+      <div *ngIf="loadingAi" class="ats-ai-loading">
+        <span class="ats-spinner ai-spinner"></span>
+        Gemini is analysing your gaps and finding matching jobs...
+      </div>
+
+      <!-- Step 2: AI Feedback -->
+      <ng-container *ngIf="feedback">
+        <div class="ats-feedback-grid">
+          <div class="ats-feedback-card full-width">
+            <div class="ats-feedback-card-title verdict">📊 AI Assessment</div>
+            <p class="ats-feedback-desc">
+              Score confirmed at <strong>{{ feedback.atsScore }}/100</strong> —
+              <span [class]="'ats-status-badge ' + getMatchLevelClass(feedback.matchLevel)">{{ feedback.matchLevel }}</span>
+            </p>
+          </div>
+          <div class="ats-feedback-card" *ngIf="feedback.strengths?.length">
+            <div class="ats-feedback-card-title strengths">💚 Strengths</div>
+            <ul class="ats-feedback-list">
+              <li *ngFor="let s of feedback.strengths">{{ s }}</li>
+            </ul>
+          </div>
+          <div class="ats-feedback-card" *ngIf="feedback.weaknesses?.length">
+            <div class="ats-feedback-card-title weaknesses">⚠️ Weaknesses</div>
+            <ul class="ats-feedback-list">
+              <li *ngFor="let w of feedback.weaknesses">{{ w }}</li>
+            </ul>
+          </div>
+          <div class="ats-feedback-card full-width" *ngIf="feedback.recommendations?.length">
+            <div class="ats-feedback-card-title suggestions">💡 Recommendations</div>
+            <ul class="ats-feedback-list">
+              <li *ngFor="let r of feedback.recommendations">{{ r }}</li>
+            </ul>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- Recommended Jobs -->
+      <ng-container *ngIf="recommendedJobs.length > 0">
+        <div class="ats-jobs-section">
+          <div class="ats-jobs-title">🏢 Recommended Jobs From Our Portal</div>
+          <p class="ats-jobs-subtitle">Based on your resume skills — sourced from recruiter-posted listings.</p>
+          <div class="ats-jobs-grid">
+            <div *ngFor="let job of recommendedJobs" class="ats-job-card">
+              <div class="ats-job-header">
+                <div>
+                  <div class="ats-job-title">{{ job.title }}</div>
+                  <div class="ats-job-company">{{ job.company }}</div>
+                </div>
+                <span [class]="'ats-job-match-badge ' + getJobScoreClass(job.matchScore)">
+                  {{ job.matchScore }}% match
+                </span>
+              </div>
+              <p *ngIf="job.reason" class="ats-job-reason">{{ job.reason }}</p>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+
+      <div *ngIf="aiFeedback && recommendedJobs.length === 0" class="ats-jobs-section">
+        <div class="ats-jobs-title">🏢 Job Recommendations</div>
+        <p class="ats-no-jobs">No matching jobs found in the portal right now. Check back as recruiters post new listings.</p>
+      </div>
+    </div>
+
+  </main>
+</div>
