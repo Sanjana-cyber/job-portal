@@ -7,26 +7,20 @@
   <!-- ── Sticky Header ── -->
   <header class="dashboard-header">
     <a class="dashboard-logo" (click)="router.navigate(['/'])">
-      <div class="dashboard-logo-icon">💼</div>
+      <div class="dashboard-logo-icon"></div>
       <span class="dashboard-logo-text">TalentBridge</span>
     </a>
     <div class="dashboard-header-actions">
       <!-- Dashboard -->
       <button class="btn-nav-dashboard" (click)="router.navigate(['/dashboard'])">
-        🏠 Dashboard
+        Dashboard
       </button>
       <!-- Find Jobs (active state) -->
       <button class="btn-find-jobs" disabled style="opacity:0.7;cursor:default">
-        🔍 Find Jobs
+        Find Jobs
       </button>
       <!-- Logout -->
       <button class="btn-logout-sm" (click)="logout()">Logout</button>
-      <!-- Hamburger -->
-      <button class="btn-hamburger" (click)="menuOpen = !menuOpen" title="Menu">
-        <span class="hamburger-line"></span>
-        <span class="hamburger-line"></span>
-        <span class="hamburger-line"></span>
-      </button>
     </div>
   </header>
 

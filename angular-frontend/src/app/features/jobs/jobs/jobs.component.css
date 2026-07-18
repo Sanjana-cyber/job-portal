@@ -90,10 +90,45 @@ h1, h2, h3, h4, .job-listing-title {
   border: 1px solid var(--border-subtle) !important;
 }
 
+/* Alternating card colors: odd = white, even = black */
+.job-listing-card:nth-child(odd) {
+  background: #ffffff;
+}
+
+.job-listing-card:nth-child(even) {
+  background: #111111;
+  border-color: #2a2a2a !important;
+}
+
+/* Text colors on black cards */
+.job-listing-card:nth-child(even) .job-listing-title {
+  color: #ffffff;
+}
+
+.job-listing-card:nth-child(even) .job-listing-meta,
+.job-listing-card:nth-child(even) .job-listing-meta span {
+  color: #aaaaaa;
+}
+
+.job-listing-card:nth-child(even) .job-listing-desc {
+  color: #bbbbbb;
+}
+
+.job-listing-card:nth-child(even) .skills-label {
+  color: #888888;
+}
+
+.job-listing-card:nth-child(even) .badge {
+  background: rgba(255,255,255,0.12);
+  color: #e0e0e0;
+  border-color: rgba(255,255,255,0.2);
+}
+
 .job-listing-card:hover {
   transform: translateY(-3px);
   box-shadow: var(--shadow-md);
 }
+
 
 .job-listing-top {
   display: flex;

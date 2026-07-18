@@ -5,16 +5,14 @@
   right: 0;
   z-index: 1000;
   padding: 0;
-  background: rgba(12, 13, 13, 0.95); /* Sleek black */
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: #111111;
+  border-bottom: 1px solid #2a2a2a;
   transition: all var(--ease-normal);
 }
 
 .navbar.scrolled {
-  background: rgba(12, 13, 13, 1);
-  border-bottom-color: rgba(255, 255, 255, 0.15);
+  background: #111111;
+  border-bottom-color: #2a2a2a;
   box-shadow: var(--shadow-sm);
 }
 
@@ -46,9 +44,9 @@
   justify-content: center;
   width: 34px;
   height: 34px;
-  background: var(--navy-800);
+  background: #ffffff;
   border-radius: var(--radius-sm);
-  color: white;
+  color: #111111;
   flex-shrink: 0;
 }
 

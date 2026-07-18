@@ -4,15 +4,15 @@
   <!-- ── Sticky Header ── -->
   <header class="dashboard-header">
     <a class="dashboard-logo" (click)="router.navigate(['/'])">
-      <div class="dashboard-logo-icon">💼</div>
+      <div class="dashboard-logo-icon"></div>
       <span class="dashboard-logo-text">TalentBridge</span>
     </a>
     <div class="dashboard-header-actions">
       <button class="btn-nav-dashboard" (click)="router.navigate(['/dashboard'])">
-        🏠 Dashboard
+        Dashboard
       </button>
       <button class="btn-find-jobs" (click)="goToFindJobs()">
-        🔍 Find Jobs
+        Find Jobs
       </button>
       <button class="btn-logout-sm" (click)="logout()">Logout</button>
       <!-- Hamburger menu -->
@@ -31,14 +31,13 @@
     <div class="welcome-banner" *ngIf="user">
       <div class="welcome-bg-glow"></div>
       <div class="welcome-text">
-        <p class="welcome-greeting">{{ greeting }} 👋</p>
+        <p class="welcome-greeting">{{ greeting }}</p>
         <h1 class="welcome-name">Welcome back, {{ firstName }}!</h1>
         <p class="welcome-sub">Build your profile to attract the best opportunities.</p>
       </div>
       <div class="welcome-badge-area">
         <img *ngIf="profile?.photo?.url" [src]="profile!.photo!.url" alt="Profile photo" class="welcome-photo" />
         <div class="welcome-role-badge">
-          <p class="welcome-role-icon">🚀</p>
           <p class="welcome-role-label">Job Seeker</p>
         </div>
       </div>
@@ -82,7 +81,9 @@
               <p class="chip-label" [class.done-label]="sec.check(profile)">{{ sec.label }}</p>
               <p class="chip-sub">{{ getSectionSubtitle(sec) }}</p>
             </div>
-            <span class="chip-status">{{ sec.check(profile) ? '✅' : '⚠️' }}</span>
+            <span class="chip-status" [style.color]="sec.check(profile) ? '#4ade80' : '#f59e0b'" [style.font-weight]="'700'">
+              {{ sec.check(profile) ? '✓' : '!' }}
+            </span>
           </button>
         </div>
       </div>
@@ -100,7 +101,7 @@
           </span>
         </div>
         <div class="resume-card-body" *ngIf="activeResume; else noResume">
-          <div class="resume-icon-box">📄</div>
+          <div class="resume-icon-box"></div>
           <div class="resume-info">
             <p class="resume-title">
               <span class="resume-version">v{{ activeResume.versionNumber }}</span>
@@ -133,10 +134,10 @@
     <!-- ATS Analysis Panel -->
     <div class="ats-panel">
       <div class="ats-panel-header">
-        <h3>🎯 ATS Match Analyzer</h3>
+        <h3>ATS Match Analyzer</h3>
         <div *ngIf="activeResume" class="ats-resume-info">
           Using: <strong>{{ activeResume.title }}</strong>
-          <span *ngIf="activeResume.parsingStatus !== 'done'" class="ats-not-parsed">⚠ Not parsed yet</span>
+          <span *ngIf="activeResume.parsingStatus !== 'done'" class="ats-not-parsed">Not parsed yet</span>
         </div>
       </div>
 
@@ -149,7 +150,7 @@
         <div *ngIf="atsError" class="ats-error-msg">{{ atsError }}</div>
         <button class="ats-analyze-btn" [disabled]="isLoading" (click)="handleAnalyze()">
           <span *ngIf="isLoading" class="ats-spinner"></span>
-          {{ loadingAts ? 'Scoring resume...' : loadingAi ? 'Generating AI insights...' : '🚀 Analyze My Resume' }}
+          {{ loadingAts ? 'Scoring resume...' : loadingAi ? 'Generating AI insights...' : 'Analyze My Resume' }}
         </button>
       </div>
 
@@ -208,26 +209,26 @@
       <ng-container *ngIf="feedback">
         <div class="ats-feedback-grid">
           <div class="ats-feedback-card full-width">
-            <div class="ats-feedback-card-title verdict">📊 AI Assessment</div>
+            <div class="ats-feedback-card-title verdict">AI Assessment</div>
             <p class="ats-feedback-desc">
               Score confirmed at <strong>{{ feedback.atsScore }}/100</strong> —
               <span [class]="'ats-status-badge ' + getMatchLevelClass(feedback.matchLevel)">{{ feedback.matchLevel }}</span>
             </p>
           </div>
           <div class="ats-feedback-card" *ngIf="feedback.strengths?.length">
-            <div class="ats-feedback-card-title strengths">💚 Strengths</div>
+            <div class="ats-feedback-card-title strengths">Strengths</div>
             <ul class="ats-feedback-list">
               <li *ngFor="let s of feedback.strengths">{{ s }}</li>
             </ul>
           </div>
           <div class="ats-feedback-card" *ngIf="feedback.weaknesses?.length">
-            <div class="ats-feedback-card-title weaknesses">⚠️ Weaknesses</div>
+            <div class="ats-feedback-card-title weaknesses">Weaknesses</div>
             <ul class="ats-feedback-list">
               <li *ngFor="let w of feedback.weaknesses">{{ w }}</li>
             </ul>
           </div>
           <div class="ats-feedback-card full-width" *ngIf="feedback.recommendations?.length">
-            <div class="ats-feedback-card-title suggestions">💡 Recommendations</div>
+            <div class="ats-feedback-card-title suggestions">Recommendations</div>
             <ul class="ats-feedback-list">
               <li *ngFor="let r of feedback.recommendations">{{ r }}</li>
             </ul>
@@ -238,7 +239,7 @@
       <!-- Recommended Jobs -->
       <ng-container *ngIf="recommendedJobs.length > 0">
         <div class="ats-jobs-section">
-          <div class="ats-jobs-title">🏢 Recommended Jobs From Our Portal</div>
+          <div class="ats-jobs-title">Recommended Jobs From Our Portal</div>
           <p class="ats-jobs-subtitle">Based on your resume skills — sourced from recruiter-posted listings.</p>
           <div class="ats-jobs-grid">
             <div *ngFor="let job of recommendedJobs" class="ats-job-card">
@@ -258,7 +259,7 @@
       </ng-container>
 
       <div *ngIf="aiFeedback && recommendedJobs.length === 0" class="ats-jobs-section">
-        <div class="ats-jobs-title">🏢 Job Recommendations</div>
+        <div class="ats-jobs-title">Job Recommendations</div>
         <p class="ats-no-jobs">No matching jobs found in the portal right now. Check back as recruiters post new listings.</p>
       </div>
     </div>

@@ -43,7 +43,7 @@
 
     <!-- Empty State -->
     <div class="empty-state" *ngIf="!loading && jobs.length === 0">
-      <div class="empty-icon">💼</div>
+      <div class="empty-icon"></div>
       <p>No jobs found</p>
       <span>Try adjusting your search terms.</span>
     </div>
@@ -115,7 +115,7 @@
   <!-- ── Auth Gate Modal (unauthenticated user) ── -->
   <div class="modal-overlay" *ngIf="authGateJob" (click)="closeAuthGate()">
     <div class="auth-gate-modal animate-scale-in" (click)="$event.stopPropagation()">
-      <div class="auth-gate-icon">🔐</div>
+      <div class="auth-gate-icon"></div>
       <h2 class="auth-gate-title">Join to Apply</h2>
       <p class="auth-gate-job">Applying for <strong>{{ authGateJob.title }}</strong></p>
       <p class="auth-gate-company">at {{ authGateJob.company }}</p>

@@ -41,14 +41,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   // ── Profile Sections ──
   readonly sections = [
-    { key: 'personal',       label: 'Personal Info',   icon: '👤', check: (p: Profile | null) => !!(p?.phone && p?.location) },
-    { key: 'professional',   label: 'Professional',    icon: '💼', check: (p: Profile | null) => !!(p?.headline && p?.about) },
-    { key: 'skills',         label: 'Skills',          icon: '⚡', check: (p: Profile | null) => !!(p?.technicalSkills && p.technicalSkills.length > 0) },
-    { key: 'education',      label: 'Education',       icon: '🎓', check: (p: Profile | null) => !!(p?.education && p.education.length > 0) },
-    { key: 'experience',     label: 'Experience',      icon: '🏢', check: (p: Profile | null) => !!(p?.experience && p.experience.length > 0) },
-    { key: 'projects',       label: 'Projects',        icon: '🛠️', check: (p: Profile | null) => !!(p?.projects && p.projects.length > 0) },
-    { key: 'certifications', label: 'Certifications',  icon: '🏅', check: (p: Profile | null) => !!(p?.certifications && p.certifications.length > 0) },
-    { key: 'resume',         label: 'Resume',          icon: '📄', check: (p: Profile | null) => !!(p?.resume?.url) },
+    { key: 'personal',       label: 'Personal Info',   icon: '', check: (p: Profile | null) => !!(p?.phone && p?.location) },
+    { key: 'professional',   label: 'Professional',    icon: '', check: (p: Profile | null) => !!(p?.headline && p?.about) },
+    { key: 'skills',         label: 'Skills',          icon: '', check: (p: Profile | null) => !!(p?.technicalSkills && p.technicalSkills.length > 0) },
+    { key: 'education',      label: 'Education',       icon: '', check: (p: Profile | null) => !!(p?.education && p.education.length > 0) },
+    { key: 'experience',     label: 'Experience',      icon: '', check: (p: Profile | null) => !!(p?.experience && p.experience.length > 0) },
+    { key: 'projects',       label: 'Projects',        icon: '', check: (p: Profile | null) => !!(p?.projects && p.projects.length > 0) },
+    { key: 'certifications', label: 'Certifications',  icon: '', check: (p: Profile | null) => !!(p?.certifications && p.certifications.length > 0) },
+    { key: 'resume',         label: 'Resume',          icon: '', check: (p: Profile | null) => !!(p?.resume?.url) },
   ];
 
   private subs = new Subscription();
@@ -68,9 +68,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   get completionColor(): string {
-    if (this.completionScore >= 80) return '#2d7c58';
-    if (this.completionScore >= 50) return '#d97706';
-    return '#574641';
+    if (this.completionScore >= 80) return '#4ade80';
+    if (this.completionScore >= 50) return '#f59e0b';
+    return '#aaaaaa';
   }
 
   get completionLabel(): string {
