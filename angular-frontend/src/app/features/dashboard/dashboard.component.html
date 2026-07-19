@@ -36,7 +36,17 @@
         <p class="welcome-sub">Build your profile to attract the best opportunities.</p>
       </div>
       <div class="welcome-badge-area">
-        <img *ngIf="profile?.photo?.url" [src]="profile!.photo!.url" alt="Profile photo" class="welcome-photo" />
+        <div class="photo-upload-wrapper" (click)="photoInput.click()">
+          <img *ngIf="profile?.photo?.url" [src]="profile!.photo!.url" alt="Profile photo" class="welcome-photo" />
+          <div *ngIf="!profile?.photo?.url" class="welcome-photo-placeholder">
+             <span style="font-size: 24px;">📷</span>
+          </div>
+          <div class="photo-overlay">
+            <span>{{ uploadingPhoto ? 'Uploading...' : 'Change' }}</span>
+          </div>
+        </div>
+        <input #photoInput type="file" accept="image/*" style="display:none" (change)="onPhotoSelected($event)">
+        
         <div class="welcome-role-badge">
           <p class="welcome-role-label">Job Seeker</p>
         </div>
@@ -114,6 +124,13 @@
           <div class="resume-empty"><p>No active resume selected.</p></div>
         </ng-template>
         <div class="resume-actions">
+          <button *ngIf="activeResume && activeResume.parsingStatus !== 'done'"
+                  class="btn-resume-manage"
+                  [disabled]="parsingResume"
+                  style="background: #10b981; color: white; border: none; margin-right: 8px;"
+                  (click)="parseActiveResume()">
+            {{ parsingResume ? 'Parsing...' : '✨ Parse Resume' }}
+          </button>
           <a *ngIf="activeResume"
              [href]="apiUrl + '/profile/resumes/' + activeResume._id + '/download'"
              class="btn-resume-download">Download</a>

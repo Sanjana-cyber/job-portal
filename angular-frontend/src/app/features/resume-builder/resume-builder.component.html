@@ -1,0 +1,208 @@
+<div class="resume-builder-page">
+  <div class="top-nav no-print">
+    <div class="nav-left">
+      <a class="back-link" routerLink="/">← Home</a>
+      <div class="divider"></div>
+      <span class="title">Resume Builder</span>
+    </div>
+    <div class="nav-right">
+      <button class="btn-primary" (click)="downloadPDF()">
+        <span class="icon">⬇</span> Download PDF
+      </button>
+    </div>
+  </div>
+
+  <div class="builder-container">
+    
+    <!-- LEFT SIDE: FORM (Hidden during print) -->
+    <div class="builder-sidebar no-print">
+      
+      <div *ngIf="isLoadingData" class="loading-state">
+        Loading your profile data...
+      </div>
+
+      <div class="form-wrapper" *ngIf="!isLoadingData">
+        
+        <!-- Personal Info -->
+        <section class="form-section">
+          <h3>Personal Details</h3>
+          <div class="form-grid">
+            <div class="input-group">
+              <label>Full Name</label>
+              <input type="text" [(ngModel)]="resumeData.personal.name" placeholder="John Doe">
+            </div>
+            <div class="input-group">
+              <label>Professional Headline</label>
+              <input type="text" [(ngModel)]="resumeData.personal.headline" placeholder="Senior Software Engineer">
+            </div>
+            <div class="input-group">
+              <label>Email</label>
+              <input type="email" [(ngModel)]="resumeData.personal.email" placeholder="john@example.com">
+            </div>
+            <div class="input-group">
+              <label>Phone</label>
+              <input type="text" [(ngModel)]="resumeData.personal.phone" placeholder="+1 (555) 123-4567">
+            </div>
+            <div class="input-group">
+              <label>Location</label>
+              <input type="text" [(ngModel)]="resumeData.personal.location" placeholder="New York, NY">
+            </div>
+            <div class="input-group">
+              <label>LinkedIn URL</label>
+              <input type="text" [(ngModel)]="resumeData.personal.linkedin" placeholder="linkedin.com/in/johndoe">
+            </div>
+            <div class="input-group full-width">
+              <label>Professional Summary</label>
+              <textarea [(ngModel)]="resumeData.personal.summary" rows="3" placeholder="Brief overview of your career..."></textarea>
+            </div>
+          </div>
+        </section>
+
+        <!-- Experience -->
+        <section class="form-section">
+          <h3>Work Experience</h3>
+          <div class="repeater-item" *ngFor="let exp of resumeData.experience; let i = index">
+            <div class="repeater-header">
+              <h4>Role {{ i + 1 }}</h4>
+              <button class="btn-remove" (click)="removeExperience(i)">Remove</button>
+            </div>
+            <div class="form-grid">
+              <div class="input-group">
+                <label>Company</label>
+                <input type="text" [(ngModel)]="exp.company" placeholder="Google">
+              </div>
+              <div class="input-group">
+                <label>Job Title</label>
+                <input type="text" [(ngModel)]="exp.role" placeholder="Software Engineer">
+              </div>
+              <div class="input-group">
+                <label>Start Year</label>
+                <input type="text" [(ngModel)]="exp.startDate" placeholder="2020">
+              </div>
+              <div class="input-group">
+                <label>End Year</label>
+                <input type="text" [(ngModel)]="exp.endDate" placeholder="2023 or Present" [disabled]="exp.isCurrent">
+                <div class="checkbox-group">
+                  <input type="checkbox" [(ngModel)]="exp.isCurrent" id="current-{{i}}">
+                  <label for="current-{{i}}">Current Role</label>
+                </div>
+              </div>
+              <div class="input-group full-width">
+                <label>Responsibilities (Bullet points)</label>
+                <textarea [(ngModel)]="exp.responsibilities" rows="3" placeholder="• Developed scalable microservices..."></textarea>
+              </div>
+            </div>
+          </div>
+          <button class="btn-add" (click)="addExperience()">+ Add Experience</button>
+        </section>
+
+        <!-- Education -->
+        <section class="form-section">
+          <h3>Education</h3>
+          <div class="repeater-item" *ngFor="let edu of resumeData.education; let i = index">
+            <div class="repeater-header">
+              <h4>Education {{ i + 1 }}</h4>
+              <button class="btn-remove" (click)="removeEducation(i)">Remove</button>
+            </div>
+            <div class="form-grid">
+              <div class="input-group">
+                <label>Institution</label>
+                <input type="text" [(ngModel)]="edu.college" placeholder="MIT">
+              </div>
+              <div class="input-group">
+                <label>Degree</label>
+                <input type="text" [(ngModel)]="edu.degree" placeholder="B.S. Computer Science">
+              </div>
+              <div class="input-group">
+                <label>Start Year</label>
+                <input type="text" [(ngModel)]="edu.startYear" placeholder="2016">
+              </div>
+              <div class="input-group">
+                <label>End Year</label>
+                <input type="text" [(ngModel)]="edu.endYear" placeholder="2020">
+              </div>
+            </div>
+          </div>
+          <button class="btn-add" (click)="addEducation()">+ Add Education</button>
+        </section>
+
+        <!-- Skills -->
+        <section class="form-section">
+          <h3>Skills</h3>
+          <div class="input-group full-width">
+            <label>Technical Skills (Comma separated)</label>
+            <textarea [(ngModel)]="resumeData.skills" rows="2" placeholder="JavaScript, React, Node.js, Python..."></textarea>
+          </div>
+        </section>
+
+      </div>
+    </div>
+
+    <!-- RIGHT SIDE: RESUME PREVIEW (Visible during print) -->
+    <div class="builder-preview">
+      <div class="a4-resume" id="resume-document">
+        
+        <!-- HEADER -->
+        <header class="res-header">
+          <h1 class="res-name">{{ resumeData.personal.name || 'Your Name' }}</h1>
+          <h2 class="res-title" *ngIf="resumeData.personal.headline">{{ resumeData.personal.headline }}</h2>
+          <div class="res-contact">
+            <span *ngIf="resumeData.personal.email">{{ resumeData.personal.email }}</span>
+            <span *ngIf="resumeData.personal.phone">{{ resumeData.personal.phone }}</span>
+            <span *ngIf="resumeData.personal.location">{{ resumeData.personal.location }}</span>
+            <span *ngIf="resumeData.personal.linkedin">{{ resumeData.personal.linkedin }}</span>
+          </div>
+        </header>
+
+        <!-- SUMMARY -->
+        <section class="res-section" *ngIf="resumeData.personal.summary">
+          <h3 class="res-section-title">Professional Summary</h3>
+          <p class="res-summary">{{ resumeData.personal.summary }}</p>
+        </section>
+
+        <!-- EXPERIENCE -->
+        <section class="res-section" *ngIf="resumeData.experience.length > 0">
+          <h3 class="res-section-title">Experience</h3>
+          <div class="res-item" *ngFor="let exp of resumeData.experience">
+            <div class="res-item-header">
+              <div>
+                <strong class="res-role">{{ exp.role || 'Job Title' }}</strong>
+                <span class="res-company"> | {{ exp.company || 'Company Name' }}</span>
+              </div>
+              <div class="res-dates">
+                {{ exp.startDate || 'Start' }} - {{ exp.isCurrent ? 'Present' : (exp.endDate || 'End') }}
+              </div>
+            </div>
+            <div class="res-desc" *ngIf="exp.responsibilities">
+              {{ exp.responsibilities }}
+            </div>
+          </div>
+        </section>
+
+        <!-- EDUCATION -->
+        <section class="res-section" *ngIf="resumeData.education.length > 0">
+          <h3 class="res-section-title">Education</h3>
+          <div class="res-item" *ngFor="let edu of resumeData.education">
+            <div class="res-item-header">
+              <div>
+                <strong class="res-role">{{ edu.degree || 'Degree' }}</strong>
+                <span class="res-company"> | {{ edu.college || 'Institution' }}</span>
+              </div>
+              <div class="res-dates">
+                {{ edu.startYear || 'Start' }} - {{ edu.endYear || 'End' }}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SKILLS -->
+        <section class="res-section" *ngIf="resumeData.skills">
+          <h3 class="res-section-title">Skills</h3>
+          <p class="res-skills">{{ resumeData.skills }}</p>
+        </section>
+
+      </div>
+    </div>
+
+  </div>
+</div>

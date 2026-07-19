@@ -60,6 +60,96 @@ exports.updateSkills = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
+// ─── PUT /api/profile/autofill ────────────────────────────────────────────
+exports.autofillProfile = async (req, res, next) => {
+  try {
+    const data = req.body;
+    const profile = await getOrCreate(req.user._id);
+
+    // Personal & Professional
+    if (data.phone) profile.phone = data.phone;
+    if (data.location) profile.location = data.location;
+    if (data.linkedin) profile.linkedin = data.linkedin;
+    if (data.github) profile.github = data.github;
+    if (data.portfolio) profile.portfolio = data.portfolio;
+    if (data.headline) profile.headline = data.headline;
+    if (data.about) profile.about = data.about;
+
+    // Skills (merge unique)
+    if (Array.isArray(data.technicalSkills)) {
+      profile.technicalSkills = [...new Set([...profile.technicalSkills, ...data.technicalSkills])];
+    }
+    if (Array.isArray(data.tools)) {
+      profile.tools = [...new Set([...profile.tools, ...data.tools])];
+    }
+    if (Array.isArray(data.softSkills)) {
+      profile.softSkills = [...new Set([...profile.softSkills, ...data.softSkills])];
+    }
+
+    // Education (append new)
+    if (Array.isArray(data.education)) {
+      data.education.forEach(edu => {
+        if (edu.institution || edu.college) {
+          profile.education.push({
+            college: edu.institution || edu.college,
+            degree: edu.degree || "Degree",
+            specialization: edu.field || edu.specialization || "",
+            startYear: parseInt(edu.startYear) || new Date().getFullYear() - 4,
+            endYear: parseInt(edu.endYear) || new Date().getFullYear(),
+            cgpa: edu.grade || edu.cgpa || ""
+          });
+        }
+      });
+    }
+
+    // Experience (append new)
+    if (Array.isArray(data.experience)) {
+      data.experience.forEach(exp => {
+        if (exp.company || exp.role) {
+          profile.experience.push({
+            company: exp.company || "Company",
+            role: exp.role || "Role",
+            startDate: exp.startDate ? new Date(exp.startDate) : null,
+            endDate: exp.endDate ? new Date(exp.endDate) : null,
+            isCurrent: !exp.endDate || String(exp.endDate).toLowerCase() === "present",
+            responsibilities: exp.description || ""
+          });
+        }
+      });
+    }
+
+    // Projects (append new)
+    if (Array.isArray(data.projects)) {
+      data.projects.forEach(proj => {
+        if (proj.name) {
+          profile.projects.push({
+            name: proj.name,
+            description: proj.description || "",
+            techStack: Array.isArray(proj.techStack) ? proj.techStack : [],
+            liveLink: proj.link || proj.liveLink || ""
+          });
+        }
+      });
+    }
+
+    // Certifications (append new)
+    if (Array.isArray(data.certifications)) {
+      data.certifications.forEach(cert => {
+        if (cert.name) {
+          profile.certifications.push({
+            name: cert.name,
+            issuer: cert.issuer || "",
+            issueDate: cert.year ? new Date(cert.year, 0, 1) : null
+          });
+        }
+      });
+    }
+
+    await profile.save();
+    res.status(200).json({ success: true, message: "Profile autofilled successfully", data: { profile, completionScore: profile.completionScore } });
+  } catch (err) { next(err); }
+};
+
 // ─── EDUCATION ────────────────────────────────────────────────────────────
 exports.addEducation = async (req, res, next) => {
   try {

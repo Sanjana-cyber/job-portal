@@ -38,6 +38,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   atsResult: AtsData | null = null;
   aiFeedback: { atsFeedback: AiFeedback; recommendedJobs: RecommendedJob[] } | null = null;
   atsError = '';
+  parsingResume = false;
+  uploadingPhoto = false;
 
   // ── Profile Sections ──
   readonly sections = [
@@ -148,6 +150,28 @@ export class DashboardComponent implements OnInit, OnDestroy {
     });
   }
 
+  onPhotoSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      this.uploadingPhoto = true;
+      this.profileService.uploadPhoto(file).subscribe({
+        next: (res) => {
+          this.uploadingPhoto = false;
+          if (this.profile) {
+            this.profile.photo = { url: res.data.photoUrl, publicId: '' };
+            this.completionScore = res.data.completionScore;
+          }
+          alert('Photo uploaded successfully!');
+        },
+        error: (err) => {
+          this.uploadingPhoto = false;
+          alert('Failed to upload photo.');
+          console.error(err);
+        }
+      });
+    }
+  }
+
   getSectionSubtitle(section: { key: string; check: (p: Profile | null) => boolean }): string {
     const done = section.check(this.profile);
     if (section.key === 'resume' && done) return 'Uploaded ✓';
@@ -162,6 +186,27 @@ export class DashboardComponent implements OnInit, OnDestroy {
   toggleMenu(): void { this.menuOpen = !this.menuOpen; }
   goToFindJobs(): void { this.router.navigate(['/dashboard/jobs']); }
   goToBuildProfile(): void { this.router.navigate(['/dashboard/profile']); }
+
+  parseActiveResume(): void {
+    if (!this.activeResume) return;
+    this.parsingResume = true;
+    this.profileService.parseResume(this.activeResume._id).subscribe({
+      next: (res) => {
+        this.parsingResume = false;
+        const idx = this.resumes.findIndex(r => r._id === this.activeResume!._id);
+        if (idx !== -1) {
+          this.resumes[idx].parsingStatus = 'done';
+          this.resumes[idx].parsedData = res.data.parsedData;
+        }
+        alert('Resume parsed successfully! You can now use the ATS Match Analyzer.');
+      },
+      error: (err) => {
+        this.parsingResume = false;
+        alert('Failed to parse resume. Check console for details.');
+        console.error(err);
+      }
+    });
+  }
 
   handleAnalyze(): void {
     if (!this.jd.trim() || this.jd.trim().length < 30) {

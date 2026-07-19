@@ -26,6 +26,7 @@ router.get("/me", getMyProfile);
 router.put("/personal",      updatePersonalInfo);
 router.put("/professional",  updateProfessional);
 router.put("/skills",        updateSkills);
+router.put("/autofill",      require("../controllers/profileController").autofillProfile);
 
 // ─── Education ─────────────────────────────────────────────────────────────
 router.post("/education",         addEducation);

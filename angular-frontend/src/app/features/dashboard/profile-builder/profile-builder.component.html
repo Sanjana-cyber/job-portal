@@ -1,0 +1,275 @@
+<div class="page-wrapper">
+
+  <!-- Toast -->
+  <div *ngIf="toastMsg" class="toast" [class.success]="toastType==='success'" [class.error]="toastType==='error'">{{ toastMsg }}</div>
+
+  <header class="top-nav">
+    <div class="nav-left">
+      <a class="back-link" routerLink="/dashboard">← Dashboard</a>
+      <div class="divider"></div>
+      <span class="title">Profile Builder</span>
+    </div>
+    <div class="nav-right">
+      <button class="btn-primary btn-sm" routerLink="/dashboard">Finish Profile ✨</button>
+    </div>
+  </header>
+
+  <main class="content">
+    <div class="header-text">
+      <h1>Build Your Profile</h1>
+      <p>Complete each section to boost your profile score.</p>
+    </div>
+
+    <!-- Section Tabs -->
+    <div class="tabs">
+      <button *ngFor="let t of tabs" class="tab-btn" [class.active]="activeTab===t.key" [class.done]="t.check(profile)" (click)="activeTab=t.key">
+        {{ t.label }}
+      </button>
+    </div>
+
+    <!-- ═══ PERSONAL INFO ═══ -->
+    <div class="card" *ngIf="activeTab==='personal'">
+      <h2>Personal Information</h2>
+      <form (ngSubmit)="savePersonal()">
+        <div class="form-grid">
+          <div class="form-group"><label>Phone</label><input class="input-field" [(ngModel)]="profile.phone" name="phone" placeholder="+1 234 567 8900"/></div>
+          <div class="form-group"><label>Location</label><input class="input-field" [(ngModel)]="profile.location" name="location" placeholder="New York, NY"/></div>
+          <div class="form-group"><label>LinkedIn</label><input class="input-field" [(ngModel)]="profile.linkedin" name="linkedin" placeholder="https://linkedin.com/in/..."/></div>
+          <div class="form-group"><label>GitHub</label><input class="input-field" [(ngModel)]="profile.github" name="github" placeholder="https://github.com/..."/></div>
+          <div class="form-group"><label>Portfolio</label><input class="input-field" [(ngModel)]="profile.portfolio" name="portfolio" placeholder="https://mysite.com"/></div>
+        </div>
+        <div class="form-actions">
+          <span *ngIf="saving" class="saving-text">Saving...</span>
+          <button type="submit" class="btn-primary" [disabled]="saving">Save Personal Info</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- ═══ PROFESSIONAL ═══ -->
+    <div class="card" *ngIf="activeTab==='professional'">
+      <h2>Professional Summary</h2>
+      <form (ngSubmit)="saveProfessional()">
+        <div class="form-grid">
+          <div class="form-group full"><label>Headline</label><input class="input-field" [(ngModel)]="profile.headline" name="headline" placeholder="Full-Stack Developer | React & Node.js"/></div>
+          <div class="form-group full"><label>About</label><textarea class="input-field" [(ngModel)]="profile.about" name="about" rows="5" placeholder="Describe yourself in a few sentences..."></textarea></div>
+        </div>
+        <div class="form-actions">
+          <span *ngIf="saving" class="saving-text">Saving...</span>
+          <button type="submit" class="btn-primary" [disabled]="saving">Save Professional Info</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- ═══ SKILLS ═══ -->
+    <div class="card" *ngIf="activeTab==='skills'">
+      <h2>Skills</h2>
+      <form (ngSubmit)="saveSkills()">
+        <!-- Technical Skills -->
+        <div class="form-group" style="margin-bottom:20px">
+          <label>Technical Skills</label>
+          <div class="tags-area">
+            <span class="tag-chip" *ngFor="let s of profile.technicalSkills; let i = index">{{ s }} <button type="button" (click)="removeSkill('technicalSkills', i)">×</button></span>
+          </div>
+          <div class="tag-input-row">
+            <input class="input-field" [(ngModel)]="newTechnical" name="newTech" placeholder="Type a skill and press Add" (keydown.enter)="$event.preventDefault(); addSkill('technicalSkills', newTechnical); newTechnical=''"/>
+            <button type="button" class="btn-secondary" (click)="addSkill('technicalSkills', newTechnical); newTechnical=''">Add</button>
+          </div>
+        </div>
+        <!-- Tools -->
+        <div class="form-group" style="margin-bottom:20px">
+          <label>Tools & Technologies</label>
+          <div class="tags-area">
+            <span class="tag-chip" *ngFor="let s of profile.tools; let i = index">{{ s }} <button type="button" (click)="removeSkill('tools', i)">×</button></span>
+          </div>
+          <div class="tag-input-row">
+            <input class="input-field" [(ngModel)]="newTool" name="newTool" placeholder="e.g. Docker, AWS..." (keydown.enter)="$event.preventDefault(); addSkill('tools', newTool); newTool=''"/>
+            <button type="button" class="btn-secondary" (click)="addSkill('tools', newTool); newTool=''">Add</button>
+          </div>
+        </div>
+        <!-- Soft Skills -->
+        <div class="form-group" style="margin-bottom:20px">
+          <label>Soft Skills</label>
+          <div class="tags-area">
+            <span class="tag-chip" *ngFor="let s of profile.softSkills; let i = index">{{ s }} <button type="button" (click)="removeSkill('softSkills', i)">×</button></span>
+          </div>
+          <div class="tag-input-row">
+            <input class="input-field" [(ngModel)]="newSoft" name="newSoft" placeholder="e.g. Leadership..." (keydown.enter)="$event.preventDefault(); addSkill('softSkills', newSoft); newSoft=''"/>
+            <button type="button" class="btn-secondary" (click)="addSkill('softSkills', newSoft); newSoft=''">Add</button>
+          </div>
+        </div>
+        <div class="form-actions">
+          <span *ngIf="saving" class="saving-text">Saving...</span>
+          <button type="submit" class="btn-primary" [disabled]="saving">Save Skills</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- ═══ EDUCATION ═══ -->
+    <div class="card" *ngIf="activeTab==='education'">
+      <h2>Education</h2>
+      <div class="entry-list" *ngIf="profile.education && profile.education.length">
+        <div class="entry-item" *ngFor="let e of profile.education">
+          <div class="entry-info">
+            <h4>{{ e.degree }} — {{ e.college }}</h4>
+            <p>{{ e.startYear }} – {{ e.endYear }} <span *ngIf="e.specialization">| {{ e.specialization }}</span> <span *ngIf="e.cgpa">| CGPA: {{ e.cgpa }}</span></p>
+          </div>
+          <div class="entry-actions">
+            <button class="btn-sm danger" (click)="deleteEntry('education', e._id!)">Delete</button>
+          </div>
+        </div>
+      </div>
+      <div class="empty-state" *ngIf="!profile.education?.length">No education entries yet.</div>
+      <h2 style="margin-top:20px">Add Education</h2>
+      <form (ngSubmit)="addEducation()">
+        <div class="form-grid">
+          <div class="form-group"><label>Degree *</label><input class="input-field" [(ngModel)]="eduForm.degree" name="degree" required placeholder="B.Tech Computer Science"/></div>
+          <div class="form-group"><label>College *</label><input class="input-field" [(ngModel)]="eduForm.college" name="college" required placeholder="MIT"/></div>
+          <div class="form-group"><label>Specialization</label><input class="input-field" [(ngModel)]="eduForm.specialization" name="spec" placeholder="AI & ML"/></div>
+          <div class="form-group"><label>Start Year *</label><input class="input-field" type="number" [(ngModel)]="eduForm.startYear" name="sy" required placeholder="2020"/></div>
+          <div class="form-group"><label>End Year *</label><input class="input-field" type="number" [(ngModel)]="eduForm.endYear" name="ey" required placeholder="2024"/></div>
+          <div class="form-group"><label>CGPA</label><input class="input-field" [(ngModel)]="eduForm.cgpa" name="cgpa" placeholder="8.5"/></div>
+        </div>
+        <div class="form-actions">
+          <span *ngIf="saving" class="saving-text">Saving...</span>
+          <button type="submit" class="btn-primary" [disabled]="saving">Add Education</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- ═══ EXPERIENCE ═══ -->
+    <div class="card" *ngIf="activeTab==='experience'">
+      <h2>Experience</h2>
+      <div class="entry-list" *ngIf="profile.experience && profile.experience.length">
+        <div class="entry-item" *ngFor="let e of profile.experience">
+          <div class="entry-info">
+            <h4>{{ e.role }} at {{ e.company }}</h4>
+            <p>{{ e.isCurrent ? 'Current' : '' }}</p>
+          </div>
+          <div class="entry-actions">
+            <button class="btn-sm danger" (click)="deleteEntry('experience', e._id!)">Delete</button>
+          </div>
+        </div>
+      </div>
+      <div class="empty-state" *ngIf="!profile.experience?.length">No experience entries yet.</div>
+      <h2 style="margin-top:20px">Add Experience</h2>
+      <form (ngSubmit)="addExperience()">
+        <div class="form-grid">
+          <div class="form-group"><label>Company</label><input class="input-field" [(ngModel)]="expForm.company" name="company" placeholder="Google"/></div>
+          <div class="form-group"><label>Role</label><input class="input-field" [(ngModel)]="expForm.role" name="role" placeholder="Software Engineer"/></div>
+          <div class="form-group"><label>Start Date</label><input class="input-field" type="date" [(ngModel)]="expForm.startDate" name="sd"/></div>
+          <div class="form-group"><label>End Date</label><input class="input-field" type="date" [(ngModel)]="expForm.endDate" name="ed" [disabled]="expForm.isCurrent"/></div>
+          <div class="form-group full">
+            <div class="checkbox-row"><input type="checkbox" id="isCurrent" [(ngModel)]="expForm.isCurrent" name="isCurrent"/><label for="isCurrent">I currently work here</label></div>
+          </div>
+          <div class="form-group full"><label>Responsibilities</label><textarea class="input-field" [(ngModel)]="expForm.responsibilities" name="resp" rows="3" placeholder="Describe your key responsibilities..."></textarea></div>
+        </div>
+        <div class="form-actions">
+          <span *ngIf="saving" class="saving-text">Saving...</span>
+          <button type="submit" class="btn-primary" [disabled]="saving">Add Experience</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- ═══ PROJECTS ═══ -->
+    <div class="card" *ngIf="activeTab==='projects'">
+      <h2>Projects</h2>
+      <div class="entry-list" *ngIf="profile.projects && profile.projects.length">
+        <div class="entry-item" *ngFor="let p of profile.projects">
+          <div class="entry-info">
+            <h4>{{ p.name }}</h4>
+            <p>{{ p.description }}</p>
+          </div>
+          <div class="entry-actions">
+            <button class="btn-sm danger" (click)="deleteEntry('projects', p._id!)">Delete</button>
+          </div>
+        </div>
+      </div>
+      <div class="empty-state" *ngIf="!profile.projects?.length">No projects yet.</div>
+      <h2 style="margin-top:20px">Add Project</h2>
+      <form (ngSubmit)="addProject()">
+        <div class="form-grid">
+          <div class="form-group"><label>Project Name</label><input class="input-field" [(ngModel)]="projForm.name" name="name" placeholder="My Awesome App"/></div>
+          <div class="form-group full"><label>Description</label><textarea class="input-field" [(ngModel)]="projForm.description" name="desc" rows="3" placeholder="What does the project do?"></textarea></div>
+          <div class="form-group"><label>GitHub Link</label><input class="input-field" [(ngModel)]="projForm.githubLink" name="gh" placeholder="https://github.com/..."/></div>
+          <div class="form-group"><label>Live Link</label><input class="input-field" [(ngModel)]="projForm.liveLink" name="live" placeholder="https://myapp.com"/></div>
+          <div class="form-group full">
+            <label>Tech Stack</label>
+            <div class="tags-area">
+              <span class="tag-chip" *ngFor="let t of projForm.techStack; let i = index">{{ t }} <button type="button" (click)="projForm.techStack!.splice(i,1)">×</button></span>
+            </div>
+            <div class="tag-input-row">
+              <input class="input-field" [(ngModel)]="newProjTech" name="projTech" placeholder="e.g. React" (keydown.enter)="$event.preventDefault(); addProjTech()"/>
+              <button type="button" class="btn-secondary" (click)="addProjTech()">Add</button>
+            </div>
+          </div>
+        </div>
+        <div class="form-actions">
+          <span *ngIf="saving" class="saving-text">Saving...</span>
+          <button type="submit" class="btn-primary" [disabled]="saving">Add Project</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- ═══ CERTIFICATIONS ═══ -->
+    <div class="card" *ngIf="activeTab==='certifications'">
+      <h2>Certifications</h2>
+      <div class="entry-list" *ngIf="profile.certifications && profile.certifications.length">
+        <div class="entry-item" *ngFor="let c of profile.certifications">
+          <div class="entry-info">
+            <h4>{{ c.name }}</h4>
+            <p>{{ c.issuer }}</p>
+          </div>
+          <div class="entry-actions">
+            <button class="btn-sm danger" (click)="deleteEntry('certifications', c._id!)">Delete</button>
+          </div>
+        </div>
+      </div>
+      <div class="empty-state" *ngIf="!profile.certifications?.length">No certifications yet.</div>
+      <h2 style="margin-top:20px">Add Certification</h2>
+      <form (ngSubmit)="addCertification()">
+        <div class="form-grid">
+          <div class="form-group"><label>Name</label><input class="input-field" [(ngModel)]="certForm.name" name="name" placeholder="AWS Solutions Architect"/></div>
+          <div class="form-group"><label>Issuer</label><input class="input-field" [(ngModel)]="certForm.issuer" name="issuer" placeholder="Amazon Web Services"/></div>
+          <div class="form-group"><label>Issue Date</label><input class="input-field" type="date" [(ngModel)]="certForm.issueDate" name="issueDate"/></div>
+          <div class="form-group"><label>Credential URL</label><input class="input-field" [(ngModel)]="certForm.credentialUrl" name="credUrl" placeholder="https://credential.net/..."/></div>
+        </div>
+        <div class="form-actions">
+          <span *ngIf="saving" class="saving-text">Saving...</span>
+          <button type="submit" class="btn-primary" [disabled]="saving">Add Certification</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- ═══ RESUME ═══ -->
+    <div class="card" *ngIf="activeTab==='resume'">
+      <h2>Resume Versions</h2>
+      <div class="resume-list" *ngIf="resumes.length">
+        <div class="resume-item" *ngFor="let r of resumes" [class.active]="r.isActive">
+          <div class="resume-meta">
+            <strong>v{{ r.versionNumber }} — {{ r.title || r.originalFileName }}</strong>
+            <span>{{ r.createdAt | date:'d MMM y' }} {{ r.isActive ? '• Active' : '' }}</span>
+          </div>
+          <div class="resume-btns">
+            <button class="btn-sm" (click)="autoFillFromResume(r)" [disabled]="saving">✨ Auto-fill Profile</button>
+            <button class="btn-sm" *ngIf="!r.isActive" (click)="setActive(r._id)">Set Active</button>
+            <button class="btn-sm danger" (click)="deleteResume(r._id)">Delete</button>
+          </div>
+        </div>
+      </div>
+      <div class="empty-state" *ngIf="!resumes.length">No resumes uploaded yet.</div>
+      <div class="upload-zone" (click)="resumeInput.click()">
+        <p>Click to upload a resume (PDF, DOC, DOCX)</p>
+        <input #resumeInput type="file" accept=".pdf,.doc,.docx" (change)="uploadResume($event)"/>
+      </div>
+      <span *ngIf="saving" class="saving-text">Uploading...</span>
+    </div>
+
+    <!-- ═══ FINISH PROFILE ACTION ═══ -->
+    <div style="margin-top: 40px; padding: 24px; background: #fff; border-radius: 20px; text-align: center; border: 1px solid #e2e8f0; box-shadow: 0 2px 16px rgba(0,0,0,0.06);">
+      <h2 style="margin: 0 0 8px; color: #111;">All Done?</h2>
+      <p style="color: #6b7280; margin: 0 0 20px; font-size: 14px;">Your changes are saved automatically when you submit each section.</p>
+      <button class="btn-primary" style="padding: 14px 40px; font-size: 16px;" routerLink="/dashboard">Go to Dashboard ✨</button>
+    </div>
+
+  </main>
+</div>
