@@ -13,15 +13,9 @@
     <span class="dashboard-logo-text">TalentBridge</span>
   </a>
   <div class="dashboard-header-actions">
-    <button *ngIf="user" class="btn-nav-dashboard" (click)="router.navigate(['/dashboard'])">
-      Dashboard
-    </button>
-    <button class="btn-nav-dashboard" (click)="router.navigate(['/resume-builder'])">
-      Build Resume
-    </button>
-    <button class="btn-find-jobs" (click)="router.navigate(['/jobs'])">
-      Find Jobs
-    </button>
+    <button *ngIf="user" class="btn-nav-dashboard" (click)="router.navigate(['/dashboard'])">Dashboard</button>
+    <button class="btn-nav-dashboard" (click)="router.navigate(['/resume-builder'])">Build Resume</button>
+    <button class="btn-find-jobs">Find Jobs</button>
     <button *ngIf="user" class="btn-logout-sm" (click)="logout()">Logout</button>
     <button *ngIf="!user" class="btn-nav-dashboard" (click)="goToLogin()">Login</button>
     <button *ngIf="!user" class="btn-nav-dashboard" (click)="goToRegister()">Sign Up</button>

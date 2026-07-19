@@ -8,22 +8,10 @@
       <span class="dashboard-logo-text">TalentBridge</span>
     </a>
     <div class="dashboard-header-actions">
-      <button class="btn-nav-dashboard" (click)="router.navigate(['/dashboard'])">
-        Dashboard
-      </button>
-      <button class="btn-nav-dashboard" (click)="router.navigate(['/resume-builder'])">
-        Build Resume
-      </button>
-      <button class="btn-find-jobs" (click)="goToFindJobs()">
-        Find Jobs
-      </button>
+      <button class="btn-find-jobs">Dashboard</button>
+      <button class="btn-nav-dashboard" (click)="router.navigate(['/resume-builder'])">Build Resume</button>
+      <button class="btn-nav-dashboard" (click)="goToFindJobs()">Find Jobs</button>
       <button class="btn-logout-sm" (click)="logout()">Logout</button>
-      <!-- Hamburger menu -->
-      <button class="btn-hamburger" (click)="toggleMenu()" title="Menu">
-        <span class="hamburger-line"></span>
-        <span class="hamburger-line"></span>
-        <span class="hamburger-line"></span>
-      </button>
     </div>
   </header>
 
