@@ -22,10 +22,17 @@ export class NavbarComponent implements OnInit, OnDestroy {
   user: any = null;
   isAuthenticated = false;
   showDropdown = false;
-  showNavbar = true;
+  // Start hidden — will be set correctly in ngOnInit based on current route
+  showNavbar = false;
   isScrolled = false;
 
   private subs = new Subscription();
+
+  constructor() {
+    // Synchronously check URL before first render to prevent flash
+    const url = typeof window !== 'undefined' ? window.location.pathname : '/';
+    this.showNavbar = this.isNavbarRoute(url);
+  }
 
   ngOnInit(): void {
     // 1. Listen to auth state changes
@@ -40,8 +47,14 @@ export class NavbarComponent implements OnInit, OnDestroy {
       })
     );
 
-    // 2. Hide navbar on dashboard routes (parity with React)
-    this.checkNavbarVisibility(this.router.url);
+    // 2. Hide navbar on dashboard/jobs routes
+    // Use window.location.pathname for the initial check — this.router.url is
+    // always '/' at ngOnInit time before Angular's router has finished its
+    // first navigation, causing the navbar to flash on page load.
+    const initialUrl = typeof window !== 'undefined'
+      ? window.location.pathname
+      : this.router.url;
+    this.checkNavbarVisibility(initialUrl);
     this.subs.add(
       this.router.events.pipe(
         filter(event => event instanceof NavigationEnd)
@@ -68,14 +81,18 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.isScrolled = window.scrollY > 10;
   };
 
-  private checkNavbarVisibility(url: string): void {
-    this.showNavbar = !(
+  private isNavbarRoute(url: string): boolean {
+    return !(
       url.startsWith('/dashboard') ||
       url.startsWith('/recruiter/dashboard') ||
       url.startsWith('/admin') ||
       url.startsWith('/resume-builder') ||
       url.startsWith('/jobs')
     );
+  }
+
+  private checkNavbarVisibility(url: string): void {
+    this.showNavbar = this.isNavbarRoute(url);
   }
 
   toggleDropdown(): void {

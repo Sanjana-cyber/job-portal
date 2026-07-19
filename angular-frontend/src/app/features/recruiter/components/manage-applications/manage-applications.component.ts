@@ -42,18 +42,10 @@ import { ApplicationService } from '../../../../core/services/application.servic
 
                 <div class="app-actions">
                   <div class="resume-buttons" *ngIf="app.resume?.fileUrl">
-                    <a [href]="app.resume.fileUrl"
-                       target="_blank"
-                       rel="noopener noreferrer"
+                    <button (click)="downloadResume(app.resume.fileUrl, app.applicant?.name)"
                        class="btn-view-resume">
-                      📄 View
-                    </a>
-                    <a [href]="app.resume.fileUrl"
-                       download
-                       target="_blank"
-                       class="btn-download-resume">
-                      ⬇ Download
-                    </a>
+                      📄 View Resume
+                    </button>
                   </div>
                   <span *ngIf="!app.resume?.fileUrl" class="no-resume">No resume uploaded</span>
 
@@ -105,11 +97,8 @@ import { ApplicationService } from '../../../../core/services/application.servic
     .ats-score strong { color: #166534; }
     .app-actions { display: flex; flex-direction: column; gap: 12px; align-items: flex-end; flex-shrink: 0; }
     .resume-buttons { display: flex; gap: 8px; }
-    .btn-view-resume, .btn-download-resume { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; transition: background 0.2s; white-space: nowrap; }
-    .btn-view-resume { background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; }
-    .btn-view-resume:hover { background: #e5e7eb; }
-    .btn-download-resume { background: #111; color: #fff; }
-    .btn-download-resume:hover { background: #333; }
+    .btn-view-resume { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 700; text-decoration: none; transition: background 0.2s; white-space: nowrap; background: #111; color: #fff; border: none; cursor: pointer; }
+    .btn-view-resume:hover { background: #333; }
     .no-resume { font-size: 12px; color: #9ca3af; font-style: italic; }
     .status-controls { display: flex; align-items: center; gap: 8px; }
     select { padding: 8px 12px; border-radius: 6px; border: 1px solid #d1d5db; font-family: inherit; font-size: 13px; background: #fff; font-weight: 600; cursor: pointer; }
@@ -169,6 +158,27 @@ export class ManageApplicationsComponent implements OnInit {
         alert('Failed to update status');
       }
     });
+  }
+
+  downloadResume(fileUrl: string, applicantName?: string) {
+    // Fetch the file as a blob and trigger a browser download as PDF
+    fetch(fileUrl)
+      .then(res => res.blob())
+      .then(blob => {
+        const blobUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        const safeName = (applicantName || 'resume').replace(/\s+/g, '_');
+        link.download = `${safeName}_resume.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(blobUrl);
+      })
+      .catch(() => {
+        // Fallback: open in new tab if fetch fails (e.g. CORS)
+        window.open(fileUrl, '_blank');
+      });
   }
 
   close() {
