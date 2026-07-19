@@ -33,7 +33,7 @@ export class JobsComponent implements OnInit {
   private profileService = inject(ProfileService);
   private authService = inject(AuthService);
   private modalService = inject(AuthModalService);
-  private router = inject(Router);
+  router = inject(Router);
 
   // ── State (mirrors React useState) ──
   jobs: Job[] = [];
@@ -183,5 +183,16 @@ export class JobsComponent implements OnInit {
     this.toastType = type;
     this.toastVisible = true;
     setTimeout(() => { this.toastVisible = false; }, 3500);
+  }
+
+  logout() {
+    this.authService.logout().subscribe({
+      next: () => {
+        this.router.navigate(['/']);
+      },
+      error: () => {
+        this.router.navigate(['/']);
+      }
+    });
   }
 }

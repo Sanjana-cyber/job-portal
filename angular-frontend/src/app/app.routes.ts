@@ -47,6 +47,13 @@ export const routes: Routes = [
     title: 'Find Jobs — TalentBridge'
   },
   {
+    // Resume Builder Tool
+    path: 'resume-builder',
+    loadComponent: () =>
+      import('./features/resume-builder/resume-builder.component').then(m => m.ResumeBuilderComponent),
+    title: 'Build Resume — TalentBridge'
+  },
+  {
     // Protected Recruiter Dashboard
     path: 'recruiter/dashboard',
     loadComponent: () =>

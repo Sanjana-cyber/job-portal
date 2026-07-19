@@ -72,7 +72,9 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.showNavbar = !(
       url.startsWith('/dashboard') ||
       url.startsWith('/recruiter/dashboard') ||
-      url.startsWith('/admin')
+      url.startsWith('/admin') ||
+      url.startsWith('/resume-builder') ||
+      url.startsWith('/jobs')
     );
   }
 

@@ -1,16 +1,25 @@
 <div class="resume-builder-page">
-  <div class="top-nav no-print">
-    <div class="nav-left">
-      <a class="back-link" routerLink="/">← Home</a>
-      <div class="divider"></div>
-      <span class="title">Resume Builder</span>
-    </div>
-    <div class="nav-right">
-      <button class="btn-primary" (click)="downloadPDF()">
+  <header class="dashboard-header no-print">
+    <a class="dashboard-logo" (click)="router.navigate(['/'])">
+      <div class="dashboard-logo-icon"></div>
+      <span class="dashboard-logo-text">TalentBridge</span>
+    </a>
+    <div class="dashboard-header-actions">
+      <button class="btn-nav-dashboard" (click)="router.navigate(['/dashboard'])">
+        Dashboard
+      </button>
+      <button class="btn-nav-dashboard" style="opacity: 0.7; cursor: default;">
+        Build Resume
+      </button>
+      <button class="btn-find-jobs" (click)="router.navigate(['/jobs'])">
+        Find Jobs
+      </button>
+      <button class="btn-logout-sm" (click)="logout()">Logout</button>
+      <button class="btn-primary" (click)="downloadPDF()" style="margin-left: 8px;">
         <span class="icon">⬇</span> Download PDF
       </button>
     </div>
-  </div>
+  </header>
 
   <div class="builder-container">
     

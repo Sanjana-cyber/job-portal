@@ -2,8 +2,10 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService } from '../../../core/services/auth.service';
-import { ProfileService } from '../../../core/services/profile.service';
+import { AuthService } from '../../core/services/auth.service';
+import { ProfileService } from '../../core/services/profile.service';
+// @ts-ignore
+import html2pdf from 'html2pdf.js';
 
 interface ResumeData {
   personal: {
@@ -79,7 +81,7 @@ export class ResumeBuilderComponent implements OnInit {
   loadProfileData() {
     this.isLoadingData = true;
     this.profileService.getMyProfile().subscribe({
-      next: (res) => {
+      next: (res: any) => {
         if (res.success && res.data.profile) {
           const p = res.data.profile;
           // Map backend profile to resumeData
@@ -173,9 +175,28 @@ export class ResumeBuilderComponent implements OnInit {
       return;
     }
     
-    // Trigger native browser print
-    setTimeout(() => {
-      window.print();
-    }, 100);
+    const element = document.getElementById('resume-document');
+    if (!element) return;
+    
+    const opt: any = {
+      margin:       0,
+      filename:     `${this.resumeData.personal.name ? this.resumeData.personal.name.replace(/\s+/g, '_') : 'Resume'}_TalentBridge.pdf`,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+    
+    html2pdf().set(opt).from(element).save();
+  }
+
+  logout() {
+    this.authService.logout().subscribe({
+      next: () => {
+        this.router.navigate(['/']);
+      },
+      error: () => {
+        this.router.navigate(['/']);
+      }
+    });
   }
 }
