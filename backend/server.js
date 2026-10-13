@@ -13,7 +13,7 @@ const { errorHandler } = require("./middleware/errorHandler");
 const authRoutes = require("./routes/authRoutes");
 const profileRoutes = require("./routes/profileRoutes");
 const resumeIntelligenceRoutes = require("./routes/resumeIntelligenceRoutes");
-const jobRoutes = require("./routes/jobRoutes");
+const jobRoutes = require("./routes/jobRoutes");           // Recruiter job management (protected)
 const applicationRoutes = require("./routes/applicationRoutes");
 const verificationRoutes = require("./routes/verificationRoutes");
 
@@ -29,8 +29,9 @@ app.use(
   cors({
     origin: [
       process.env.FRONTEND_URL || "http://localhost:5173",
+      "http://localhost:5173",
       "http://localhost:5174",
-      "http://localhost:4200" // New Angular Auth Frontend
+      "http://localhost:3000",
     ],
     credentials: true, // Allow cookies to be sent cross-origin
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
@@ -89,8 +90,9 @@ app.use("/api/profile", profileRoutes);
 // Resume intelligence routes (parse, ATS, AI feedback)
 app.use("/api/resume-intelligence", resumeIntelligenceRoutes);
 
-// Job routes
-app.use("/api/jobs", jobRoutes);
+// Recruiter Job Management routes (protected — recruiter/admin only)
+// Handles: POST, GET, GET/:id, PUT/:id, DELETE/:id for a recruiter's own jobs
+app.use("/api/recruiter/jobs", jobRoutes);
 
 // Application routes
 app.use("/api/applications", applicationRoutes);

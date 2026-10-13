@@ -209,9 +209,6 @@ Developed as a Hackathon Project.
 
 ---
 
-## License
-
-This project is intended for educational and hackathon purposes.
 
 #video link[
 (https://drive.google.com/drive/folders/1Jr9R4IuFEdzHz8uXUvjA5mXqX6tNrYbE?usp=drive_link)](https://drive.google.com/drive/folders/1SwR7apSisPZnootZl8P2Wp9ZROjL7dql?usp=sharing)

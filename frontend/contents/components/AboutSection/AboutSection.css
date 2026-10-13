@@ -1,0 +1,191 @@
+/* ==========================================================================
+   TALENTBRIDGE ABOUT SECTION — STYLESHEET
+   Slightly darker blue than hero (#e6f0fa), but significantly lighter than footer (#0a2558)
+   ========================================================================== */
+
+.about-section {
+  width: 100%;
+  background: linear-gradient(180deg, #d8e8f8 0%, #cde0f5 100%);
+  color: var(--color-navy, #0a2558);
+  padding: 80px 24px 90px;
+  position: relative;
+  overflow: hidden;
+  border-top: 1px solid rgba(10, 37, 88, 0.08);
+}
+
+.about-container {
+  max-width: 1080px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 48px;
+  position: relative;
+  z-index: 2;
+}
+
+/* Header & Eyebrow */
+.about-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  max-width: 760px;
+}
+
+.about-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(10, 37, 88, 0.12);
+  padding: 6px 16px;
+  border-radius: 9999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--color-navy, #0a2558);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.about-title {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: clamp(2rem, 4.5vw, 3.2rem);
+  font-weight: 900;
+  line-height: 1.15;
+  color: var(--color-navy, #0a2558);
+  letter-spacing: -0.02em;
+}
+
+.about-description {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: clamp(1rem, 1.8vw, 1.18rem);
+  line-height: 1.65;
+  color: #1e3a6d;
+}
+
+/* 3 Pillars / Feature Grid */
+.about-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  width: 100%;
+}
+
+.about-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(10, 37, 88, 0.06), 0 1px 3px rgba(10, 37, 88, 0.04);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.about-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 16px 32px rgba(10, 37, 88, 0.1);
+  background: #ffffff;
+}
+
+.about-card-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #2563eb 0%, #0a2558 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
+}
+
+.about-card-title {
+  margin: 0 0 10px;
+  font-family: var(--font-heading);
+  font-size: 1.22rem;
+  font-weight: 800;
+  color: var(--color-navy, #0a2558);
+}
+
+.about-card-text {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: #435b80;
+}
+
+/* Stats Ribbon */
+.about-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid rgba(10, 37, 88, 0.1);
+  border-radius: 20px;
+  padding: 28px 20px;
+  box-shadow: 0 6px 20px rgba(10, 37, 88, 0.05);
+}
+
+.about-stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.about-stat-num {
+  font-family: var(--font-heading);
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--color-navy, #0a2558);
+  letter-spacing: -0.02em;
+}
+
+.about-stat-label {
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #51638a;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .about-section {
+    padding: 60px 20px 70px;
+  }
+
+  .about-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+    max-width: 520px;
+  }
+
+  .about-stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    max-width: 520px;
+  }
+}
+
+@media (max-width: 600px) {
+  .about-section {
+    padding: 50px 16px 60px;
+  }
+
+  .about-stats {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+}

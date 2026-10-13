@@ -1,0 +1,36 @@
+/* Global variables + reset. Replaces the default Vite/CRA index.css. */
+
+:root {
+    /* Colors */
+    --color-hero-bg: #edf1fa;
+    --color-navy: #103576;
+    --color-royal: #2f5bea;
+    --color-white: #ffffff;
+    --color-text-muted: #51638a;
+    --color-dot: #2f5bea;
+
+    /* Typography */
+    --font-heading: Arial, "Helvetica Neue", Helvetica, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
+body {
+    font-family: var(--font-heading);
+    -webkit-font-smoothing: antialiased;
+}
+
+#root {
+    width: 100%;
+}

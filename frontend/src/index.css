@@ -1,0 +1,52 @@
+/* ==========================================================================
+   TALENTBRIDGE GLOBAL DESIGN SYSTEM & TOKENS
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+:root {
+  /* Page & Hero Theme Colors (Light Blue Background & Dark Blue Branding) */
+  --color-hero-bg: #e6f0fa;        /* Light blue background */
+  --color-navy: #0a2558;           /* Dark blue for TALENT BRIDGE & headings */
+  --color-royal: #2563eb;          /* Vibrant royal blue accent */
+  --color-royal-deep: #1d4ed8;     /* Deep royal */
+  --color-light-blue: #93c5fd;     /* Soft sky/light blue */
+  --color-white: #ffffff;
+  --color-text-muted: #51638a;      /* Readable slate-blue for descriptions */
+  --color-dot: #60a5fa;            /* Light blue decorative dots */
+
+  /* Typography */
+  --font-heading: 'Inter', Arial, "Helvetica Neue", Helvetica, sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-hero-bg);
+  color: var(--color-navy);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
