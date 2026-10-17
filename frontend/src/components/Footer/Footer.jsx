@@ -18,28 +18,28 @@ function Footer() {
     {
       name: "WhatsApp",
       icon: FaWhatsapp,
-      url: "https://wa.me/910000000000",
+      url: "https://wa.me/9877932989",
       className: "whatsapp",
       ariaLabel: "Connect with us on WhatsApp",
     },
     {
       name: "Instagram",
       icon: FaInstagram,
-      url: "https://instagram.com/talentbridge",
+      url: "https://instagram.com/san_jana._03",
       className: "instagram",
       ariaLabel: "Follow us on Instagram",
     },
     {
       name: "LinkedIn",
       icon: FaLinkedinIn,
-      url: "https://linkedin.com/company/talentbridge",
+      url: "https://www.linkedin.com/in/sanjana-0b66b5309",
       className: "linkedin",
       ariaLabel: "Follow us on LinkedIn",
     },
     {
       name: "GitHub",
       icon: FaGithub,
-      url: "https://github.com/talentbridge",
+      url: "https://github.com/Sanjana-cyber",
       className: "github",
       ariaLabel: "View our code on GitHub",
     },
@@ -48,21 +48,6 @@ function Footer() {
   return (
     <footer className="tb-footer">
       <div className="tb-footer__container">
-        {/* Brand Header */}
-        <div className="tb-footer__brand">
-          <TalentBridgeLogo
-            variant="paperplane"
-            size="1.5em"
-            royal="#60a5fa"
-            royalDeep="#3b82f6"
-            darkBlue="#ffffff"
-          />
-          <h2 className="tb-footer__title">TALENT BRIDGE</h2>
-        </div>
-
-        <p className="tb-footer__tagline">
-          Find Jobs. Build Career. Shape Your Future.
-        </p>
 
         {/* Social Icons Row */}
         <ul className="tb-footer__socials" aria-label="Social Media Links">

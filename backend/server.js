@@ -6,6 +6,7 @@ dotenv.config({ path: path.join(__dirname, ".env") });
 
 const express = require("express");
 const cors = require("cors");
+const helmet = require("helmet");
 const cookieParser = require("cookie-parser");
 const mongoSanitize = require("express-mongo-sanitize");
 const connectDB = require("./config/db");
@@ -36,6 +37,32 @@ app.use(
     credentials: true, // Allow cookies to be sent cross-origin
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
+// Helmet — sets secure HTTP headers (XSS, clickjacking, sniffing protection)
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc:  ["'self'", "https://accounts.google.com", "https://apis.google.com"],
+        styleSrc:   ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        fontSrc:    ["'self'", "https://fonts.gstatic.com"],
+        imgSrc:     ["'self'", "data:", "https:"],
+        connectSrc: [
+          "'self'",
+          process.env.FRONTEND_URL || "http://localhost:5173",
+          "http://localhost:5173",
+          "http://localhost:5000",
+          "https://accounts.google.com",
+        ],
+        frameSrc:   ["https://accounts.google.com"],
+        objectSrc:  ["'none'"],
+        upgradeInsecureRequests: process.env.NODE_ENV === "production" ? [] : null,
+      },
+    },
+    crossOriginEmbedderPolicy: false, // needed for Google Sign-In iframe
   })
 );
 

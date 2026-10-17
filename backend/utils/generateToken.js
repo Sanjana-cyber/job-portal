@@ -16,8 +16,8 @@ const sendTokenResponse = (user, statusCode, res, message = "Success") => {
     expires: new Date(
       Date.now() + process.env.COOKIE_EXPIRE * 24 * 60 * 60 * 1000
     ),
-    httpOnly: true, // Prevents JavaScript access (XSS protection)
-    sameSite: "lax", // CSRF protection
+    httpOnly: true,    // Prevents JavaScript access (XSS protection)
+    sameSite: "strict", // Strongest CSRF protection — cookie never sent cross-site
     secure: process.env.NODE_ENV === "production", // HTTPS only in production
     path: "/",
   };

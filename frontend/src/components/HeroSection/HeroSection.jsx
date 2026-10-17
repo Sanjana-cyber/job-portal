@@ -1,7 +1,8 @@
-import React from "react";
+﻿import React from "react";
 import { Search, FileText, BriefcaseBusiness, UserRound, Users } from "lucide-react";
 import TalentBridgeLogo from "../TalentBridgeLogo/TalentBridgeLogo";
 import heroImg from "./hero.png";
+import { useAuthModal } from "../../context/AuthModalContext";
 import "./HeroSection.css";
 
 const ICON_SIZE = 22;
@@ -35,6 +36,8 @@ const FEATURES = [
 ];
 
 function HeroSection() {
+  const { openModal } = useAuthModal();
+
   return (
     <section className="hero">
       <div className="hero__dots" aria-hidden="true" />
@@ -75,9 +78,15 @@ function HeroSection() {
             <h3 className="account-card__title">
               Join Thousands of Job Seekers Today!
             </h3>
-            <a href="/register" className="account-card__btn">
+            {/* Opens Auth Dialog instead of navigating */}
+            <button
+              type="button"
+              className="account-card__btn"
+              id="create-account-btn"
+              onClick={() => openModal("role")}
+            >
               Create Account
-            </a>
+            </button>
           </div>
 
           {/* Laptop Mockup Image */}
