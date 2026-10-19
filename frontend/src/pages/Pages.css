@@ -1,0 +1,299 @@
+/* ==========================================================================
+   TALENTBRIDGE PORTAL PAGES (Recruiter & Seeker) RESPONSIVE STYLES
+   ========================================================================== */
+
+.page-container {
+  min-height: 100vh;
+  width: 100%;
+  background-color: var(--color-hero-bg, #e6f0fa);
+  font-family: var(--font-body, 'Inter', sans-serif);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: #ffffff;
+  border-bottom: 1px solid #cbd5e1;
+  box-shadow: 0 2px 8px rgba(10, 37, 88, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+.page-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.page-brand-name {
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: var(--color-navy, #0a2558);
+  letter-spacing: 0.05em;
+}
+
+.page-badge {
+  border-radius: 9999px;
+  padding: 0.2rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.page-badge--recruiter {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+.page-badge--seeker {
+  background-color: #ecfdf5;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+}
+
+.page-logout-btn {
+  background-color: #ffffff;
+  color: #dc2626;
+  border: 1px solid #fca5a5;
+  padding: 0.45rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.page-logout-btn:hover {
+  background-color: #fef2f2;
+  border-color: #ef4444;
+}
+
+/* Main */
+.page-main {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2.5rem 1.5rem;
+}
+
+.page-card {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 2.5rem;
+  max-width: 520px;
+  width: 100%;
+  box-shadow: 0 10px 25px rgba(10, 37, 88, 0.08);
+  text-align: center;
+}
+
+.page-icon-wrap {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.page-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--color-navy, #0a2558);
+  margin: 0 0 0.5rem;
+}
+
+.page-subtitle {
+  font-size: 0.95rem;
+  color: #475569;
+  margin: 0 0 1.5rem;
+  line-height: 1.5;
+}
+
+.page-info-box {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  text-align: left;
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.page-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.page-label {
+  font-weight: 600;
+  color: #64748b;
+}
+
+.page-value {
+  font-weight: 600;
+  color: var(--color-navy, #0a2558);
+  word-break: break-all;
+}
+
+.page-note {
+  font-size: 0.85rem;
+  color: #64748b;
+  line-height: 1.5;
+  margin: 0 0 1.5rem;
+}
+
+.page-action-btn {
+  background-color: var(--color-navy, #0a2558);
+  color: #ffffff;
+  border: none;
+  padding: 0.75rem 1.4rem;
+  border-radius: 9px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: opacity 0.18s, transform 0.18s;
+  width: 100%;
+}
+
+.page-action-btn:hover {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+
+/* ---------- Media Queries: Pages ---------- */
+
+/* Tablet Landscape / Medium Desktop (<= 1024px) */
+@media (max-width: 1024px) {
+  .page-main {
+    padding: 2.5rem 1.5rem;
+  }
+
+  .page-card {
+    max-width: 540px;
+  }
+}
+
+/* Tablet Portrait (<= 768px) */
+@media (max-width: 768px) {
+  .page-header {
+    padding: 0.85rem 1.25rem;
+  }
+
+  .page-card {
+    padding: 2rem 1.5rem;
+    max-width: 480px;
+  }
+
+  .page-title {
+    font-size: 1.5rem;
+  }
+}
+
+/* Small Tablet / Large Mobile (<= 600px) */
+@media (max-width: 600px) {
+  .page-header {
+    padding: 0.75rem 1rem;
+  }
+
+  .page-main {
+    padding: 2rem 1rem;
+  }
+
+  .page-card {
+    padding: 1.75rem 1.25rem;
+    max-width: 100%;
+  }
+
+  .page-title {
+    font-size: 1.4rem;
+  }
+}
+
+/* Mobile (<= 480px) */
+@media (max-width: 480px) {
+  .page-header {
+    padding: 0.75rem 1rem;
+  }
+
+  .page-brand-name {
+    font-size: 0.95rem;
+  }
+
+  .page-badge {
+    padding: 0.15rem 0.5rem;
+    font-size: 0.7rem;
+  }
+
+  .page-logout-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+
+  .page-main {
+    padding: 1.5rem 0.85rem;
+  }
+
+  .page-card {
+    padding: 1.5rem 1.15rem;
+    border-radius: 14px;
+  }
+
+  .page-icon-wrap {
+    font-size: 2rem;
+  }
+
+  .page-title {
+    font-size: 1.35rem;
+  }
+
+  .page-subtitle {
+    font-size: 0.88rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .page-info-box {
+    padding: 0.85rem 1rem;
+  }
+
+  .page-info-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.2rem;
+  }
+
+  .page-label {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .page-value {
+    font-size: 0.88rem;
+  }
+
+  .page-note {
+    font-size: 0.8rem;
+    margin-bottom: 1.25rem;
+  }
+}
+
+/* Extra Small (<= 340px) */
+@media (max-width: 340px) {
+  .page-brand-name {
+    display: none;
+  }
+
+  .page-card {
+    padding: 1.25rem 0.85rem;
+  }
+}
+

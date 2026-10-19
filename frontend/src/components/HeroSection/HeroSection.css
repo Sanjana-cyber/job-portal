@@ -271,18 +271,27 @@
     filter: contrast(1.02);
 }
 
-/* ---------- Tablet ---------- */
+/* ---------- Media Queries: Responsive Design ---------- */
 
-@media (max-width: 1060px) {
+/* Laptops & Small Desktops (<= 1200px) */
+@media (max-width: 1200px) {
+    .hero__account-card {
+        left: -80px;
+        width: 210px;
+    }
+}
+
+/* Tablets Landscape (<= 1024px) */
+@media (max-width: 1024px) {
     .hero {
-        padding: 36px 20px 44px;
+        padding: 38px 20px 44px;
     }
 
     .hero__dots {
         top: 16px;
         left: 18px;
-        width: 56px;
-        height: 56px;
+        width: 58px;
+        height: 58px;
         background-size: 13px 13px;
     }
 
@@ -291,10 +300,9 @@
         margin-bottom: 20px;
     }
 
-
     .hero__account-card {
         width: 195px;
-        left: -90px;
+        left: -40px;
         padding: 18px 14px;
     }
 
@@ -313,38 +321,51 @@
     }
 }
 
-/* ---------- Mobile ---------- */
-
-@media (max-width: 680px) {
+/* Tablets Portrait & Large Mobile (<= 768px) */
+@media (max-width: 768px) {
     .hero {
-        padding: 32px 16px 36px;
+        padding: 32px 18px 40px;
     }
 
     .hero__dots {
         top: 12px;
-        left: 12px;
-        width: 44px;
-        height: 44px;
-        background-size: 11px 11px;
+        left: 14px;
+        width: 48px;
+        height: 48px;
+        background-size: 12px 12px;
+        opacity: 0.45;
+    }
+
+    .hero__brand {
+        font-size: clamp(1.8rem, 6.8vw, 2.8rem);
     }
 
     .hero__subtitle {
         margin: 8px 0 20px;
+        font-size: 1.05rem;
     }
 
     .hero__features {
         grid-template-columns: repeat(2, 1fr);
-        gap: 20px 12px;
-        margin-bottom: 16px;
+        gap: 20px 16px;
+        margin-bottom: 24px;
+        max-width: 540px;
     }
 
+    .hero__image-wrapper {
+        flex-direction: column;
+        align-items: center;
+        margin: 8px auto 0;
+        width: 100%;
+    }
 
     .hero__account-card {
         position: static;
         transform: none;
         width: 100%;
-        max-width: 270px;
-        margin: 0 auto 16px;
+        max-width: 290px;
+        margin: 0 auto 20px;
+        box-shadow: 0 8px 24px rgba(10, 37, 88, 0.12);
     }
 
     .hero__account-card:hover {
@@ -352,6 +373,94 @@
     }
 
     .hero__mockup-img {
-        max-height: 320px;
+        max-height: 340px;
+        width: 100%;
     }
 }
+
+/* Mobile Phones (<= 480px) */
+@media (max-width: 480px) {
+    .hero {
+        padding: 24px 14px 32px;
+    }
+
+    .hero__dots {
+        display: none; /* Hide decorative background dots on tiny screens to avoid visual clutter */
+    }
+
+    .hero__brand {
+        font-size: clamp(1.6rem, 7.8vw, 2.1rem);
+        gap: 0.2em;
+    }
+
+    .hero__subtitle {
+        font-size: 0.92rem;
+        margin: 6px 0 16px;
+        padding: 0 6px;
+        line-height: 1.45;
+    }
+
+    .hero__features {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px 10px;
+        margin-bottom: 18px;
+    }
+
+    .feature__icon-circle {
+        width: 48px;
+        height: 48px;
+    }
+
+    .feature__title {
+        font-size: 0.88rem;
+        margin: 8px 0 2px;
+    }
+
+    .feature__description {
+        font-size: 0.76rem;
+        max-width: 120px;
+    }
+
+    .hero__account-card {
+        padding: 16px 14px;
+        max-width: 260px;
+        margin-bottom: 16px;
+    }
+
+    .account-card__icon-wrap {
+        width: 44px;
+        height: 44px;
+        margin-bottom: 10px;
+    }
+
+    .account-card__title {
+        font-size: 0.86rem;
+        margin-bottom: 12px;
+    }
+
+    .account-card__btn {
+        padding: 9px 14px;
+        font-size: 0.8rem;
+    }
+
+    .hero__mockup-img {
+        max-height: 230px;
+    }
+}
+
+/* Extra Small Phones (<= 360px) */
+@media (max-width: 360px) {
+    .hero__brand {
+        font-size: 1.45rem;
+    }
+
+    .hero__features {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    .feature__description {
+        max-width: 200px;
+    }
+}
+

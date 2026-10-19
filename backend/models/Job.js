@@ -1,151 +1,149 @@
 const mongoose = require("mongoose");
 
 /**
- * Job.js
- * ──────
- * Mongoose schema for recruiter-posted job listings.
- *
- * Fields with `required: true` must be provided on creation.
- * Fields with `default` or no `required` are optional.
- *
- * recruiterId references the User document (a recruiter user).
- * Ownership checks in the controller compare job.recruiterId with req.user._id.
+ * Job Schema
+ * ──────────
+ * Stores recruiter job postings for Talent Bridge.
+ * Each job is linked to the authenticated recruiter via the `recruiter` field.
  */
 const jobSchema = new mongoose.Schema(
   {
-    // ── Core details ──────────────────────────────────────────────────────────
-    title: {
+    // ── Basic Job Information ──────────────────────────────────────────
+    jobTitle: {
       type: String,
       required: [true, "Job title is required"],
       trim: true,
-      maxlength: [150, "Title cannot exceed 150 characters"],
     },
-
-    company: {
-      type: String,
-      required: [true, "Company name is required"],
-      trim: true,
-      maxlength: [100, "Company name cannot exceed 100 characters"],
+    headcount: {
+      type: Number,
+      required: [true, "Headcount is required"],
+      min: [1, "Headcount must be at least 1"],
     },
-
-    location: {
+    jobType: {
       type: String,
-      required: [true, "Location is required"],
-      trim: true,
-      maxlength: [150, "Location cannot exceed 150 characters"],
-    },
-
-    // ── Employment details ────────────────────────────────────────────────────
-    employmentType: {
-      type: String,
-      required: [true, "Employment type is required"],
-      enum: {
-        values: ["full-time", "part-time", "internship", "contract"],
-        message:
-          "Employment type must be one of: full-time, part-time, internship, contract",
-      },
-    },
-
-    description: {
-      type: String,
-      required: [true, "Job description is required"],
+      required: [true, "Job type is required"],
       trim: true,
     },
-
-    responsibilities: {
-      type: String,
-      trim: true,
-      default: "",
-    },
-
-    // skills is a required array of strings
-    skills: {
+    acceptableLocations: {
       type: [String],
-      required: [true, "At least one skill is required"],
+      required: [true, "At least one acceptable location is required"],
       validate: {
-        validator: function (arr) {
-          // Array must have at least one non-empty string
-          return Array.isArray(arr) && arr.length > 0;
+        validator: function (val) {
+          return Array.isArray(val) && val.length > 0;
         },
-        message: "Skills must be a non-empty array of strings",
+        message: "At least one acceptable location is required",
       },
     },
 
-    experience: {
-      type: String,
-      required: [true, "Experience requirement is required"],
-      trim: true,
-      maxlength: [100, "Experience field cannot exceed 100 characters"],
-    },
-
-    education: {
-      type: String,
-      trim: true,
-      default: "",
-    },
-
-    // ── Compensation ──────────────────────────────────────────────────────────
+    // ── Salary Information ─────────────────────────────────────────────
     salaryMin: {
       type: Number,
       min: [0, "Minimum salary cannot be negative"],
       default: null,
     },
-
     salaryMax: {
       type: Number,
       min: [0, "Maximum salary cannot be negative"],
       default: null,
     },
-
-    // ── Logistics ─────────────────────────────────────────────────────────────
-    openings: {
-      type: Number,
-      required: [true, "Number of openings is required"],
-      min: [1, "Openings must be at least 1"],
-      validate: {
-        validator: Number.isInteger,
-        message: "Openings must be a whole number",
-      },
+    useRecommendedSalary: {
+      type: Boolean,
+      default: false,
+    },
+    offeringBonus: {
+      type: Boolean,
+      default: false,
+    },
+    offeringEquity: {
+      type: Boolean,
+      default: false,
     },
 
+    // ── Skills and Experience ──────────────────────────────────────────
+    level: {
+      type: String,
+      required: [true, "Level is required"],
+      trim: true,
+    },
+    techStack: {
+      type: [String],
+      required: [true, "Tech stack is required"],
+      validate: {
+        validator: function (val) {
+          return Array.isArray(val) && val.length > 0;
+        },
+        message: "Tech stack must contain at least one item",
+      },
+    },
+    requiredSkills: {
+      type: [String],
+      required: [true, "Required skills are required"],
+      validate: {
+        validator: function (val) {
+          return Array.isArray(val) && val.length > 0;
+        },
+        message: "Required skills must contain at least one skill",
+      },
+    },
+    yearsOfExperience: {
+      type: Number,
+      required: [true, "Years of experience is required"],
+      min: [0, "Years of experience cannot be negative"],
+    },
+
+    // ── Additional Job Information ─────────────────────────────────────
+    description: {
+      type: String,
+      required: [true, "Job description is required"],
+      trim: true,
+    },
+    responsibilities: {
+      type: [String],
+      default: [],
+    },
+    requirements: {
+      type: [String],
+      default: [],
+    },
+    employmentType: {
+      type: String,
+      required: [true, "Employment type is required"],
+      trim: true,
+    },
     applicationDeadline: {
       type: Date,
       default: null,
     },
+    status: {
+      type: String,
+      default: "Open",
+      enum: {
+        values: ["Open", "Closed", "Draft"],
+        message: "Status must be Open, Closed, or Draft",
+      },
+    },
 
-    // ── Ownership ─────────────────────────────────────────────────────────────
-    // Points to the User document of the recruiter who created this job.
-    // Set exclusively by the backend from req.user._id — never trusted from the client.
-    recruiterId: {
+    // ── Recruiter Relationship ─────────────────────────────────────────
+    recruiter: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: [true, "Recruiter reference is required"],
     },
-
-    // ── Status ────────────────────────────────────────────────────────────────
-    status: {
-      type: String,
-      enum: {
-        values: ["active", "closed", "draft"],
-        message: "Status must be one of: active, closed, draft",
-      },
-      default: "active",
-    },
   },
   {
-    // Automatically adds createdAt and updatedAt timestamps
     timestamps: true,
   }
 );
 
 /**
- * Schema-level validation: salaryMin must not exceed salaryMax.
- * This runs only when both values are provided.
+ * Validate salaryMin does not exceed salaryMax when both are provided
  */
 jobSchema.pre("validate", function (next) {
   if (
     this.salaryMin !== null &&
+    this.salaryMin !== undefined &&
     this.salaryMax !== null &&
+    this.salaryMax !== undefined &&
     this.salaryMin > this.salaryMax
   ) {
     this.invalidate(

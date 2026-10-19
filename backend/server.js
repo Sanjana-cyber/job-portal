@@ -119,6 +119,7 @@ app.use("/api/resume-intelligence", resumeIntelligenceRoutes);
 
 // Recruiter Job Management routes (protected — recruiter/admin only)
 // Handles: POST, GET, GET/:id, PUT/:id, DELETE/:id for a recruiter's own jobs
+app.use("/api/jobs", jobRoutes);
 app.use("/api/recruiter/jobs", jobRoutes);
 
 // Application routes

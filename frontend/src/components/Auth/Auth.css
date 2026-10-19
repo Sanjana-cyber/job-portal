@@ -1,4 +1,4 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    AUTH MODAL — TalentBridge
    Uses the same color tokens defined in src/index.css
    ========================================================================== */
@@ -296,6 +296,23 @@
 }
 .auth-input::placeholder { color: #a0aec0; }
 
+/* Error state on individual input */
+.auth-input--error {
+  border-color: #ef4444 !important;
+  background: #fff8f8 !important;
+}
+.auth-input--error:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.14) !important;
+}
+
+/* Inline field-level error message */
+.auth-field-error {
+  font-size: 0.77rem;
+  color: #ef4444;
+  margin: 0.15rem 0 0;
+  line-height: 1.35;
+}
+
 .auth-input-wrap .auth-input {
   padding-right: 2.5rem;
 }
@@ -397,10 +414,112 @@
   to   { transform: rotate(360deg); }
 }
 
-/* Responsive */
-@media (max-width: 500px) {
+/* ---------- Media Queries: Auth Modal ---------- */
+@media (max-width: 520px) {
+  .auth-overlay {
+    padding: 0.75rem;
+  }
+
   .auth-modal {
-    padding: 2rem 1.25rem 1.5rem;
+    padding: 1.75rem 1.25rem 1.5rem;
     border-radius: 16px;
+    max-height: 94vh;
+    overflow-y: auto;
+  }
+
+  .auth-modal__close {
+    top: 0.75rem;
+    right: 0.75rem;
+    width: 28px;
+    height: 28px;
+  }
+
+  .auth-modal__title {
+    font-size: 1.25rem;
+  }
+
+  .auth-modal__sub {
+    font-size: 0.82rem;
+  }
+
+  .role-card {
+    padding: 12px 14px;
+    gap: 12px;
+  }
+
+  .role-card__label {
+    font-size: 0.95rem;
+  }
+
+  .role-card__desc {
+    font-size: 0.78rem;
+  }
+
+  .auth-input {
+    padding: 0.65rem 0.8rem;
+    font-size: 0.88rem;
+  }
+
+  .auth-submit-btn {
+    padding: 0.75rem;
+    font-size: 0.92rem;
+  }
+
+  .auth-footer-links {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    text-align: center;
   }
 }
+
+@media (max-width: 360px) {
+  .auth-overlay {
+    padding: 0.35rem;
+  }
+
+  .auth-modal {
+    padding: 1.5rem 1rem 1.25rem;
+  }
+
+  .role-cards {
+    gap: 8px;
+  }
+
+  .role-card {
+    padding: 10px 12px;
+  }
+}
+
+/* Height-constrained / Landscape Mobile Devices */
+@media (max-height: 700px) {
+  .auth-modal {
+    max-height: 92vh;
+    padding: 1.5rem 1.25rem 1.25rem;
+    overflow-y: auto;
+  }
+
+  .auth-modal__header {
+    margin-bottom: 1rem;
+  }
+
+  .auth-modal__logo-mark {
+    width: 38px;
+    height: 38px;
+    margin-bottom: 0.4rem;
+  }
+
+  .auth-modal__title {
+    font-size: 1.25rem;
+  }
+
+  .role-cards {
+    gap: 0.5rem;
+  }
+
+  .role-card {
+    padding: 0.75rem 1rem;
+  }
+}
+
+

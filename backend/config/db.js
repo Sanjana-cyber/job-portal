@@ -14,7 +14,13 @@ try {
  */
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGO_URI);
+    const conn = await mongoose.connect(process.env.MONGO_URI, {
+      serverSelectionTimeoutMS: 10000,   // fail fast if Atlas unreachable
+      socketTimeoutMS: 45000,
+      tls: true,
+      tlsAllowInvalidCertificates: false, // keep cert validation — set true only as last resort
+    });
+
     console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
     console.error(`❌ MongoDB Connection Error: ${error.message}`);

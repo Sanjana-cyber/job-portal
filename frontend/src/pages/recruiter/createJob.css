@@ -1,0 +1,880 @@
+/* ==========================================================================
+   TALENT BRIDGE — ENTERPRISE RECRUITER CREATE JOB PAGE
+   Clean, polished SaaS interface with strong visual hierarchy & responsive grid.
+   ========================================================================== */
+
+/* ── Page Canvas ─────────────────────────────────────────────────────────── */
+.create-job-page {
+  min-height: 100vh;
+  width: 100%;
+  background-color: #f8fafc;
+  color: #0a2558;
+  font-family: var(--font-body, 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Content Container ───────────────────────────────────────────────────── */
+.create-job-container {
+  max-width: 1240px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 1.75rem 2rem 5rem;
+}
+
+/* ── Breadcrumb & Navigation Bar ─────────────────────────────────────────── */
+.create-job-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.create-job-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  color: #64748b;
+}
+
+.create-job-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #475569;
+  font-weight: 600;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.35rem 0.65rem;
+  margin-left: -0.65rem;
+  border-radius: 6px;
+  transition: all 0.18s ease;
+}
+
+.create-job-back-link:hover {
+  color: var(--color-royal, #2563eb);
+  background-color: #eff6ff;
+}
+
+.create-job-breadcrumb__separator {
+  color: #cbd5e1;
+}
+
+.create-job-breadcrumb__current {
+  color: #0a2558;
+  font-weight: 600;
+}
+
+/* ── Page Header Row ─────────────────────────────────────────────────────── */
+.create-job-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 1.75rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+}
+
+.create-job-header__text h1 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--color-navy, #0a2558);
+  margin: 0 0 0.35rem;
+  letter-spacing: -0.025em;
+  line-height: 1.25;
+}
+
+.create-job-header__text p {
+  font-size: 0.92rem;
+  color: #64748b;
+  margin: 0;
+  max-width: 620px;
+  line-height: 1.5;
+}
+
+.create-job-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+/* ── Error Banner ────────────────────────────────────────────────────────── */
+.create-job-error-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+  padding: 0.9rem 1.2rem;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  margin-bottom: 1.75rem;
+  line-height: 1.45;
+}
+
+.create-job-error-banner svg {
+  flex-shrink: 0;
+  color: #dc2626;
+  margin-top: 0.15rem;
+}
+
+/* ── Layout Grid (Wide Form + Contextual Sidebar) ────────────────────────── */
+.create-job-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 2rem;
+  align-items: start;
+}
+
+/* ── Main Form Column ────────────────────────────────────────────────────── */
+.create-job-form-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ── Section Cards ───────────────────────────────────────────────────────── */
+.create-job-section {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.75rem;
+  box-shadow: 0 1px 3px rgba(10, 37, 88, 0.04);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.create-job-section:hover {
+  border-color: #cbd5e1;
+}
+
+.create-job-section__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #f1f5f9;
+  gap: 1rem;
+}
+
+.create-job-section__title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.create-job-section__icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background-color: #eff6ff;
+  color: var(--color-royal, #2563eb);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.create-job-section__title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--color-navy, #0a2558);
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.create-job-section__desc {
+  font-size: 0.84rem;
+  color: #64748b;
+  margin: 0.25rem 0 0;
+  line-height: 1.45;
+}
+
+.create-job-section__badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  background-color: #f1f5f9;
+  color: #475569;
+  white-space: nowrap;
+}
+
+.create-job-section__badge--required {
+  background-color: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fee2e2;
+}
+
+/* ── Form Fields & Input Grids ───────────────────────────────────────────── */
+.create-job-form-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.create-job-form-row--3col {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.create-job-field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.25rem;
+}
+
+.create-job-form-row .create-job-field {
+  margin-bottom: 0;
+}
+
+.create-job-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 0.45rem;
+  letter-spacing: 0.01em;
+}
+
+.create-job-label__required {
+  color: #dc2626;
+  margin-left: 0.2rem;
+}
+
+.create-job-label__hint {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: #94a3b8;
+}
+
+.create-job-input,
+.create-job-select,
+.create-job-textarea {
+  width: 100%;
+  font-family: inherit;
+  font-size: 0.88rem;
+  color: #0a2558;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+}
+
+.create-job-input,
+.create-job-select {
+  height: 42px;
+  padding: 0 0.85rem;
+}
+
+.create-job-textarea {
+  padding: 0.75rem 0.85rem;
+  resize: vertical;
+  min-height: 110px;
+  line-height: 1.5;
+}
+
+.create-job-input::placeholder,
+.create-job-textarea::placeholder {
+  color: #94a3b8;
+}
+
+.create-job-input:focus,
+.create-job-select:focus,
+.create-job-textarea:focus {
+  border-color: var(--color-royal, #2563eb);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.create-job-input--error,
+.create-job-select--error,
+.create-job-textarea--error {
+  border-color: #ef4444 !important;
+  background-color: #fffbfb;
+}
+
+.create-job-input--error:focus,
+.create-job-select--error:focus,
+.create-job-textarea--error:focus {
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12) !important;
+}
+
+.create-job-field-error {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: #dc2626;
+  margin-top: 0.35rem;
+}
+
+.create-job-field-hint {
+  font-size: 0.76rem;
+  color: #64748b;
+  margin-top: 0.35rem;
+  line-height: 1.4;
+}
+
+/* ── Segmented Control / Radio Pill Group ────────────────────────────────── */
+.create-job-segmented {
+  display: flex;
+  background-color: #f1f5f9;
+  border-radius: 8px;
+  padding: 3px;
+  gap: 3px;
+}
+
+.create-job-segmented__btn {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #64748b;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.18s;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.create-job-segmented__btn--active {
+  background-color: #ffffff;
+  color: var(--color-navy, #0a2558);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* ── Checkboxes Group ────────────────────────────────────────────────────── */
+.create-job-checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.35rem;
+  margin-bottom: 0.5rem;
+}
+
+.create-job-checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: #334155;
+  cursor: pointer;
+  user-select: none;
+}
+
+.create-job-checkbox {
+  width: 17px;
+  height: 17px;
+  border-radius: 4px;
+  accent-color: var(--color-royal, #2563eb);
+  cursor: pointer;
+}
+
+/* ── Interactive Tag / Chip Input ────────────────────────────────────────── */
+.create-job-tag-input-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.create-job-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  min-height: 38px;
+  padding: 0.45rem 0.65rem;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.create-job-tag-list:empty::before {
+  content: "No tags added yet. Type below and press Enter.";
+  color: #94a3b8;
+  font-size: 0.8rem;
+  font-style: italic;
+  display: flex;
+  align-items: center;
+}
+
+.create-job-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background-color: #eff6ff;
+  color: var(--color-royal, #2563eb);
+  border: 1px solid #dbeafe;
+  padding: 0.25rem 0.55rem;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.create-job-tag__remove {
+  background: none;
+  border: none;
+  color: #93c5fd;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-radius: 50%;
+  transition: color 0.15s;
+}
+
+.create-job-tag__remove:hover {
+  color: #1d4ed8;
+}
+
+.create-job-tag-input-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.create-job-tag-add-btn {
+  height: 42px;
+  padding: 0 1rem;
+  background-color: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  border-radius: 8px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.create-job-tag-add-btn:hover {
+  background-color: #e2e8f0;
+  color: #0a2558;
+}
+
+/* ── Dynamic Item List Builder (Responsibilities & Requirements) ─────────── */
+.create-job-items-builder {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.create-job-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.create-job-item-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  background-color: #ffffff;
+  padding: 0.4rem 0.65rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  color: #334155;
+}
+
+.create-job-item-bullet {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--color-royal, #2563eb);
+  flex-shrink: 0;
+}
+
+.create-job-item-text {
+  flex: 1;
+  line-height: 1.45;
+}
+
+.create-job-item-delete {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.create-job-item-delete:hover {
+  color: #dc2626;
+  background-color: #fef2f2;
+}
+
+.create-job-item-input-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* ── Contextual Sidebar ──────────────────────────────────────────────────── */
+.create-job-sidebar {
+  position: sticky;
+  top: 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.create-job-sidebar-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.4rem;
+  box-shadow: 0 1px 3px rgba(10, 37, 88, 0.04);
+}
+
+.create-job-sidebar-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.create-job-sidebar-card__title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-navy, #0a2558);
+  margin: 0;
+}
+
+/* Publishing checklist items */
+.create-job-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.create-job-checklist__item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 0.82rem;
+  color: #475569;
+  transition: color 0.18s;
+}
+
+.create-job-checklist__item--complete {
+  color: #0f172a;
+  font-weight: 500;
+}
+
+.create-job-checklist__icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.create-job-checklist__icon--pending {
+  color: #cbd5e1;
+}
+
+.create-job-checklist__icon--done {
+  color: #10b981;
+}
+
+.create-job-checklist__progress-wrap {
+  margin-top: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+.create-job-checklist__progress-bar {
+  width: 100%;
+  height: 6px;
+  background-color: #e2e8f0;
+  border-radius: 9999px;
+  overflow: hidden;
+  margin-bottom: 0.4rem;
+}
+
+.create-job-checklist__progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #2563eb, #10b981);
+  transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.create-job-checklist__progress-text {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+/* Visibility panel details */
+.create-job-visibility-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.create-job-visibility-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.create-job-visibility-label {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.create-job-visibility-value {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--color-navy, #0a2558);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.create-job-visibility-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background-color: #ecfdf5;
+  color: #059669;
+  border: 1px solid #d1fae5;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+}
+
+.create-job-visibility-tip {
+  display: flex;
+  gap: 0.5rem;
+  background-color: #eff6ff;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  padding: 0.75rem;
+  font-size: 0.78rem;
+  color: #1e40af;
+  line-height: 1.45;
+  margin-top: 0.5rem;
+}
+
+.create-job-visibility-tip svg {
+  flex-shrink: 0;
+  color: #2563eb;
+  margin-top: 0.1rem;
+}
+
+/* ── Footer Actions ──────────────────────────────────────────────────────── */
+.create-job-footer {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.85rem;
+}
+
+/* ── Buttons ─────────────────────────────────────────────────────────────── */
+.create-job-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  height: 42px;
+  padding: 0 1.35rem;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+}
+
+.create-job-btn--secondary {
+  background-color: #ffffff;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+}
+
+.create-job-btn--secondary:hover:not(:disabled) {
+  background-color: #f8fafc;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+/* Primary / Publish Button — signature Create Account styling */
+.create-job-btn--primary {
+  appearance: none;
+  border: none;
+  background: linear-gradient(135deg, #2563eb 0%, #1a3fa8 100%);
+  color: #ffffff;
+  font-family: var(--font-heading, 'Inter', sans-serif);
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 10px 22px;
+  border-radius: 10px;
+  box-shadow:
+    0 4px 14px rgba(37, 99, 235, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Shimmer on hover */
+.create-job-btn--primary::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 30%, rgba(255, 255, 255, 0.18) 50%, transparent 70%);
+  transform: translateX(-100%);
+  transition: transform 0.45s ease;
+  pointer-events: none;
+}
+
+.create-job-btn--primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1d4ed8 0%, #163499 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(37, 99, 235, 0.42);
+}
+
+.create-job-btn--primary:hover:not(:disabled)::after {
+  transform: translateX(100%);
+}
+
+.create-job-btn--primary:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 3px 10px rgba(37, 99, 235, 0.3);
+}
+
+.create-job-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.create-job-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: create-job-spin 0.65s linear infinite;
+}
+
+@keyframes create-job-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Responsive Breakpoints ──────────────────────────────────────────────── */
+
+/* Tablet (<= 992px) */
+@media (max-width: 992px) {
+  .create-job-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .create-job-sidebar {
+    position: static;
+    order: 2;
+  }
+
+  .create-job-form-col {
+    order: 1;
+  }
+}
+
+/* Small Tablet / Mobile Landscape (<= 768px) */
+@media (max-width: 768px) {
+  .create-job-container {
+    padding: 1.25rem 1rem 4rem;
+  }
+
+  .create-job-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .create-job-header__actions {
+    width: 100%;
+  }
+
+  .create-job-header__actions button {
+    flex: 1;
+  }
+
+  .create-job-form-row {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .create-job-form-row--3col {
+    grid-template-columns: 1fr;
+  }
+
+  .create-job-section {
+    padding: 1.25rem;
+  }
+}
+
+/* Mobile Phones (<= 480px) */
+@media (max-width: 480px) {
+  .create-job-header__text h1 {
+    font-size: 1.45rem;
+  }
+
+  .create-job-tag-input-row,
+  .create-job-item-input-row {
+    flex-direction: column;
+  }
+
+  .create-job-tag-add-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .create-job-footer {
+    flex-direction: column-reverse;
+  }
+
+  .create-job-footer button {
+    width: 100%;
+  }
+}

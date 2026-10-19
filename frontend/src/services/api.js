@@ -1,17 +1,26 @@
-﻿import axios from "axios";
+import axios from "axios";
 
 /**
  * Central API Client
- * - withCredentials sends the HttpOnly JWT cookie automatically
- * - 10s timeout prevents UI hanging on dead backend
- * - 401 interceptor auto-redirects when session expires
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Security features baked in:
+ *   • withCredentials — sends the HttpOnly JWT cookie on every request (no
+ *     localStorage, no XSS-accessible token)
+ *   • 10 s timeout — prevents the UI from hanging on a dead backend
+ *   • 401 interceptor — fires a custom DOM event so AuthModalContext can clear
+ *     the user state and show the login modal automatically
+ *   • 429 interceptor — surfaces the backend rate-limit message clearly
+ *   • Input sanitisation helpers — trim/lowercase before every request so the
+ *     server never receives accidental leading/trailing whitespace
  */
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
-  withCredentials: true,        // sends HttpOnly cookie on every request
-  timeout: 10000,               // 10 second timeout
+  withCredentials: true,   // HttpOnly cookie — JWT never touches localStorage
+  timeout: 10_000,         // 10-second timeout; shows error instead of spinning
   headers: {
     "Content-Type": "application/json",
   },
@@ -21,18 +30,19 @@ export const api = axios.create({
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    const status  = error.response?.status;
-    const message = error.response?.data?.message || error.message || "Something went wrong";
+    const status = error.response?.status;
+    const message =
+      error.response?.data?.message ||
+      error.message ||
+      "Something went wrong";
 
-    // 401 → session expired / cookie gone → soft redirect to home
+    // 401 → cookie expired or invalid → signal the app to auto-logout
     if (status === 401) {
-      // Only redirect if not already on a public page
-      if (!window.location.pathname.startsWith("/login")) {
-        window.dispatchEvent(new CustomEvent("auth:expired"));
-      }
+      // Dispatch a custom event; AuthModalContext listens and clears user state
+      window.dispatchEvent(new CustomEvent("auth:expired"));
     }
 
-    // 429 → rate-limited by backend
+    // 429 → rate-limited by backend (brute-force protection)
     if (status === 429) {
       return Promise.reject({
         status: 429,
@@ -49,69 +59,110 @@ api.interceptors.response.use(
   }
 );
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+// ─── Sanitisation Helpers ─────────────────────────────────────────────────────
 
-/** Trim and lowercase an email before sending */
+/** Trim whitespace and lowercase — safe for email fields */
 const sanitizeEmail = (email) => (email || "").trim().toLowerCase();
 
-/** Trim a plain string */
+/** Trim whitespace from plain strings */
 const sanitizeStr = (str) => (str || "").trim();
 
-// ============================================
-// Auth API Endpoints
-// ============================================
+// ─── Auth API ─────────────────────────────────────────────────────────────────
 
-/** Register a user — token stored as HttpOnly cookie by backend */
-export const registerUser = async ({ name, email, password, role, companyName, companyWebsite }) => {
+/**
+ * Register a new user.
+ * JWT is stored in an HttpOnly cookie by the backend — never exposed to JS.
+ *
+ * @param {{ name, email, password, role, companyName?, companyWebsite? }} params
+ */
+export const registerUser = async ({
+  name,
+  email,
+  password,
+  role,
+  companyName,
+  companyWebsite,
+}) => {
   const payload = {
     name: sanitizeStr(name),
     email: sanitizeEmail(email),
-    password,
+    password, // never trimmed — user may intentionally include spaces
     role,
   };
+  // Only include recruiter fields when registering as a recruiter
   if (role === "recruiter") {
-    payload.companyName    = sanitizeStr(companyName);
+    payload.companyName = sanitizeStr(companyName);
     payload.companyWebsite = sanitizeStr(companyWebsite);
   }
   const res = await api.post("/auth/register", payload);
-  return res.data;
+  return res.data; // { success, message, user }
 };
 
-/** Login user — token stored as HttpOnly cookie by backend */
+/**
+ * Login an existing user.
+ * Backend sets the HttpOnly JWT cookie on success.
+ *
+ * @param {{ email, password }} params
+ */
 export const loginUser = async ({ email, password }) => {
   const res = await api.post("/auth/login", {
     email: sanitizeEmail(email),
     password,
   });
-  return res.data;
+  return res.data; // { success, message, user }
 };
 
-/** Forgot password — sends reset email */
+/**
+ * Send a forgot-password reset link to the provided email.
+ * Backend always returns success to prevent email enumeration.
+ *
+ * @param {string} email
+ */
 export const forgotPassword = async (email) => {
-  const res = await api.post("/auth/forgot-password", { email: sanitizeEmail(email) });
-  return res.data;
+  const res = await api.post("/auth/forgot-password", {
+    email: sanitizeEmail(email),
+  });
+  return res.data; // { success, message }
 };
 
-/** Reset password using token */
+/**
+ * Reset the user's password using the token from the reset email.
+ *
+ * @param {{ token, password }} params
+ */
 export const resetPassword = async ({ token, password }) => {
-  const res = await api.post("/auth/reset-password", { token, password });
-  return res.data;
+  const res = await api.post("/auth/reset-password", {
+    token: sanitizeStr(token),
+    password,
+  });
+  return res.data; // { success, message, user }
 };
 
-/** Google OAuth — role passed so backend assigns correct user type */
+/**
+ * Authenticate via Google OAuth (ID token from GSI library).
+ * Role is passed so the backend can assign the correct user type for new users.
+ *
+ * @param {{ credential, role }} params
+ */
 export const googleAuth = async ({ credential, role = "jobseeker" }) => {
   const res = await api.post("/auth/google", { credential, role });
-  return res.data;
+  return res.data; // { success, message, user }
 };
 
-/** Get authenticated user profile (requires valid cookie) */
+/**
+ * Fetch the currently authenticated user's profile.
+ * Relies on the HttpOnly cookie being present — will 401 if not logged in.
+ */
 export const getMe = async () => {
   const res = await api.get("/auth/me");
-  return res.data;
+  return res.data; // { success, user }
 };
 
-/** Logout — backend clears the HttpOnly cookie */
+/**
+ * Log the user out.
+ * Backend clears the HttpOnly cookie; frontend clears its local state.
+ */
 export const logoutUser = async () => {
   const res = await api.post("/auth/logout");
-  return res.data;
+  return res.data; // { success, message }
 };
