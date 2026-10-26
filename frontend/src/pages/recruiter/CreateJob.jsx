@@ -175,62 +175,115 @@ export default function CreateJob({ onBack, onJobCreated, initialData = null }) 
   };
 
   // ── Form Validation ───────────────────────────────────────────────────────
-  const validate = () => {
+  const validate = (isDraft = false, data = formData, isClosed = false) => {
     const errs = {};
 
-    if (!formData.jobTitle.trim()) {
-      errs.jobTitle = "Job title is required";
-    }
-    if (!formData.employmentType.trim()) {
-      errs.employmentType = "Employment type is required";
-    }
-    if (!formData.jobType.trim()) {
-      errs.jobType = "Work arrangement is required";
-    }
-    if (!formData.acceptableLocations || formData.acceptableLocations.length === 0) {
-      errs.acceptableLocations = "At least one location is required";
-    }
-    if (!formData.headcount || Number(formData.headcount) < 1) {
-      errs.headcount = "Openings must be at least 1";
-    }
-    if (!formData.level.trim()) {
-      errs.level = "Experience level is required";
-    }
-    if (
-      formData.yearsOfExperience === "" ||
-      Number(formData.yearsOfExperience) < 0
-    ) {
-      errs.yearsOfExperience = "Years of experience must be 0 or greater";
-    }
-    if (!formData.requiredSkills || formData.requiredSkills.length === 0) {
-      errs.requiredSkills = "Add at least one required skill";
-    }
-    if (!formData.techStack || formData.techStack.length === 0) {
-      errs.techStack = "Add at least one tech stack tool";
-    }
-    if (!formData.description.trim()) {
-      errs.description = "Job summary description is required";
-    } else if (formData.description.trim().length < 20) {
-      errs.description = "Description should be at least 20 characters";
+    // For draft or closing registration: only job title is required so it can be identified
+    if (!data.jobTitle?.trim()) {
+      errs.jobTitle = isDraft
+        ? "Job title is required to save a draft"
+        : isClosed
+        ? "Job title is required to close registration"
+        : "Job title is required";
     }
 
-    // Salary validation
+    // Salary validation (applies if values are entered)
     if (
-      formData.salaryMin !== "" &&
-      formData.salaryMax !== "" &&
-      Number(formData.salaryMin) > Number(formData.salaryMax)
+      data.salaryMin !== "" &&
+      data.salaryMax !== "" &&
+      Number(data.salaryMin) > Number(data.salaryMax)
     ) {
       errs.salaryMin = "Minimum salary cannot exceed maximum salary";
     }
 
+    // If saving as draft or closing registration, skip other strict mandatory checks
+    if (isDraft || isClosed) {
+      setErrors(errs);
+      return { isValid: Object.keys(errs).length === 0, errors: errs };
+    }
+
+    // Mandatory fields for Publishing / Open jobs
+    if (!data.employmentType?.trim()) {
+      errs.employmentType = "Employment type is required";
+    }
+    if (!data.jobType?.trim()) {
+      errs.jobType = "Work arrangement is required";
+    }
+    if (!data.acceptableLocations || data.acceptableLocations.length === 0) {
+      errs.acceptableLocations = "At least one location is required";
+    }
+    if (!data.headcount || Number(data.headcount) < 1) {
+      errs.headcount = "Openings must be at least 1";
+    }
+    if (!data.level?.trim()) {
+      errs.level = "Experience level is required";
+    }
+    if (
+      data.yearsOfExperience === "" ||
+      Number(data.yearsOfExperience) < 0
+    ) {
+      errs.yearsOfExperience = "Years of experience must be 0 or greater";
+    }
+    if (!data.requiredSkills || data.requiredSkills.length === 0) {
+      errs.requiredSkills = "Add at least one required skill";
+    }
+    if (!data.techStack || data.techStack.length === 0) {
+      errs.techStack = "Add at least one tech stack tool";
+    }
+    if (!data.description?.trim()) {
+      errs.description = "Job summary description is required";
+    } else if (data.description.trim().length < 20) {
+      errs.description = "Description should be at least 20 characters";
+    }
+
     setErrors(errs);
-    return Object.keys(errs).length === 0;
+    return { isValid: Object.keys(errs).length === 0, errors: errs };
   };
 
   // ── Form Submission ───────────────────────────────────────────────────────
   const handleSubmit = async (submitStatus = "Open") => {
-    if (!validate()) {
-      window.scrollTo({ top: 180, behavior: "smooth" });
+    const isDraft = submitStatus === "Draft";
+    const isClosed = submitStatus === "Closed";
+
+    // Auto-commit any currently typed text in inputs into their arrays
+    let currentSkills = [...formData.requiredSkills];
+    if (skillInput.trim() && !currentSkills.includes(skillInput.trim())) {
+      currentSkills.push(skillInput.trim());
+      setSkillInput("");
+    }
+
+    let currentTech = [...formData.techStack];
+    if (techInput.trim() && !currentTech.includes(techInput.trim())) {
+      currentTech.push(techInput.trim());
+      setTechInput("");
+    }
+
+    let currentLocations = [...formData.acceptableLocations];
+    if (locationInput.trim() && !currentLocations.includes(locationInput.trim())) {
+      currentLocations.push(locationInput.trim());
+      setLocationInput("");
+    }
+
+    const currentData = {
+      ...formData,
+      status: submitStatus,
+      requiredSkills: currentSkills,
+      techStack: currentTech,
+      acceptableLocations: currentLocations,
+    };
+    setFormData(currentData);
+
+    const { isValid, errors: validationErrors } = validate(isDraft, currentData, isClosed);
+    if (!isValid) {
+      const errorList = Object.values(validationErrors);
+      setApiError(
+        isDraft
+          ? "Please provide a Job Title to save this job as a draft."
+          : isClosed
+          ? "Please provide a Job Title to close registration."
+          : `Please fill in all required fields before publishing: ${errorList.join(", ")}`
+      );
+      window.scrollTo({ top: 120, behavior: "smooth" });
       return;
     }
 
@@ -238,24 +291,34 @@ export default function CreateJob({ onBack, onJobCreated, initialData = null }) 
     setApiError(null);
 
     const payload = {
-      jobTitle: formData.jobTitle.trim(),
-      headcount: Number(formData.headcount),
-      jobType: formData.jobType.trim(),
-      acceptableLocations: formData.acceptableLocations,
-      employmentType: formData.employmentType.trim(),
-      level: formData.level.trim(),
-      yearsOfExperience: Number(formData.yearsOfExperience),
-      salaryMin: formData.salaryMin !== "" ? Number(formData.salaryMin) : null,
-      salaryMax: formData.salaryMax !== "" ? Number(formData.salaryMax) : null,
-      offeringBonus: Boolean(formData.offeringBonus),
-      offeringEquity: Boolean(formData.offeringEquity),
-      useRecommendedSalary: Boolean(formData.useRecommendedSalary),
-      requiredSkills: formData.requiredSkills,
-      techStack: formData.techStack,
-      description: formData.description.trim(),
-      responsibilities: formData.responsibilities,
-      requirements: formData.requirements,
-      applicationDeadline: formData.applicationDeadline || null,
+      jobTitle: currentData.jobTitle.trim(),
+      headcount: Number(currentData.headcount) || 1,
+      jobType: currentData.jobType.trim() || "Remote",
+      acceptableLocations:
+        currentData.acceptableLocations.length > 0
+          ? currentData.acceptableLocations
+          : ["Remote"],
+      employmentType: currentData.employmentType.trim() || "Full-time",
+      level: currentData.level.trim() || "Mid Level",
+      yearsOfExperience:
+        currentData.yearsOfExperience !== ""
+          ? Number(currentData.yearsOfExperience)
+          : 0,
+      salaryMin:
+        currentData.salaryMin !== "" ? Number(currentData.salaryMin) : null,
+      salaryMax:
+        currentData.salaryMax !== "" ? Number(currentData.salaryMax) : null,
+      offeringBonus: Boolean(currentData.offeringBonus),
+      offeringEquity: Boolean(currentData.offeringEquity),
+      useRecommendedSalary: Boolean(currentData.useRecommendedSalary),
+      requiredSkills: currentData.requiredSkills,
+      techStack: currentData.techStack,
+      description:
+        currentData.description.trim() ||
+        (isDraft ? "Draft job posting" : ""),
+      responsibilities: currentData.responsibilities,
+      requirements: currentData.requirements,
+      applicationDeadline: currentData.applicationDeadline || null,
       status: submitStatus,
     };
 
@@ -275,11 +338,12 @@ export default function CreateJob({ onBack, onJobCreated, initialData = null }) 
         }
       }
     } catch (err) {
-      setApiError(
-        err.response?.data?.message ||
-          err.message ||
-          "Failed to create job. Please verify all fields and try again."
-      );
+      const msg =
+        err.data?.message ||
+        err.data?.detail ||
+        err.message ||
+        "Failed to save job. Please verify all fields and try again.";
+      setApiError(msg);
       window.scrollTo({ top: 120, behavior: "smooth" });
     } finally {
       setIsSubmitting(false);
@@ -342,12 +406,7 @@ export default function CreateJob({ onBack, onJobCreated, initialData = null }) 
     <div className="create-job-page">
       {/* ── Recruiter Top Navbar ───────────────────────────────────────────── */}
       <nav className="recruiter-navbar" id="create-job-navbar">
-        <div className="recruiter-navbar__brand">
-          <div className="recruiter-navbar__logo-wrapper">
-            <TalentBridgeLogo variant="paperplane" size="26" />
-          </div>
-          <span className="recruiter-navbar__brand-name">TALENT BRIDGE</span>
-        </div>
+
 
         <div className="recruiter-navbar__profile">
           <div
@@ -407,15 +466,34 @@ export default function CreateJob({ onBack, onJobCreated, initialData = null }) 
             </button>
             <button
               type="button"
+              className="create-job-btn create-job-btn--close-reg"
+              onClick={() => handleSubmit("Closed")}
+              disabled={isSubmitting}
+              id="close-registration-top-btn"
+              title="Close candidate registration"
+            >
+              {formData.status === "Closed" ? "Registration Closed" : "Close Registration"}
+            </button>
+            <button
+              type="button"
+              className="create-job-btn create-job-btn--secondary"
+              onClick={() => handleSubmit("Draft")}
+              disabled={isSubmitting}
+              id="save-draft-top-btn"
+            >
+              Save Draft
+            </button>
+            <button
+              type="button"
               className="create-job-btn create-job-btn--primary"
-              onClick={() => handleSubmit(formData.status || "Open")}
+              onClick={() => handleSubmit(formData.status === "Closed" ? "Closed" : "Open")}
               disabled={isSubmitting}
               id="publish-job-top-btn"
             >
               {isSubmitting ? (
                 <>
                   <span className="create-job-spinner" />
-                  Publishing…
+                  Saving…
                 </>
               ) : (
                 <>
@@ -686,6 +764,56 @@ export default function CreateJob({ onBack, onJobCreated, initialData = null }) 
                       handleInputChange("applicationDeadline", e.target.value)
                     }
                   />
+                </div>
+              </div>
+
+              {/* Registration Status Selector */}
+              <div className="create-job-field" style={{ marginTop: "1rem" }}>
+                <label className="create-job-label">
+                  <span>
+                    Job Registration Status
+                    <span className="create-job-label__required">*</span>
+                  </span>
+                  <span className="create-job-label__hint">
+                    Choose whether candidates can currently register & apply
+                  </span>
+                </label>
+                <div className="create-job-status-picker">
+                  <button
+                    type="button"
+                    className={`create-job-status-btn ${formData.status === "Open" ? "create-job-status-btn--active-open" : ""}`}
+                    onClick={() => handleInputChange("status", "Open")}
+                  >
+                    <span className="create-job-status-indicator create-job-status-indicator--open" />
+                    <div>
+                      <strong>Open</strong>
+                      <p>Accepting new applications</p>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    className={`create-job-status-btn ${formData.status === "Closed" ? "create-job-status-btn--active-closed" : ""}`}
+                    onClick={() => handleInputChange("status", "Closed")}
+                  >
+                    <span className="create-job-status-indicator create-job-status-indicator--closed" />
+                    <div>
+                      <strong>Closed</strong>
+                      <p>Close registration (no new applicants)</p>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    className={`create-job-status-btn ${formData.status === "Draft" ? "create-job-status-btn--active-draft" : ""}`}
+                    onClick={() => handleInputChange("status", "Draft")}
+                  >
+                    <span className="create-job-status-indicator create-job-status-indicator--draft" />
+                    <div>
+                      <strong>Draft</strong>
+                      <p>Saved as work-in-progress</p>
+                    </div>
+                  </button>
                 </div>
               </div>
             </section>
@@ -1246,6 +1374,16 @@ export default function CreateJob({ onBack, onJobCreated, initialData = null }) 
             </section>
 
             {/* ── Footer Actions ── */}
+            {apiError && (
+              <div className="create-job-error-banner" role="alert" style={{ marginBottom: "1rem" }}>
+                <AlertCircle size={18} />
+                <div>
+                  <strong>Attention Needed</strong>
+                  <p>{apiError}</p>
+                </div>
+              </div>
+            )}
+
             <div className="create-job-footer">
               <button
                 type="button"
@@ -1257,17 +1395,34 @@ export default function CreateJob({ onBack, onJobCreated, initialData = null }) 
               </button>
               <button
                 type="button"
+                className="create-job-btn create-job-btn--close-reg"
+                onClick={() => handleSubmit("Closed")}
+                disabled={isSubmitting}
+                id="close-registration-bottom-btn"
+                title="Close registration to prevent new applicants"
+              >
+                {formData.status === "Closed" ? "Registration Closed" : "Close Registration"}
+              </button>
+              <button
+                type="button"
                 className="create-job-btn create-job-btn--secondary"
                 onClick={() => handleSubmit("Draft")}
                 disabled={isSubmitting}
                 id="save-draft-btn"
               >
-                Save as Draft
+                {isSubmitting ? (
+                  <>
+                    <span className="create-job-spinner" />
+                    Saving…
+                  </>
+                ) : (
+                  "Save as Draft"
+                )}
               </button>
               <button
                 type="button"
                 className="create-job-btn create-job-btn--primary"
-                onClick={() => handleSubmit("Open")}
+                onClick={() => handleSubmit(formData.status === "Closed" ? "Closed" : "Open")}
                 disabled={isSubmitting}
                 id="publish-job-bottom-btn"
               >

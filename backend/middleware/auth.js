@@ -11,7 +11,7 @@ const protect = async (req, res, next) => {
   let token;
 
   // Check for token in HTTP-only cookie first (preferred method)
-  if (req.cookies && req.cookies.token) {
+  if (req.cookies && req.cookies.token && req.cookies.token !== "none" && req.cookies.token !== "null") {
     token = req.cookies.token;
   }
   // Fallback: check Authorization header (Bearer token)
@@ -19,7 +19,10 @@ const protect = async (req, res, next) => {
     req.headers.authorization &&
     req.headers.authorization.startsWith("Bearer")
   ) {
-    token = req.headers.authorization.split(" ")[1];
+    const bearer = req.headers.authorization.split(" ")[1];
+    if (bearer && bearer !== "null" && bearer !== "undefined" && bearer !== "none") {
+      token = bearer;
+    }
   }
 
   // No token found — user is not authenticated
@@ -122,5 +125,35 @@ const requireVerified = async (req, res, next) => {
   }
 };
 
-module.exports = { protect, authorize, requireVerified };
+/**
+ * Optional Protect Middleware
+ * If token is present, sets req.user. If not, passes through without 401 error.
+ */
+const optionalProtect = async (req, res, next) => {
+  let token;
+  if (req.cookies && req.cookies.token) {
+    token = req.cookies.token;
+  } else if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
+    token = req.headers.authorization.split(" ")[1];
+  }
+
+  if (!token) {
+    return next();
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id);
+    if (user) req.user = user;
+  } catch {
+    // Ignore invalid or expired token for optional protect
+  }
+  next();
+};
+
+module.exports = { protect, authorize, requireVerified, optionalProtect };
+
 

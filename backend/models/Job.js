@@ -16,19 +16,38 @@ const jobSchema = new mongoose.Schema(
     },
     headcount: {
       type: Number,
-      required: [true, "Headcount is required"],
+      default: 1,
       min: [1, "Headcount must be at least 1"],
+      required: [
+        function () {
+          return this.status !== "Draft";
+        },
+        "Headcount is required",
+      ],
     },
     jobType: {
       type: String,
-      required: [true, "Job type is required"],
+      default: "Remote",
       trim: true,
+      required: [
+        function () {
+          return this.status !== "Draft";
+        },
+        "Job type is required",
+      ],
     },
     acceptableLocations: {
       type: [String],
-      required: [true, "At least one acceptable location is required"],
+      default: ["Remote"],
+      required: [
+        function () {
+          return this.status !== "Draft";
+        },
+        "At least one acceptable location is required",
+      ],
       validate: {
         validator: function (val) {
+          if (this.status === "Draft") return true;
           return Array.isArray(val) && val.length > 0;
         },
         message: "At least one acceptable location is required",
@@ -62,14 +81,27 @@ const jobSchema = new mongoose.Schema(
     // ── Skills and Experience ──────────────────────────────────────────
     level: {
       type: String,
-      required: [true, "Level is required"],
+      default: "Mid Level",
       trim: true,
+      required: [
+        function () {
+          return this.status !== "Draft";
+        },
+        "Level is required",
+      ],
     },
     techStack: {
       type: [String],
-      required: [true, "Tech stack is required"],
+      default: [],
+      required: [
+        function () {
+          return this.status !== "Draft";
+        },
+        "Tech stack is required",
+      ],
       validate: {
         validator: function (val) {
+          if (this.status === "Draft") return true;
           return Array.isArray(val) && val.length > 0;
         },
         message: "Tech stack must contain at least one item",
@@ -77,9 +109,16 @@ const jobSchema = new mongoose.Schema(
     },
     requiredSkills: {
       type: [String],
-      required: [true, "Required skills are required"],
+      default: [],
+      required: [
+        function () {
+          return this.status !== "Draft";
+        },
+        "Required skills are required",
+      ],
       validate: {
         validator: function (val) {
+          if (this.status === "Draft") return true;
           return Array.isArray(val) && val.length > 0;
         },
         message: "Required skills must contain at least one skill",
@@ -87,15 +126,27 @@ const jobSchema = new mongoose.Schema(
     },
     yearsOfExperience: {
       type: Number,
-      required: [true, "Years of experience is required"],
+      default: 0,
       min: [0, "Years of experience cannot be negative"],
+      required: [
+        function () {
+          return this.status !== "Draft";
+        },
+        "Years of experience is required",
+      ],
     },
 
     // ── Additional Job Information ─────────────────────────────────────
     description: {
       type: String,
-      required: [true, "Job description is required"],
+      default: "",
       trim: true,
+      required: [
+        function () {
+          return this.status !== "Draft";
+        },
+        "Job description is required",
+      ],
     },
     responsibilities: {
       type: [String],
@@ -107,8 +158,14 @@ const jobSchema = new mongoose.Schema(
     },
     employmentType: {
       type: String,
-      required: [true, "Employment type is required"],
+      default: "Full-time",
       trim: true,
+      required: [
+        function () {
+          return this.status !== "Draft";
+        },
+        "Employment type is required",
+      ],
     },
     applicationDeadline: {
       type: Date,
@@ -138,7 +195,7 @@ const jobSchema = new mongoose.Schema(
 /**
  * Validate salaryMin does not exceed salaryMax when both are provided
  */
-jobSchema.pre("validate", function (next) {
+jobSchema.pre("validate", async function (next) {
   if (
     this.salaryMin !== null &&
     this.salaryMin !== undefined &&
@@ -151,7 +208,9 @@ jobSchema.pre("validate", function (next) {
       "Minimum salary cannot be greater than maximum salary"
     );
   }
-  next();
+  if (typeof next === "function") {
+    next();
+  }
 });
 
 module.exports = mongoose.model("Job", jobSchema);

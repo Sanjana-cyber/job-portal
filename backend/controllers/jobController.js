@@ -15,8 +15,23 @@ const createJob = async (req, res) => {
   try {
     const jobData = { ...req.body };
 
+    // Debug: log incoming body to trace 500 errors
+    console.log("[createJob] Incoming body keys:", Object.keys(jobData));
+    console.log("[createJob] recruiter user id:", req.user?._id);
+
     // Assign authenticated recruiter ID from verified JWT session
     jobData.recruiter = req.user._id;
+
+    // Clean up numeric and date fields to avoid Mongoose cast issues
+    if (jobData.salaryMin === null || jobData.salaryMin === "") delete jobData.salaryMin;
+    if (jobData.salaryMax === null || jobData.salaryMax === "") delete jobData.salaryMax;
+    if (jobData.applicationDeadline === null || jobData.applicationDeadline === "") delete jobData.applicationDeadline;
+    if (jobData.yearsOfExperience === "" || jobData.yearsOfExperience === null) {
+      jobData.yearsOfExperience = 0;
+    }
+    if (jobData.headcount === "" || jobData.headcount === null || isNaN(Number(jobData.headcount))) {
+      jobData.headcount = 1;
+    }
 
     const job = new Job(jobData);
     await job.save();
@@ -27,29 +42,43 @@ const createJob = async (req, res) => {
       job,
     });
   } catch (error) {
+    console.error("[createJob] Error name:", error.name);
+    console.error("[createJob] Error message:", error.message);
+    console.error("[createJob] Stack:", error.stack);
     if (error.name === "ValidationError") {
+      const messages = Object.values(error.errors).map((e) => e.message).join(", ");
       return res.status(400).json({
         success: false,
-        message: error.message,
+        message: messages,
       });
     }
     return res.status(500).json({
       success: false,
       message: "Failed to create job",
+      detail: error.message,   // Always show in dev for debugging
     });
   }
 };
 
 /**
- * @desc    Get all jobs for the authenticated recruiter
+ * @desc    Get all jobs (Recruiter sees their own jobs; Jobseeker/Guest sees all published jobs)
  * @route   GET /api/jobs
- * @access  Private (Recruiter only)
+ * @access  Public / Private
  */
 const getAllJobs = async (req, res) => {
   try {
-    const jobs = await Job.find({ recruiter: req.user._id }).sort({
-      createdAt: -1,
-    });
+    let query = {};
+    if (req.user && req.user.role === "recruiter") {
+      // Recruiter sees all jobs they posted (including drafts and closed)
+      query = { recruiter: req.user._id };
+    } else {
+      // Job seekers and visitors see published/open jobs (exclude unpublished drafts)
+      query = { status: { $ne: "Draft" } };
+    }
+
+    const jobs = await Job.find(query)
+      .populate("recruiter", "name email companyName")
+      .sort({ createdAt: -1 });
 
     return res.status(200).json({
       success: true,
@@ -57,17 +86,19 @@ const getAllJobs = async (req, res) => {
       jobs,
     });
   } catch (error) {
+    console.error("[getAllJobs] Error:", error.name, error.message);
     return res.status(500).json({
       success: false,
       message: "Failed to fetch jobs",
+      detail: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 };
 
 /**
- * @desc    Get a single job by ID (authenticated recruiter only)
+ * @desc    Get a single job by ID
  * @route   GET /api/jobs/:id
- * @access  Private (Recruiter only)
+ * @access  Public / Private
  */
 const getJobById = async (req, res) => {
   try {
@@ -80,10 +111,14 @@ const getJobById = async (req, res) => {
       });
     }
 
-    const job = await Job.findOne({
-      _id: id,
-      recruiter: req.user._id,
-    });
+    let query = { _id: id };
+    if (req.user && req.user.role === "recruiter") {
+      query.recruiter = req.user._id;
+    } else {
+      query.status = { $ne: "Draft" };
+    }
+
+    const job = await Job.findOne(query).populate("recruiter", "name email companyName");
 
     if (!job) {
       return res.status(404).json({
@@ -97,9 +132,11 @@ const getJobById = async (req, res) => {
       job,
     });
   } catch (error) {
+    console.error("[getJobById] Error:", error.name, error.message);
     return res.status(500).json({
       success: false,
       message: "Failed to fetch job",
+      detail: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 };
@@ -128,6 +165,10 @@ const updateJob = async (req, res) => {
     delete updateData.createdAt;
     delete updateData.updatedAt;
 
+    if (updateData.salaryMin === null || updateData.salaryMin === "") delete updateData.salaryMin;
+    if (updateData.salaryMax === null || updateData.salaryMax === "") delete updateData.salaryMax;
+    if (updateData.applicationDeadline === null || updateData.applicationDeadline === "") delete updateData.applicationDeadline;
+
     const updatedJob = await Job.findOneAndUpdate(
       { _id: id, recruiter: req.user._id },
       { $set: updateData },
@@ -147,6 +188,7 @@ const updateJob = async (req, res) => {
       job: updatedJob,
     });
   } catch (error) {
+    console.error("[updateJob] Error:", error.name, error.message);
     if (error.name === "ValidationError") {
       return res.status(400).json({
         success: false,
@@ -156,6 +198,7 @@ const updateJob = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to update job",
+      detail: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 };
@@ -193,9 +236,11 @@ const deleteJob = async (req, res) => {
       message: "Job deleted successfully",
     });
   } catch (error) {
+    console.error("[deleteJob] Error:", error.name, error.message);
     return res.status(500).json({
       success: false,
       message: "Failed to delete job",
+      detail: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 };

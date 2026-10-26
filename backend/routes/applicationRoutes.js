@@ -5,10 +5,15 @@ const {
   applyToJob,
   getJobApplications,
   getMyApplications,
-  updateApplicationStatus
+  updateApplicationStatus,
+  directApply,
+  upload,
 } = require("../controllers/applicationController");
 
-// All routes require authentication
+// ─── Public: Seeker direct-apply with resume upload (no auth) ──────────────
+router.post("/:jobId/direct-apply", upload.single("resume"), directApply);
+
+// ─── Protected routes ──────────────────────────────────────────────────────
 router.use(protect);
 
 // Candidate routes
@@ -20,3 +25,4 @@ router.get("/job/:jobId", authorize("recruiter", "admin"), getJobApplications);
 router.put("/:id/status", authorize("recruiter", "admin"), updateApplicationStatus);
 
 module.exports = router;
+

@@ -229,9 +229,9 @@ const login = async (req, res, next) => {
  */
 const logout = async (req, res, next) => {
   try {
-    // Clear the JWT cookie
-    res.cookie("token", "none", {
-      expires: new Date(Date.now() + 5 * 1000), // Expires in 5 seconds
+    // Clear the JWT cookie cleanly
+    res.cookie("token", "", {
+      expires: new Date(0),
       httpOnly: true,
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",

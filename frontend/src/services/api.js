@@ -1,17 +1,16 @@
 import axios from "axios";
+import tokenService from "./tokenService";
 
 /**
  * Central API Client
  * ─────────────────────────────────────────────────────────────────────────────
- * Security features baked in:
- *   • withCredentials — sends the HttpOnly JWT cookie on every request (no
- *     localStorage, no XSS-accessible token)
+ * Production Security Architecture:
+ *   • withCredentials: true — automatically sends the HttpOnly cookie when supported
+ *   • Bearer Token Injection — request interceptor pulls token from tokenService
+ *     and injects into the Authorization header (essential for cross-origin/localhost reliability)
  *   • 10 s timeout — prevents the UI from hanging on a dead backend
- *   • 401 interceptor — fires a custom DOM event so AuthModalContext can clear
- *     the user state and show the login modal automatically
- *   • 429 interceptor — surfaces the backend rate-limit message clearly
- *   • Input sanitisation helpers — trim/lowercase before every request so the
- *     server never receives accidental leading/trailing whitespace
+ *   • 401 interceptor — clears tokenService and signals session expiration
+ *   • 429 interceptor — surfaces rate-limiting
  */
 
 const API_BASE_URL =
@@ -19,11 +18,21 @@ const API_BASE_URL =
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
-  withCredentials: true,   // HttpOnly cookie — JWT never touches localStorage
-  timeout: 10_000,         // 10-second timeout; shows error instead of spinning
+  withCredentials: true,
+  timeout: 10_000,
   headers: {
     "Content-Type": "application/json",
   },
+});
+
+// ─── Request Interceptor ─────────────────────────────────────────────────────
+// Attach Bearer token from tokenService on every outgoing request
+api.interceptors.request.use((config) => {
+  const token = tokenService.getToken();
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
 });
 
 // ─── Response Interceptor ────────────────────────────────────────────────────
@@ -36,9 +45,9 @@ api.interceptors.response.use(
       error.message ||
       "Something went wrong";
 
-    // 401 → cookie expired or invalid → signal the app to auto-logout
+    // 401 → session expired or invalid → clear token and dispatch auth:expired
     if (status === 401) {
-      // Dispatch a custom event; AuthModalContext listens and clears user state
+      tokenService.clearToken();
       window.dispatchEvent(new CustomEvent("auth:expired"));
     }
 
@@ -95,12 +104,15 @@ export const registerUser = async ({
     payload.companyWebsite = sanitizeStr(companyWebsite);
   }
   const res = await api.post("/auth/register", payload);
+  if (res.data?.token) {
+    tokenService.setToken(res.data.token);
+  }
   return res.data; // { success, message, user }
 };
 
 /**
  * Login an existing user.
- * Backend sets the HttpOnly JWT cookie on success.
+ * Sets the token via tokenService and receives HttpOnly cookie.
  *
  * @param {{ email, password }} params
  */
@@ -109,6 +121,9 @@ export const loginUser = async ({ email, password }) => {
     email: sanitizeEmail(email),
     password,
   });
+  if (res.data?.token) {
+    tokenService.setToken(res.data.token);
+  }
   return res.data; // { success, message, user }
 };
 
@@ -135,6 +150,9 @@ export const resetPassword = async ({ token, password }) => {
     token: sanitizeStr(token),
     password,
   });
+  if (res.data?.token) {
+    tokenService.setToken(res.data.token);
+  }
   return res.data; // { success, message, user }
 };
 
@@ -146,12 +164,15 @@ export const resetPassword = async ({ token, password }) => {
  */
 export const googleAuth = async ({ credential, role = "jobseeker" }) => {
   const res = await api.post("/auth/google", { credential, role });
+  if (res.data?.token) {
+    tokenService.setToken(res.data.token);
+  }
   return res.data; // { success, message, user }
 };
 
 /**
  * Fetch the currently authenticated user's profile.
- * Relies on the HttpOnly cookie being present — will 401 if not logged in.
+ * Relies on Bearer token or HttpOnly cookie being present — will 401 if not logged in.
  */
 export const getMe = async () => {
   const res = await api.get("/auth/me");
@@ -160,9 +181,10 @@ export const getMe = async () => {
 
 /**
  * Log the user out.
- * Backend clears the HttpOnly cookie; frontend clears its local state.
+ * Clears tokenService and notifies backend to clear HttpOnly cookie.
  */
 export const logoutUser = async () => {
+  tokenService.clearToken();
   const res = await api.post("/auth/logout");
   return res.data; // { success, message }
 };

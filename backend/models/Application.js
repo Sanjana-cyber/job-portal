@@ -10,33 +10,33 @@ const applicationSchema = new mongoose.Schema(
     applicant: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      default: null,
     },
     resume: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Resume",
-      required: true,
+      default: null,
+    },
+    // Direct-apply fields (when seeker fills the form without a stored resume)
+    applicantName: { type: String, default: "" },
+    applicantEmail: { type: String, default: "" },
+    applicantPhone: { type: String, default: "" },
+    resumeFilePath: { type: String, default: "" }, // uploaded file path on server
+    coverLetter: {
+      type: String,
+      default: "",
     },
     status: {
       type: String,
       enum: ["pending", "reviewed", "shortlisted", "rejected", "hired"],
       default: "pending",
     },
-    coverLetter: {
-      type: String,
-      default: "",
-    },
-    atsScore: {
-      type: Number,
-      default: null,
-    },
+    atsScore: { type: Number, default: null },
     matchedKeywords: [{ type: String }],
     missingKeywords: [{ type: String }],
   },
   { timestamps: true }
 );
 
-// Prevent a user from applying to the same job multiple times
-applicationSchema.index({ job: 1, applicant: 1 }, { unique: true });
-
 module.exports = mongoose.model("Application", applicationSchema);
+

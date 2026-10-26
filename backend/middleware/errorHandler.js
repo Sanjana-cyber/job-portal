@@ -20,11 +20,14 @@ const errorHandler = (err, req, res, next) => {
 
   // Log error for development debugging
   if (process.env.NODE_ENV === "development") {
-    // Don't log full stack traces for expected 401/404 errors
-    if (err.statusCode === 401 || err.statusCode === 404) {
-      console.error(`⚠️  [${err.statusCode}] ${err.message}`);
-    } else {
-      console.error("❌ Error:", err);
+    // Expected 401 on /api/auth/me occurs silently on page load when user is not logged in
+    const isSilentAuthCheck = err.statusCode === 401 && req.originalUrl?.includes("/auth/me");
+    if (!isSilentAuthCheck) {
+      if (err.statusCode === 401 || err.statusCode === 404) {
+        console.error(`⚠️  [${err.statusCode}] ${err.message} (${req.method} ${req.originalUrl})`);
+      } else {
+        console.error("❌ Error:", err);
+      }
     }
   }
 

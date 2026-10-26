@@ -46,10 +46,10 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc:  ["'self'", "https://accounts.google.com", "https://apis.google.com"],
-        styleSrc:   ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-        fontSrc:    ["'self'", "https://fonts.gstatic.com"],
-        imgSrc:     ["'self'", "data:", "https:"],
+        scriptSrc: ["'self'", "https://accounts.google.com", "https://apis.google.com"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        fontSrc: ["'self'", "https://fonts.gstatic.com"],
+        imgSrc: ["'self'", "data:", "https:"],
         connectSrc: [
           "'self'",
           process.env.FRONTEND_URL || "http://localhost:5173",
@@ -57,8 +57,8 @@ app.use(
           "http://localhost:5000",
           "https://accounts.google.com",
         ],
-        frameSrc:   ["https://accounts.google.com"],
-        objectSrc:  ["'none'"],
+        frameSrc: ["https://accounts.google.com"],
+        objectSrc: ["'none'"],
         upgradeInsecureRequests: process.env.NODE_ENV === "production" ? [] : null,
       },
     },
@@ -107,6 +107,10 @@ app.get("/api/health", (req, res) => {
     timestamp: new Date().toISOString(),
   });
 });
+
+// Serve uploaded files (resumes etc.)
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
 
 // Authentication routes
 app.use("/api/auth", authRoutes);

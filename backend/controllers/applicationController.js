@@ -1,8 +1,69 @@
+const path = require("path");
+const fs = require("fs");
+const multer = require("multer");
 const Application = require("../models/Application");
 const Job = require("../models/Job");
 const Resume = require("../models/Resume");
 const { ErrorResponse } = require("../middleware/errorHandler");
 const { computeAtsScore } = require("../utils/atsScoringService");
+
+// ─── Multer setup for resume file uploads ──────────────────────────────────
+const uploadDir = path.join(__dirname, "../uploads/resumes");
+if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+
+const storage = multer.diskStorage({
+  destination: (_req, _file, cb) => cb(null, uploadDir),
+  filename: (_req, file, cb) => {
+    const unique = `${Date.now()}-${Math.round(Math.random() * 1e6)}`;
+    cb(null, `${unique}-${file.originalname}`);
+  },
+});
+
+const fileFilter = (_req, file, cb) => {
+  const allowed = [".pdf", ".doc", ".docx"];
+  const ext = path.extname(file.originalname).toLowerCase();
+  if (allowed.includes(ext)) cb(null, true);
+  else cb(new Error("Only PDF, DOC, and DOCX files are allowed"), false);
+};
+
+exports.upload = multer({ storage, fileFilter, limits: { fileSize: 5 * 1024 * 1024 } });
+
+// ─── POST /api/applications/:jobId/direct-apply ────────────────────────────
+// Seeker submits an application form with resume file upload (no auth required)
+exports.directApply = async (req, res, next) => {
+  try {
+    const { jobId } = req.params;
+    const { applicantName, applicantEmail, applicantPhone, coverLetter } = req.body;
+
+    if (!applicantName || !applicantEmail) {
+      return next(new ErrorResponse("Name and email are required", 400));
+    }
+
+    const job = await Job.findById(jobId);
+    if (!job) return next(new ErrorResponse("Job not found", 404));
+
+    const resumeFilePath = req.file ? req.file.path : "";
+
+    const application = await Application.create({
+      job: jobId,
+      applicantName: applicantName.trim(),
+      applicantEmail: applicantEmail.trim().toLowerCase(),
+      applicantPhone: (applicantPhone || "").trim(),
+      resumeFilePath,
+      coverLetter: (coverLetter || "").trim(),
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Application submitted successfully",
+      data: { id: application._id },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+
 
 // ─── POST /api/applications/:jobId ─────────────────────────────────────────
 // Candidate applies to a job

@@ -1,0 +1,481 @@
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/*  ApplyForm.css — Naukri-style Application Form                            */
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --af-blue: #4a90d9;
+  --af-blue-dark: #1a5fa8;
+  --af-blue-light: #e8f1fb;
+  --af-border: #dde1e7;
+  --af-bg: #f3f3f3;
+  --af-white: #ffffff;
+  --af-text-dark: #1a1a1a;
+  --af-text-mid: #555;
+  --af-text-muted: #888;
+  --af-red: #dc3545;
+  --af-green: #2e8b57;
+}
+
+* { box-sizing: border-box; }
+
+/* ─── PAGE WRAPPER ───────────────────────────────────────────────────────── */
+.af-page {
+  min-height: 100vh;
+  background: var(--af-bg);
+  display: flex;
+  flex-direction: column;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: var(--af-text-dark);
+}
+
+/* ─── TOP BREADCRUMB BAR (Job title strip) ───────────────────────────────── */
+.af-header {
+  background: var(--af-white);
+  border-bottom: 1px solid var(--af-border);
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.af-header__logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  background: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.af-header__job {
+  display: flex;
+  flex-direction: column;
+  gap: 0.08rem;
+}
+.af-header__title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--af-text-dark);
+  margin: 0;
+  line-height: 1.3;
+}
+.af-header__company {
+  font-size: 0.82rem;
+  color: var(--af-text-muted);
+  font-weight: 500;
+  margin: 0;
+}
+
+.af-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: none;
+  border: none;
+  color: var(--af-text-mid);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  margin-right: 0.5rem;
+  transition: color 0.15s;
+  font-family: inherit;
+}
+.af-back:hover { color: var(--af-blue-dark); }
+
+/* ─── SCROLLABLE BODY ────────────────────────────────────────────────────── */
+.af-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 2rem 1rem;
+  display: flex;
+  justify-content: center;
+}
+
+/* ─── FORM CARD ──────────────────────────────────────────────────────────── */
+.af-card {
+  width: 100%;
+  max-width: 720px;
+  background: var(--af-white);
+  border: 1px solid var(--af-border);
+  border-radius: 10px;
+  padding: 2rem 2.25rem 2.5rem;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.06);
+  position: relative;
+}
+
+/* Google sign-in chip top-right */
+.af-google-btn {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.42rem 1rem;
+  border: 1.5px solid var(--af-border);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--af-text-mid);
+  font-size: 0.83rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: box-shadow 0.15s, border-color 0.15s;
+  font-family: inherit;
+}
+.af-google-btn:hover {
+  border-color: #aaa;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+.af-google-btn__icon { font-size: 1rem; }
+
+.af-card__heading {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--af-text-dark);
+  margin: 0 0 1.5rem;
+  letter-spacing: -0.01em;
+}
+
+/* Section headings */
+.af-section-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--af-text-dark);
+  margin: 0 0 1.1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--af-border);
+}
+
+/* ─── ERROR BANNER ───────────────────────────────────────────────────────── */
+.af-error {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #fff5f5;
+  border: 1px solid #fcc;
+  color: var(--af-red);
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 7px;
+  padding: 0.6rem 0.9rem;
+  margin-bottom: 1.25rem;
+}
+
+/* ─── FORM LAYOUT ────────────────────────────────────────────────────────── */
+.af-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.af-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.1rem;
+}
+@media (max-width: 560px) {
+  .af-row { grid-template-columns: 1fr; }
+}
+
+.af-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.af-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--af-text-dark);
+}
+.af-label sup {
+  color: var(--af-red);
+  font-size: 0.75rem;
+}
+.af-optional {
+  font-weight: 400;
+  color: var(--af-text-muted);
+  font-size: 0.8rem;
+}
+
+/* Text inputs */
+.af-input {
+  padding: 0.6rem 0.85rem;
+  border: 1.5px solid var(--af-border);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  color: var(--af-text-dark);
+  background: #fff;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  font-family: inherit;
+}
+.af-input:focus {
+  border-color: var(--af-blue);
+  box-shadow: 0 0 0 3px rgba(74,144,217,0.12);
+}
+
+/* Phone row — flag + prefix */
+.af-phone-row {
+  display: flex;
+  gap: 0;
+  border: 1.5px solid var(--af-border);
+  border-radius: 6px;
+  overflow: hidden;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.af-phone-row:focus-within {
+  border-color: var(--af-blue);
+  box-shadow: 0 0 0 3px rgba(74,144,217,0.12);
+}
+.af-phone-prefix {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0 0.75rem;
+  background: #f7f7f7;
+  border-right: 1.5px solid var(--af-border);
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--af-text-mid);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+}
+.af-phone-prefix__flag { font-size: 1.1rem; }
+.af-phone-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 0.6rem 0.85rem;
+  font-size: 0.9rem;
+  color: var(--af-text-dark);
+  background: #fff;
+  font-family: inherit;
+}
+
+/* Textarea */
+.af-textarea {
+  padding: 0.6rem 0.85rem;
+  border: 1.5px solid var(--af-border);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  color: var(--af-text-dark);
+  background: #fff;
+  outline: none;
+  resize: vertical;
+  font-family: inherit;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.af-textarea:focus {
+  border-color: var(--af-blue);
+  box-shadow: 0 0 0 3px rgba(74,144,217,0.12);
+}
+
+/* ─── GENDER PILLS ───────────────────────────────────────────────────────── */
+.af-gender-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.1rem;
+}
+.af-gender-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.38rem 0.85rem;
+  border-radius: 20px;
+  border: 1.5px solid var(--af-border);
+  background: #fff;
+  color: var(--af-text-mid);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+.af-gender-pill:hover {
+  border-color: var(--af-blue);
+  color: var(--af-blue-dark);
+  background: var(--af-blue-light);
+}
+.af-gender-pill--active {
+  border-color: var(--af-blue-dark);
+  color: var(--af-blue-dark);
+  background: var(--af-blue-light);
+}
+.af-gender-pill__icon { font-size: 0.85rem; }
+
+/* ─── LOCATION FIELD (with GPS icon) ────────────────────────────────────── */
+.af-location-wrap {
+  position: relative;
+}
+.af-location-wrap .af-input {
+  padding-right: 2.5rem;
+}
+.af-location-icon {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--af-blue);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+/* ─── RESUME DROPZONE ────────────────────────────────────────────────────── */
+.af-dropzone {
+  border: 2px dashed #d0d7e0;
+  border-radius: 8px;
+  background: #fafbfc;
+  padding: 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  text-align: center;
+}
+.af-dropzone:hover,
+.af-dropzone--over {
+  border-color: var(--af-blue);
+  background: var(--af-blue-light);
+}
+.af-dropzone--filled {
+  border-style: solid;
+  border-color: var(--af-green);
+  background: #f0fdf4;
+}
+.af-dropzone__icon { color: #b0bac4; }
+.af-dropzone__text { font-size: 0.88rem; color: var(--af-text-mid); margin: 0; }
+.af-dropzone__text span { color: var(--af-blue); font-weight: 600; }
+.af-dropzone__hint { font-size: 0.76rem; color: var(--af-text-muted); margin: 0; }
+.af-dropzone__file {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--af-green);
+}
+.af-dropzone__ok { color: var(--af-green); flex-shrink: 0; }
+.af-dropzone__remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #aaa;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  transition: color 0.15s;
+  margin-left: 0.25rem;
+}
+.af-dropzone__remove:hover { color: var(--af-red); }
+
+/* ─── STICKY FOOTER ──────────────────────────────────────────────────────── */
+.af-footer {
+  position: sticky;
+  bottom: 0;
+  background: var(--af-white);
+  border-top: 1px solid var(--af-border);
+  padding: 0.85rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 50;
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.06);
+}
+.af-footer__close {
+  background: none;
+  border: none;
+  color: var(--af-text-mid);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s;
+  font-family: inherit;
+}
+.af-footer__close:hover { color: var(--af-text-dark); }
+
+/* ─── BUTTONS ────────────────────────────────────────────────────────────── */
+.af-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  font-size: 0.92rem;
+  font-weight: 700;
+  padding: 0.62rem 2rem;
+  border-radius: 24px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+.af-btn--primary {
+  background: linear-gradient(135deg, #2563eb 0%, #1a3fa8 100%);
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+.af-btn--primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1d4ed8 0%, #163499 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.42);
+}
+.af-btn--primary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+.af-btn--full { width: 100%; border-radius: 6px; padding: 0.7rem; margin-top: 0.5rem; }
+
+/* ─── SUCCESS SCREEN ─────────────────────────────────────────────────────── */
+.af-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 480px;
+  gap: 1rem;
+  margin: 4rem auto;
+  padding: 2.5rem 2rem;
+  background: var(--af-white);
+  border: 1px solid var(--af-border);
+  border-radius: 12px;
+  box-shadow: 0 1px 5px rgba(0,0,0,0.06);
+}
+.af-success__icon { color: var(--af-green); }
+.af-success__title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--af-text-dark);
+  margin: 0;
+}
+.af-success__text {
+  font-size: 0.92rem;
+  color: var(--af-text-muted);
+  line-height: 1.65;
+  margin: 0;
+}
+
+/* ─── RESPONSIVE ─────────────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .af-card { padding: 1.25rem 1rem 2rem; }
+  .af-google-btn { position: static; margin-bottom: 1rem; align-self: flex-end; }
+  .af-card__heading { font-size: 1.15rem; }
+}

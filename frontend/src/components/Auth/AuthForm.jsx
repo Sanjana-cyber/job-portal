@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Eye, EyeOff, Loader2, ArrowLeft } from "lucide-react";
 import { registerUser, loginUser, forgotPassword, googleAuth } from "../../services/api";
+import { googleAuthService } from "../../services/googleAuthService";
 import "./Auth.css";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -231,34 +232,64 @@ export default function AuthForm({ role, mode, onSwitchMode, onBack, onSuccess }
     }
   };
 
-  /** Google One Tap / popup sign-in */
+  const googleBtnRef = useRef(null);
+
+  // Subscribe dynamic authentication callback to singleton GoogleAuthService
+  useEffect(() => {
+    const unsubscribe = googleAuthService.setAuthHandler(async (credential) => {
+      setLoading(true);
+      setError("");
+      try {
+        const data = await googleAuth({ credential, role });
+        setSuccessMsg("Google sign-in successful!");
+        setTimeout(() => onSuccess(data.user || data), 500);
+      } catch (err) {
+        setError(err.message || "Google sign-in failed. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [role, onSuccess]);
+
+  // Initialize singleton Google SDK and render official button cleanly
+  useEffect(() => {
+    if (!GOOGLE_CLIENT_ID) return;
+
+    let isMounted = true;
+
+    const render = async () => {
+      try {
+        await googleAuthService.initialize(GOOGLE_CLIENT_ID);
+        if (isMounted && googleBtnRef.current) {
+          await googleAuthService.renderButton(googleBtnRef.current, {
+            text: isLogin ? "signin_with" : "signup_with",
+            width: 320,
+          });
+        }
+      } catch (err) {
+        console.warn("[AuthForm] Google button render notice:", err);
+      }
+    };
+
+    render();
+
+    return () => {
+      isMounted = false;
+      googleAuthService.cancel();
+    };
+  }, [isLogin]);
+
+  /** Google One Tap / prompt fallback with request guard */
   const handleGoogleClick = () => {
     if (!GOOGLE_CLIENT_ID) {
       setError("Google login is not configured.");
       return;
     }
-    /* global google */
-    if (typeof google === "undefined") {
-      setError("Google SDK not loaded yet. Please refresh the page.");
-      return;
-    }
-    google.accounts.id.initialize({
-      client_id: GOOGLE_CLIENT_ID,
-      callback: async ({ credential }) => {
-        setLoading(true);
-        setError("");
-        try {
-          const data = await googleAuth({ credential, role });
-          setSuccessMsg("Google sign-in successful!");
-          setTimeout(() => onSuccess(data.user || data), 800);
-        } catch (err) {
-          setError(err.message || "Google sign-in failed. Please try again.");
-        } finally {
-          setLoading(false);
-        }
-      },
-    });
-    google.accounts.id.prompt();
+    googleAuthService.prompt();
   };
 
   // ─── Forgot-password sub-screen ────────────────────────────────────────────
@@ -360,35 +391,41 @@ export default function AuthForm({ role, mode, onSwitchMode, onBack, onSuccess }
         </p>
       </div>
 
-      {/* ── Google Sign-In ── */}
-      <button
-        type="button"
-        className="auth-google-btn"
-        onClick={handleGoogleClick}
-        disabled={loading}
-        id="google-signin-btn"
+      {/* ── Google Sign-In Container (Renders official unsuppressed Google button with fallback) ── */}
+      <div
+        ref={googleBtnRef}
+        id="google-signin-container"
+        style={{ width: "100%", minHeight: "44px", display: "flex", justifyContent: "center" }}
       >
-        {/* Official Google colour logo */}
-        <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
-          <path
-            fill="#4285F4"
-            d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"
-          />
-          <path
-            fill="#34A853"
-            d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z"
-          />
-          <path
-            fill="#FBBC05"
-            d="M3.964 10.707A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.039l3.007-2.332z"
-          />
-          <path
-            fill="#EA4335"
-            d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.961L3.964 6.293C4.672 4.166 6.656 3.58 9 3.58z"
-          />
-        </svg>
-        Continue with Google
-      </button>
+        <button
+          type="button"
+          className="auth-google-btn"
+          onClick={handleGoogleClick}
+          disabled={loading}
+          id="google-signin-btn"
+        >
+          {/* Official Google colour logo */}
+          <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+            <path
+              fill="#4285F4"
+              d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"
+            />
+            <path
+              fill="#34A853"
+              d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z"
+            />
+            <path
+              fill="#FBBC05"
+              d="M3.964 10.707A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.039l3.007-2.332z"
+            />
+            <path
+              fill="#EA4335"
+              d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.961L3.964 6.293C4.672 4.166 6.656 3.58 9 3.58z"
+            />
+          </svg>
+          Continue with Google
+        </button>
+      </div>
 
       <div className="auth-divider">
         <span>or</span>

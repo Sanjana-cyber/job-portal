@@ -4,6 +4,7 @@ import { api } from "../../services/api";
 import TalentBridgeLogo from "../../components/TalentBridgeLogo/TalentBridgeLogo";
 import SearchBar from "./SearchBar";
 import CreateJob from "./CreateJob";
+import ViewJobPage from "./ViewJobPage";
 import {
   Plus,
   ChevronDown,
@@ -21,7 +22,11 @@ import {
   Pencil,
   Trash2,
   FolderOpen,
-  Search
+  Search,
+  MapPin,
+  CheckCircle2,
+  XCircle,
+  Briefcase
 } from "lucide-react";
 import "./recruiter.css";
 
@@ -241,11 +246,14 @@ export default function RecruiterPage() {
   /* ── View Job ───────────────────────────────────────────────────────────── */
   const handleViewJob = async (job) => {
     setOpenMenuId(null);
+    setViewJob(job);
+    setCurrentView("view");
     setViewJobLoading(true);
-    setViewJob(job); // Show modal immediately with cached data
     try {
       const res = await api.get(`/jobs/${job._id}`);
-      setViewJob(res.data?.job || job);
+      if (res.data?.job) {
+        setViewJob(res.data.job);
+      }
     } catch {
       // If fetch fails, keep the cached card data
     } finally {
@@ -266,6 +274,23 @@ export default function RecruiterPage() {
       showToast(err.message || "Failed to delete job", "error");
     } finally {
       setDeleting(false);
+    }
+  };
+
+  /* ── Toggle Job Registration (Open / Closed) ────────────────────────────── */
+  const handleToggleJobStatus = async (job) => {
+    setOpenMenuId(null);
+    const newStatus = job.status === "Closed" ? "Open" : "Closed";
+    try {
+      await api.put(`/jobs/${job._id}`, { status: newStatus });
+      fetchJobs();
+      showToast(
+        newStatus === "Closed"
+          ? "Job registration closed successfully!"
+          : "Job registration reopened successfully!"
+      );
+    } catch (err) {
+      showToast(err.message || "Failed to update registration status", "error");
     }
   };
 
@@ -300,14 +325,52 @@ export default function RecruiterPage() {
           setEditJob(null);
           setCurrentView("jobs");
         }}
-        onJobCreated={() => {
+        onJobCreated={(createdJob) => {
           fetchJobs();
           setEditJob(null);
           setCurrentView("jobs");
-          showToast(
-            editJob
-              ? "Job updated successfully!"
-              : "Job published successfully!"
+          if (createdJob?.status === "Closed") {
+            setActiveTab("Closed");
+            showToast("Job registration closed successfully!");
+          } else if (createdJob?.status === "Draft") {
+            setActiveTab("Draft");
+            showToast("Job saved as draft successfully!");
+          } else {
+            setActiveTab("Open");
+            showToast(
+              editJob
+                ? "Job updated successfully!"
+                : "Job published successfully!"
+            );
+          }
+        }}
+      />
+    );
+  }
+
+  if (currentView === "view" && viewJob) {
+    return (
+      <ViewJobPage
+        job={viewJob}
+        companyName={user?.companyName}
+        onBack={() => {
+          setViewJob(null);
+          setCurrentView("jobs");
+        }}
+        onEdit={(jobToEdit) => {
+          setViewJob(null);
+          setEditJob(jobToEdit);
+          setCurrentView("create");
+        }}
+        onToggleStatus={async (jobToToggle) => {
+          await handleToggleJobStatus(jobToToggle);
+          setViewJob((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  status: prev.status === "Closed" ? "Open" : "Closed",
+                }
+              : null
           );
         }}
       />
@@ -318,12 +381,7 @@ export default function RecruiterPage() {
     <div className="recruiter-page">
       {/* ── Navbar ──────────────────────────────────────────────────────── */}
       <nav className="recruiter-navbar" id="recruiter-navbar">
-        <div className="recruiter-navbar__brand">
-          <div className="recruiter-navbar__logo-wrapper">
-            <TalentBridgeLogo variant="paperplane" size="26" />
-          </div>
-          <span className="recruiter-navbar__brand-name">TALENT BRIDGE</span>
-        </div>
+
 
         <div className="recruiter-navbar__search">
           <SearchBar
@@ -546,21 +604,12 @@ export default function RecruiterPage() {
                   setOpenMenuId(null);
                   setDeleteTarget(job);
                 }}
+                onToggleStatus={handleToggleJobStatus}
               />
             ))}
           </div>
         )}
       </div>
-
-      {/* ── View Job Modal ─────────────────────────────────────────────── */}
-      {viewJob && (
-        <ViewJobModal
-          job={viewJob}
-          loading={viewJobLoading}
-          companyName={user?.companyName}
-          onClose={() => setViewJob(null)}
-        />
-      )}
 
       {/* ── Delete Confirmation ────────────────────────────────────────── */}
       {deleteTarget && (
@@ -626,6 +675,7 @@ function JobCard({
   onView,
   onEdit,
   onDelete,
+  onToggleStatus,
 }) {
   const location = formatLocation(job.acceptableLocations);
   const deadline = getDeadlineInfo(job.applicationDeadline);
@@ -653,6 +703,20 @@ function JobCard({
             </button>
             <button className="recruiter-job-card__overflow-item" onClick={onEdit}>
               <Pencil size={14} /> Edit Job
+            </button>
+            <button
+              className="recruiter-job-card__overflow-item"
+              onClick={() => onToggleStatus(job)}
+            >
+              {job.status === "Closed" ? (
+                <>
+                  <CheckCircle2 size={14} /> Reopen Registration
+                </>
+              ) : (
+                <>
+                  <XCircle size={14} /> Close Registration
+                </>
+              )}
             </button>
             <button
               className="recruiter-job-card__overflow-item recruiter-job-card__overflow-item--danger"
@@ -727,180 +791,4 @@ function JobCard({
   );
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════ */
-/*  ViewJobModal Sub-Component                                               */
-/* ═══════════════════════════════════════════════════════════════════════════ */
-function ViewJobModal({ job, loading, companyName, onClose }) {
-  if (!job) return null;
-
-  const location = formatLocation(job.acceptableLocations);
-  const deadline = job.applicationDeadline
-    ? new Date(job.applicationDeadline).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    })
-    : null;
-
-  const salary =
-    job.salaryMin || job.salaryMax
-      ? [
-        job.salaryMin ? `$${Number(job.salaryMin).toLocaleString()}` : null,
-        job.salaryMax ? `$${Number(job.salaryMax).toLocaleString()}` : null,
-      ]
-        .filter(Boolean)
-        .join(" – ")
-      : null;
-
-  return (
-    <div className="recruiter-modal-overlay" onClick={onClose}>
-      <div
-        className="recruiter-modal"
-        onClick={(e) => e.stopPropagation()}
-        id="view-job-modal"
-      >
-        <div className="recruiter-modal__header">
-          <h2>{job.jobTitle || "Job Details"}</h2>
-          <button
-            className="recruiter-modal__close"
-            onClick={onClose}
-            aria-label="Close"
-          >
-            <X size={20} />
-          </button>
-        </div>
-        <div className="recruiter-modal__body">
-          {/* Info grid */}
-          <div className="recruiter-modal__info-grid">
-            {companyName && (
-              <div className="recruiter-modal__section">
-                <p className="recruiter-modal__label">Company</p>
-                <p className="recruiter-modal__value">{companyName}</p>
-              </div>
-            )}
-            {location && (
-              <div className="recruiter-modal__section">
-                <p className="recruiter-modal__label">Location</p>
-                <p className="recruiter-modal__value">{location}</p>
-              </div>
-            )}
-            {job.employmentType && (
-              <div className="recruiter-modal__section">
-                <p className="recruiter-modal__label">Employment Type</p>
-                <p className="recruiter-modal__value">{job.employmentType}</p>
-              </div>
-            )}
-            {job.jobType && (
-              <div className="recruiter-modal__section">
-                <p className="recruiter-modal__label">Job Type</p>
-                <p className="recruiter-modal__value">{job.jobType}</p>
-              </div>
-            )}
-            {job.level && (
-              <div className="recruiter-modal__section">
-                <p className="recruiter-modal__label">Level</p>
-                <p className="recruiter-modal__value">{job.level}</p>
-              </div>
-            )}
-            {job.headcount != null && (
-              <div className="recruiter-modal__section">
-                <p className="recruiter-modal__label">Headcount</p>
-                <p className="recruiter-modal__value">{job.headcount}</p>
-              </div>
-            )}
-            {salary && (
-              <div className="recruiter-modal__section">
-                <p className="recruiter-modal__label">Salary Range</p>
-                <p className="recruiter-modal__value">{salary}</p>
-              </div>
-            )}
-            {job.yearsOfExperience != null && (
-              <div className="recruiter-modal__section">
-                <p className="recruiter-modal__label">Experience Required</p>
-                <p className="recruiter-modal__value">
-                  {job.yearsOfExperience} year
-                  {job.yearsOfExperience !== 1 ? "s" : ""}
-                </p>
-              </div>
-            )}
-            {deadline && (
-              <div className="recruiter-modal__section">
-                <p className="recruiter-modal__label">Application Deadline</p>
-                <p className="recruiter-modal__value">{deadline}</p>
-              </div>
-            )}
-            {job.status && (
-              <div className="recruiter-modal__section">
-                <p className="recruiter-modal__label">Status</p>
-                <p className="recruiter-modal__value">
-                  {capitalize(job.status)}
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Description */}
-          {job.description && (
-            <div className="recruiter-modal__section">
-              <p className="recruiter-modal__label">Description</p>
-              <p className="recruiter-modal__value">{job.description}</p>
-            </div>
-          )}
-
-          {/* Responsibilities */}
-          {job.responsibilities?.length > 0 && (
-            <div className="recruiter-modal__section">
-              <p className="recruiter-modal__label">Responsibilities</p>
-              <ul className="recruiter-modal__list">
-                {job.responsibilities.map((r, i) => (
-                  <li key={i}>{r}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {/* Requirements */}
-          {job.requirements?.length > 0 && (
-            <div className="recruiter-modal__section">
-              <p className="recruiter-modal__label">Requirements</p>
-              <ul className="recruiter-modal__list">
-                {job.requirements.map((r, i) => (
-                  <li key={i}>{r}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {/* Tech Stack */}
-          {job.techStack?.length > 0 && (
-            <div className="recruiter-modal__section">
-              <p className="recruiter-modal__label">Tech Stack</p>
-              <div className="recruiter-modal__tags">
-                {job.techStack.map((t, i) => (
-                  <span className="recruiter-modal__tag" key={i}>
-                    {t}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Required Skills */}
-          {job.requiredSkills?.length > 0 && (
-            <div className="recruiter-modal__section">
-              <p className="recruiter-modal__label">Required Skills</p>
-              <div className="recruiter-modal__tags">
-                {job.requiredSkills.map((s, i) => (
-                  <span className="recruiter-modal__tag" key={i}>
-                    {s}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
 
