@@ -3,7 +3,6 @@ import {
   ArrowLeft,
   Search,
   RefreshCw,
-  Sparkles,
   CheckCircle2,
   XCircle,
   Clock,
@@ -17,6 +16,8 @@ import {
   ChevronUp,
   UserCheck,
   UserX,
+  Briefcase,
+  FileText,
 } from "lucide-react";
 import { getJobApplications, updateApplicationStatus, retryApplicationAts, api } from "../../services/api";
 import tokenService from "../../services/tokenService";
@@ -201,13 +202,6 @@ export default function AtsRankingPage({ job, onBack }) {
       )
     : pendingApps;
 
-  // ── Stats ──────────────────────────────────────────────────────────────────
-  const avgScore =
-    scoredApps.length > 0
-      ? Math.round(scoredApps.reduce((s, a) => s + a.atsScore, 0) / scoredApps.length)
-      : null;
-  const topScore = scoredApps.length > 0 ? Math.max(...scoredApps.map((a) => a.atsScore)) : null;
-
   const SORT_LABELS = {
     "score-desc": "Highest Score First",
     "score-asc":  "Lowest Score First",
@@ -218,27 +212,27 @@ export default function AtsRankingPage({ job, onBack }) {
   // ══════════════════════════════════════════════════════════════════════════
   return (
     <div className="ats-page">
-      {/* ── Navbar ─────────────────────────────────────────────────────────── */}
-      <nav className="ats-navbar">
-        <div className="ats-navbar__left">
-          <button className="ats-back-btn" onClick={onBack} id="ats-back-btn">
-            <ArrowLeft size={16} />
+      {/* ── Top Navbar (matching recruiter navbar) ─────────────────────────── */}
+      <nav className="recruiter-navbar ats-navbar">
+        <div className="recruiter-navbar__left" style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+          <button className="view-job-page__back-btn ats-back-btn" onClick={onBack} id="ats-back-btn">
+            <ArrowLeft size={18} />
             <span>Back to Dashboard</span>
           </button>
-          <span className="ats-breadcrumb-sep">/</span>
-          <span className="ats-breadcrumb-label">
+          <span className="view-job-page__breadcrumb-sep">/</span>
+          <span style={{ fontWeight: 600, color: "rgba(255, 255, 255, 0.95)", fontSize: "0.92rem" }}>
             ATS Ranking — {job?.jobTitle || "Job"}
           </span>
         </div>
-        <div className="ats-navbar__right">
+        <div className="recruiter-navbar__right" style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginLeft: "auto" }}>
           <button
             className="ats-refresh-btn"
             onClick={() => fetchApplications(false)}
             disabled={loading}
-            title="Refresh"
+            title="Refresh list"
           >
             <RefreshCw size={14} className={loading ? "ats-spin" : ""} />
-            Refresh
+            <span>Refresh</span>
           </button>
         </div>
       </nav>
@@ -246,48 +240,15 @@ export default function AtsRankingPage({ job, onBack }) {
       {/* ── Page Body ─────────────────────────────────────────────────────── */}
       <div className="ats-body">
 
-        {/* Hero Header */}
-        <header className="ats-hero">
-          <div className="ats-hero__icon-wrap">
-            <Sparkles size={28} className="ats-hero__icon" />
-          </div>
-          <div className="ats-hero__text">
-            <h1 className="ats-hero__title">ATS Candidate Ranking</h1>
-            <p className="ats-hero__subtitle">
-              {job?.jobTitle || "Job"} · Candidates ranked by Gemini AI match score
+        {/* Clean Professional Header */}
+        <header className="ats-header">
+          <div className="ats-header__text">
+            <h1 className="ats-header__title">Candidate ATS Ranking</h1>
+            <p className="ats-header__subtitle">
+              {job?.jobTitle || "Job"} · Candidates evaluated and ranked by keyword match and qualifications
             </p>
           </div>
         </header>
-
-        {/* Stats Strip */}
-        {!loading && !error && (
-          <div className="ats-stats">
-            <div className="ats-stat-card">
-              <span className="ats-stat-card__num">{applications.length}</span>
-              <span className="ats-stat-card__label">Total Applicants</span>
-            </div>
-            <div className="ats-stat-card">
-              <span className="ats-stat-card__num">{scoredApps.length}</span>
-              <span className="ats-stat-card__label">AI Screened</span>
-            </div>
-            <div className="ats-stat-card">
-              <span className="ats-stat-card__num">{pendingApps.length}</span>
-              <span className="ats-stat-card__label">Pending / Failed</span>
-            </div>
-            {avgScore !== null && (
-              <div className="ats-stat-card">
-                <span className="ats-stat-card__num">{avgScore}</span>
-                <span className="ats-stat-card__label">Avg. ATS Score</span>
-              </div>
-            )}
-            {topScore !== null && (
-              <div className="ats-stat-card ats-stat-card--highlight">
-                <span className="ats-stat-card__num">{topScore}</span>
-                <span className="ats-stat-card__label">Top Score</span>
-              </div>
-            )}
-          </div>
-        )}
 
         {/* Toolbar */}
         {!loading && !error && (
@@ -351,7 +312,7 @@ export default function AtsRankingPage({ job, onBack }) {
           </div>
         ) : applications.length === 0 ? (
           <div className="ats-empty">
-            <Sparkles size={40} className="ats-empty__icon" />
+            <Briefcase size={38} className="ats-empty__icon" />
             <h3>No applications yet</h3>
             <p>Candidates who apply to this job will appear here ranked by their ATS score.</p>
           </div>
@@ -384,8 +345,8 @@ export default function AtsRankingPage({ job, onBack }) {
                         className={`ats-card${rank <= 3 ? ` ats-card--top-${rank}` : ""}${isExpanded ? " ats-card--expanded" : ""}`}
                       >
                         {rank <= 3 && (
-                          <div className={`ats-rank-ribbon ats-rank-ribbon--${rank}`}>
-                            {rank === 1 ? "🥇" : rank === 2 ? "🥈" : "🥉"} #{rank}
+                          <div className={`ats-rank-badge ats-rank-badge--${rank}`}>
+                            Rank #{rank}
                           </div>
                         )}
 
@@ -508,8 +469,10 @@ export default function AtsRankingPage({ job, onBack }) {
 
                             {app.atsExplanation && (
                               <div className="ats-explanation">
-                                <Sparkles size={13} className="ats-explanation__icon" />
-                                <div><strong>AI Analysis:</strong> {app.atsExplanation}</div>
+                                <div className="ats-explanation__header">
+                                  <strong>Candidate Match Evaluation:</strong>
+                                </div>
+                                <div className="ats-explanation__content">{app.atsExplanation}</div>
                               </div>
                             )}
                           </div>

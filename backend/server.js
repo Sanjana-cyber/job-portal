@@ -186,6 +186,27 @@ const startServer = async () => {
     // Connect to MongoDB
     await connectDB();
 
+    // Auto-seed admin user if not present (works for both local and deployment)
+    try {
+      const User = require("./models/User");
+      const adminEmail = (process.env.ADMIN_EMAIL || "admin@jobportal.com").toLowerCase().trim();
+      const existingAdmin = await User.findOne({ email: adminEmail });
+      if (!existingAdmin) {
+        const adminPassword = process.env.ADMIN_PASSWORD || "AdminSecurePassword123!";
+        await User.create({
+          name: "System Administrator",
+          email: adminEmail,
+          password: adminPassword,
+          role: "admin",
+          isVerified: true,
+          provider: "local",
+        });
+        console.log(`🛡️  Admin user initialized: ${adminEmail}`);
+      }
+    } catch (seedErr) {
+      console.warn("⚠️  Admin auto-seed notice:", seedErr.message);
+    }
+
     // Start listening for requests
     const server = app.listen(PORT, () => {
       console.log(`\n🚀 Server running in ${process.env.NODE_ENV || "development"} mode on port ${PORT}`);

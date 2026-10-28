@@ -38,7 +38,8 @@ const protect = async (req, res, next) => {
 
   try {
     // Verify the token using our secret
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const secret = process.env.JWT_SECRET || "your_super_secret_jwt_key_change_this_in_production_2024";
+    const decoded = jwt.verify(token, secret);
 
     // Find user by decoded ID and attach to request
     const user = await User.findById(decoded.id);
@@ -149,7 +150,8 @@ const optionalProtect = async (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const secret = process.env.JWT_SECRET || "your_super_secret_jwt_key_change_this_in_production_2024";
+    const decoded = jwt.verify(token, secret);
     const user = await User.findById(decoded.id);
     if (user) req.user = user;
   } catch {

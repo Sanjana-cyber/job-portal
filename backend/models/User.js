@@ -122,9 +122,13 @@ userSchema.methods.matchPassword = async function (enteredPassword) {
  * @returns {string} Signed JWT token
  */
 userSchema.methods.getSignedJwtToken = function () {
-  return jwt.sign({ id: this._id, role: this.role }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRE,
-  });
+  return jwt.sign(
+    { id: this._id, role: this.role },
+    process.env.JWT_SECRET || "your_super_secret_jwt_key_change_this_in_production_2024",
+    {
+      expiresIn: process.env.JWT_EXPIRE || "7d",
+    }
+  );
 };
 
 /**
