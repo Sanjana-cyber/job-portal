@@ -229,12 +229,14 @@ const login = async (req, res, next) => {
  */
 const logout = async (req, res, next) => {
   try {
+    const isProduction = process.env.NODE_ENV === "production";
+
     // Clear the JWT cookie cleanly
     res.cookie("token", "", {
       expires: new Date(0),
       httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
+      sameSite: isProduction ? "none" : "lax",
+      secure: isProduction,
       path: "/",
     });
 

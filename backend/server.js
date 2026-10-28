@@ -26,20 +26,41 @@ const app = express();
 // Middleware Stack
 // ============================================
 
-// CORS — Allow frontend to communicate with backend
-app.use(
-  cors({
-    origin: [
-      process.env.FRONTEND_URL || "http://localhost:5173",
-      "http://localhost:5173",
-      "http://localhost:5174",
-      "http://localhost:3000",
-    ],
-    credentials: true, // Allow cookies to be sent cross-origin
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+// Allowed origins for CORS
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://job-portal-h9m1-nine.vercel.app",
+  "http://localhost:5174",
+  "http://localhost:3000",
+];
+
+// If FRONTEND_URL is provided in environment variables, add it after trimming trailing slashes
+if (process.env.FRONTEND_URL) {
+  const envOrigin = process.env.FRONTEND_URL.trim().replace(/\/+$/, "");
+  if (envOrigin && !allowedOrigins.includes(envOrigin)) {
+    allowedOrigins.push(envOrigin);
+  }
+}
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Allow non-browser requests (curl, Postman, server-to-server) without origin header
+    if (!origin) return callback(null, true);
+
+    const cleanOrigin = origin.trim().replace(/\/+$/, "");
+    if (allowedOrigins.includes(cleanOrigin)) {
+      return callback(null, true);
+    }
+    return callback(null, false);
+  },
+  credentials: true, // Allow cookies to be sent cross-origin
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept"],
+  optionsSuccessStatus: 200,
+};
+
+// CORS — Must be registered before any routes or terminating middleware
+app.use(cors(corsOptions));
 
 // Helmet — sets secure HTTP headers (XSS, clickjacking, sniffing protection)
 app.use(
@@ -53,8 +74,7 @@ app.use(
         imgSrc: ["'self'", "data:", "https:"],
         connectSrc: [
           "'self'",
-          process.env.FRONTEND_URL || "http://localhost:5173",
-          "http://localhost:5173",
+          ...allowedOrigins,
           "http://localhost:5000",
           "https://accounts.google.com",
         ],
@@ -64,6 +84,7 @@ app.use(
       },
     },
     crossOriginEmbedderPolicy: false, // needed for Google Sign-In iframe
+    crossOriginResourcePolicy: { policy: "cross-origin" }, // Allow cross-origin resources
   })
 );
 

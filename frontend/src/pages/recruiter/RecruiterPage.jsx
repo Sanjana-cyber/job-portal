@@ -5,6 +5,7 @@ import TalentBridgeLogo from "../../components/TalentBridgeLogo/TalentBridgeLogo
 import SearchBar from "./SearchBar";
 import CreateJob from "./CreateJob";
 import ViewJobPage from "./ViewJobPage";
+import AtsRankingPage from "./AtsRankingPage";
 import NotificationBell from "../../components/NotificationBell/NotificationBell";
 import {
   Plus,
@@ -154,6 +155,9 @@ export default function RecruiterPage() {
   // ── Delete confirm state ────────────────────────────────────────────────
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
+
+  // ── ATS Ranking view state ───────────────────────────────────────────────
+  const [atsJob, setAtsJob] = useState(null);
 
   // ── Toast state ─────────────────────────────────────────────────────────
   const [toast, setToast] = useState(null);
@@ -307,6 +311,27 @@ export default function RecruiterPage() {
     setCurrentView("create");
   };
 
+  /* ── Notification click → open ATS Ranking for that job ─────────────────── */
+  const handleNotificationSelect = useCallback(async (notif) => {
+    // Notifications carry a job reference; extract its _id
+    const jobId = notif?.job?._id || notif?.job;
+    if (!jobId) return;
+
+    // Fetch the full job object so AtsRankingPage has title, description, etc.
+    try {
+      const res = await api.get(`/jobs/${jobId}`);
+      const fullJob = res.data?.job || res.data;
+      if (fullJob) {
+        setAtsJob(fullJob);
+        setCurrentView("ats");
+      }
+    } catch {
+      // If fetch fails, use the partial data already in the notification
+      setAtsJob({ _id: jobId, jobTitle: notif?.job?.jobTitle || "Job" });
+      setCurrentView("ats");
+    }
+  }, []);
+
   /* ── User initials for avatar ───────────────────────────────────────────── */
   const initials = (user?.name || "R")
     .split(" ")
@@ -318,6 +343,18 @@ export default function RecruiterPage() {
   /* ════════════════════════════════════════════════════════════════════════ */
   /*  RENDER                                                                 */
   /* ════════════════════════════════════════════════════════════════════════ */
+  if (currentView === "ats" && atsJob) {
+    return (
+      <AtsRankingPage
+        job={atsJob}
+        onBack={() => {
+          setAtsJob(null);
+          setCurrentView("jobs");
+        }}
+      />
+    );
+  }
+
   if (currentView === "create") {
     return (
       <CreateJob
@@ -421,7 +458,7 @@ export default function RecruiterPage() {
         </div>
 
         <div className="recruiter-navbar__profile">
-          <NotificationBell />
+          <NotificationBell onSelectNotification={handleNotificationSelect} />
           <div
             className="recruiter-navbar__avatar"
             title={user?.name || "Recruiter"}

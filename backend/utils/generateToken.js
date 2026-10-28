@@ -11,14 +11,16 @@ const sendTokenResponse = (user, statusCode, res, message = "Success") => {
   // Generate JWT token using the User model method
   const token = user.getSignedJwtToken();
 
+  const isProduction = process.env.NODE_ENV === "production";
+
   // Cookie options for security
   const cookieOptions = {
     expires: new Date(
-      Date.now() + process.env.COOKIE_EXPIRE * 24 * 60 * 60 * 1000
+      Date.now() + (process.env.COOKIE_EXPIRE || 7) * 24 * 60 * 60 * 1000
     ),
     httpOnly: true,    // Prevents JavaScript access (XSS protection)
-    sameSite: "lax",   // Standard CSRF protection that allows cross-origin navigation/auth on localhost
-    secure: process.env.NODE_ENV === "production", // HTTPS only in production
+    sameSite: isProduction ? "none" : "lax",   // "none" required for cross-origin (HTTPS) cookies in production
+    secure: isProduction, // HTTPS only in production (required when sameSite is "none")
     path: "/",
   };
 

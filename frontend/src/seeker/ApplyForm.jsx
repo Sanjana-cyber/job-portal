@@ -1,8 +1,16 @@
 import React, { useState, useRef } from "react";
 import { ArrowLeft, Upload, CheckCircle2, X, MapPin } from "lucide-react";
 import "./ApplyForm.css";
+const getApiBase = () => {
+  const envUrl =
+    import.meta.env.VITE_API_URL ||
+    import.meta.env.VITE_API_BASE_URL ||
+    "http://localhost:5000/api";
+  const trimmed = envUrl.trim().replace(/\/+$/, "");
+  return trimmed.endsWith("/api") ? trimmed : `${trimmed}/api`;
+};
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
+const API_BASE = getApiBase();
 
 const GENDER_OPTIONS = [
   { label: "Female" },
@@ -84,6 +92,7 @@ export default function ApplyForm({ job, onBack }) {
 
       const res = await fetch(`${API_BASE}/applications/${job._id}/direct-apply`, {
         method: "POST",
+        credentials: "include",
         body: fd,
       });
 

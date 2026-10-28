@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Eye, EyeOff, Loader2, ArrowLeft } from "lucide-react";
 import { registerUser, loginUser, forgotPassword } from "../../services/api";
 import "./Auth.css";
