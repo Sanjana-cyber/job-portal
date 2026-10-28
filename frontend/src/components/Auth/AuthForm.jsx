@@ -47,9 +47,11 @@ function validateField(name, value, extra = {}) {
       if (!value) return "Password is required.";
       if (value.length < 8) return "Password must be at least 8 characters.";
       if (value.length > 128) return "Password is too long (max 128 characters).";
-      // For register only — require at least one letter and one digit
-      if (extra.isRegister && !/[a-zA-Z]/.test(value))
-        return "Password must contain at least one letter.";
+      // For register only — enforce uppercase, lowercase, and digit to match backend requirements
+      if (extra.isRegister && !/[a-z]/.test(value))
+        return "Password must contain at least one lowercase letter.";
+      if (extra.isRegister && !/[A-Z]/.test(value))
+        return "Password must contain at least one uppercase letter.";
       if (extra.isRegister && !/[0-9]/.test(value))
         return "Password must contain at least one number.";
       return "";

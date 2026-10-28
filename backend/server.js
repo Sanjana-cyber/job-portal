@@ -22,6 +22,9 @@ const notificationRoutes = require("./routes/notificationRoutes");
 // Create Express application
 const app = express();
 
+// Trust reverse proxy (essential for Render / load balancers to correctly determine client IP for rate limiting)
+app.set("trust proxy", 1);
+
 // ============================================
 // Middleware Stack
 // ============================================
@@ -48,7 +51,10 @@ const corsOptions = {
     if (!origin) return callback(null, true);
 
     const cleanOrigin = origin.trim().replace(/\/+$/, "");
-    if (allowedOrigins.includes(cleanOrigin)) {
+    if (
+      allowedOrigins.includes(cleanOrigin) ||
+      cleanOrigin.endsWith(".vercel.app")
+    ) {
       return callback(null, true);
     }
     return callback(null, false);

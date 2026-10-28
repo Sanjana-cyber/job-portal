@@ -30,7 +30,7 @@ router.post("/google", authLimiter, googleAuth);
 router.get("/verify-email/:token", verifyEmail);
 
 // Protected routes (require authentication)
-router.post("/logout", protect, logout);
+router.post("/logout", logout);
 router.get("/me", protect, getMe);
 
 // Admin validation check (returns success if the authenticated user has the 'admin' role)

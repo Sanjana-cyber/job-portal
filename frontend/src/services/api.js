@@ -27,7 +27,7 @@ export const API_BASE_URL = getApiBaseUrl();
 export const api = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
-  timeout: 10_000,
+  timeout: 60_000,
   headers: {
     "Content-Type": "application/json",
   },
@@ -192,9 +192,15 @@ export const getMe = async () => {
  * Clears tokenService and notifies backend to clear HttpOnly cookie.
  */
 export const logoutUser = async () => {
-  tokenService.clearToken();
-  const res = await api.post("/auth/logout");
-  return res.data; // { success, message }
+  try {
+    const res = await api.post("/auth/logout");
+    return res.data;
+  } catch {
+    // If backend is unreachable or cookie already expired, return clean success
+    return { success: true, message: "Logged out" };
+  } finally {
+    tokenService.clearToken();
+  }
 };
 
 // ─── Applications API ─────────────────────────────────────────────────────────

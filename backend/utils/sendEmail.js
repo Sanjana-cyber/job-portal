@@ -10,15 +10,23 @@ const nodemailer = require("nodemailer");
  * @param {string} options.html - HTML email body
  */
 const sendEmail = async (options) => {
+  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+    console.warn("⚠️ SMTP credentials not configured. Skipping email dispatch.");
+    return;
+  }
+
   // Create transporter with SMTP settings from environment
   const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: process.env.SMTP_PORT,
+    host: process.env.SMTP_HOST || "smtp.gmail.com",
+    port: parseInt(process.env.SMTP_PORT, 10) || 587,
     secure: false, // true for 465, false for other ports
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
     },
+    connectionTimeout: 5000,
+    greetingTimeout: 5000,
+    socketTimeout: 10000,
   });
 
   // Email message configuration

@@ -7,6 +7,7 @@ import React, {
 } from "react";
 import AuthModal from "../components/Auth/AuthModal";
 import { getMe, logoutUser } from "../services/api";
+import tokenService from "../services/tokenService";
 
 /**
  * AuthModalContext
@@ -30,15 +31,21 @@ export function AuthModalProvider({ children }) {
   const [isLoading, setIsLoading] = useState(true); // true until session check finishes
 
   // ── Session restore on mount ─────────────────────────────────────────────
-  // Silently call /api/auth/me on first load. If the HttpOnly cookie is still
-  // valid the backend returns the user; otherwise it 401s (handled below).
+  // Restore user session if a saved token exists. If no token is stored,
+  // skip the network call to avoid logging an expected 401 in the console.
   useEffect(() => {
+    if (!tokenService.hasToken()) {
+      setIsLoading(false);
+      return;
+    }
+
     getMe()
       .then((res) => {
         if (res?.user) setUser(res.user);
       })
       .catch(() => {
-        // 401 → cookie gone / expired → stay logged out, nothing to do here
+        // 401 → token expired / invalid → clear stale token
+        tokenService.clearToken();
       })
       .finally(() => setIsLoading(false));
   }, []);

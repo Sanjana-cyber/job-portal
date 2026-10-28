@@ -121,16 +121,14 @@ const register = async (req, res, next) => {
     // Build verification URL
     const verificationUrl = `${process.env.FRONTEND_URL}/verify-email/${verificationToken}`;
 
-    // Send verification email (non-blocking)
-    try {
-      await sendEmail({
-        to: user.email,
-        subject: "Verify Your Email — Job Portal",
-        html: getVerificationEmailTemplate(user.name, verificationUrl),
-      });
-    } catch (emailError) {
+    // Send verification email (non-blocking in background)
+    sendEmail({
+      to: user.email,
+      subject: "Verify Your Email — Job Portal",
+      html: getVerificationEmailTemplate(user.name, verificationUrl),
+    }).catch((emailError) => {
       console.error("Email sending failed:", emailError.message);
-    }
+    });
 
     // Determine the appropriate success message based on auto-verification
     let successMessage = "Registration successful. Please verify your email.";
