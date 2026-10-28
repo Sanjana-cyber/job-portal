@@ -5,13 +5,13 @@ import "./ApplyForm.css";
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
 
 const GENDER_OPTIONS = [
-  { label: "Female",          icon: "♀" },
-  { label: "Male",            icon: "♂" },
-  { label: "Transgender",     icon: "⚧" },
-  { label: "Intersex",        icon: "⚥" },
-  { label: "Non-binary",      icon: "⚧" },
-  { label: "Prefer not to say", icon: "🚫" },
-  { label: "Others",          icon: "🔑" },
+  { label: "Female" },
+  { label: "Male" },
+  { label: "Transgender" },
+  { label: "Intersex" },
+  { label: "Non-binary" },
+  { label: "Prefer not to say" },
+  { label: "Others" }
 ];
 
 export default function ApplyForm({ job, onBack }) {

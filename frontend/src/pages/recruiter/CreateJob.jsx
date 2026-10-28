@@ -20,6 +20,7 @@ import {
   Globe,
 } from "lucide-react";
 import "./createJob.css";
+import NotificationBell from "../../components/NotificationBell/NotificationBell";
 
 /* ─── Static Preset Options ────────────────────────────────────────────────── */
 const EMPLOYMENT_TYPES = [
@@ -409,6 +410,7 @@ export default function CreateJob({ onBack, onJobCreated, initialData = null }) 
 
 
         <div className="recruiter-navbar__profile">
+          <NotificationBell />
           <div
             className="recruiter-navbar__avatar"
             title={user?.name || "Recruiter"}

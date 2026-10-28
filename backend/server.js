@@ -17,6 +17,7 @@ const resumeIntelligenceRoutes = require("./routes/resumeIntelligenceRoutes");
 const jobRoutes = require("./routes/jobRoutes");           // Recruiter job management (protected)
 const applicationRoutes = require("./routes/applicationRoutes");
 const verificationRoutes = require("./routes/verificationRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
 
 // Create Express application
 const app = express();
@@ -128,6 +129,9 @@ app.use("/api/recruiter/jobs", jobRoutes);
 
 // Application routes
 app.use("/api/applications", applicationRoutes);
+
+// Notification routes
+app.use("/api/notifications", notificationRoutes);
 
 // Recruiter verification routes
 app.use("/api/verification", verificationRoutes);

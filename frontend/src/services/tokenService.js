@@ -22,7 +22,10 @@ export const tokenService = {
     if (memoryToken) return memoryToken;
     try {
       if (typeof window !== "undefined" && window.localStorage) {
-        const stored = window.localStorage.getItem(TOKEN_KEY);
+        const stored =
+          window.localStorage.getItem(TOKEN_KEY) ||
+          window.localStorage.getItem("token") ||
+          window.localStorage.getItem("authToken");
         if (stored && stored !== "null" && stored !== "undefined" && stored !== "none") {
           memoryToken = stored;
           return stored;
@@ -45,6 +48,7 @@ export const tokenService = {
     try {
       if (typeof window !== "undefined" && window.localStorage) {
         window.localStorage.setItem(TOKEN_KEY, token);
+        window.localStorage.setItem("token", token);
       }
     } catch {
       // Storage unavailable

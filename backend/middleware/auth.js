@@ -24,6 +24,10 @@ const protect = async (req, res, next) => {
       token = bearer;
     }
   }
+  // Fallback: check query parameter (for direct file downloads/views in new browser tabs)
+  else if (req.query && req.query.token && req.query.token !== "null" && req.query.token !== "undefined") {
+    token = req.query.token;
+  }
 
   // No token found — user is not authenticated
   if (!token) {

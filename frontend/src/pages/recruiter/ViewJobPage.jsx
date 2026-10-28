@@ -82,6 +82,7 @@ export default function ViewJobPage({
   onEdit,
   onToggleStatus,
   onApply,
+  onViewApplications,
 }) {
   if (!job) {
     return (
@@ -130,6 +131,23 @@ export default function ViewJobPage({
           </div>
 
           <div className="view-job-page__navbar-actions">
+            {/* View Applicants Button */}
+            {onViewApplications && (
+              <button
+                className="view-job-action-btn view-job-action-btn--applications"
+                onClick={() => onViewApplications(job)}
+                id="view-job-view-applicants-btn"
+                style={{
+                  background: "#2563eb",
+                  color: "#ffffff",
+                  borderColor: "#1d4ed8",
+                }}
+              >
+                <Users size={16} />
+                <span>View Applicants</span>
+              </button>
+            )}
+
             {/* Toggle Status: Close / Reopen Registration */}
             {onToggleStatus && (
               <button

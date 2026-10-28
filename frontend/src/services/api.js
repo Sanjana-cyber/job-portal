@@ -188,3 +188,38 @@ export const logoutUser = async () => {
   const res = await api.post("/auth/logout");
   return res.data; // { success, message }
 };
+
+// ─── Applications API ─────────────────────────────────────────────────────────
+
+export const getJobApplications = async (jobId) => {
+  const res = await api.get(`/applications/job/${jobId}`);
+  return res.data; // { success, count, data }
+};
+
+export const updateApplicationStatus = async (applicationId, status) => {
+  const res = await api.put(`/applications/${applicationId}/status`, { status });
+  return res.data; // { success, message, data }
+};
+
+export const retryApplicationAts = async (applicationId) => {
+  const res = await api.post(`/applications/${applicationId}/retry-ats`);
+  return res.data; // { success, message, data }
+};
+
+// ─── Notifications API ────────────────────────────────────────────────────────
+
+export const getNotifications = async () => {
+  const res = await api.get("/notifications");
+  return res.data; // { success, count, unreadCount, data }
+};
+
+export const markNotificationRead = async (notificationId) => {
+  const res = await api.put(`/notifications/${notificationId}/read`);
+  return res.data; // { success, data }
+};
+
+export const markAllNotificationsRead = async () => {
+  const res = await api.put("/notifications/read-all");
+  return res.data; // { success, message }
+};
+

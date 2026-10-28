@@ -34,6 +34,12 @@ const applicationSchema = new mongoose.Schema(
     atsScore: { type: Number, default: null },
     matchedKeywords: [{ type: String }],
     missingKeywords: [{ type: String }],
+    atsStatus: {
+      type: String,
+      enum: ["pending", "processing", "completed", "failed"],
+      default: "pending",
+    },
+    atsExplanation: { type: String, default: "" },
   },
   { timestamps: true }
 );

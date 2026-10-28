@@ -5,6 +5,7 @@ import TalentBridgeLogo from "../../components/TalentBridgeLogo/TalentBridgeLogo
 import SearchBar from "./SearchBar";
 import CreateJob from "./CreateJob";
 import ViewJobPage from "./ViewJobPage";
+import NotificationBell from "../../components/NotificationBell/NotificationBell";
 import {
   Plus,
   ChevronDown,
@@ -420,6 +421,7 @@ export default function RecruiterPage() {
         </div>
 
         <div className="recruiter-navbar__profile">
+          <NotificationBell />
           <div
             className="recruiter-navbar__avatar"
             title={user?.name || "Recruiter"}
