@@ -114,6 +114,25 @@
   flex-shrink: 0;
 }
 
+.recruiter-navbar .notification-bell-btn {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  width: 34px;
+  height: 34px;
+}
+
+.recruiter-navbar .notification-bell-btn:hover,
+.recruiter-navbar .notification-bell-btn--active {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.45);
+  color: #ffffff;
+}
+
+.recruiter-navbar .notification-badge {
+  border-color: var(--color-navy, #0a2558);
+}
+
 .recruiter-navbar__avatar {
   width: 34px;
   height: 34px;
@@ -1947,6 +1966,33 @@
   .recruiter-modal {
     width: 100%;
     max-height: 92vh;
+  }
+
+  /* ViewJobPage mobile styles */
+  .view-job-page__card {
+    padding: 1.5rem 1rem;
+    border-radius: 14px;
+  }
+
+  .view-job-hero {
+    flex-direction: column-reverse;
+    gap: 1.25rem;
+    align-items: flex-start;
+  }
+
+  .view-job-hero__title {
+    font-size: 1.5rem;
+  }
+
+  .view-job-logo-card {
+    width: 76px;
+    height: 76px;
+    border-radius: 12px;
+  }
+
+  .view-job-apply-card {
+    padding: 1.25rem 1rem;
+    border-radius: 14px;
   }
 
   .recruiter-modal__header {

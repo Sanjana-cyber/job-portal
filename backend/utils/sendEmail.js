@@ -1,4 +1,10 @@
 const nodemailer = require("nodemailer");
+const dns = require("node:dns");
+
+// Force IPv4 first to prevent ENETUNREACH on networks without IPv6 internet routes
+if (dns.setDefaultResultOrder) {
+  dns.setDefaultResultOrder("ipv4first");
+}
 
 /**
  * Send email using Nodemailer
@@ -20,31 +26,24 @@ const sendEmail = async (options) => {
 
   const host = (process.env.SMTP_HOST || "smtp.gmail.com").trim();
   const port = parseInt(process.env.SMTP_PORT, 10) || 587;
-  const isGmail = host.toLowerCase().includes("gmail");
+  const isSecure = port === 465;
 
-  const transportConfig = isGmail
-    ? {
-        service: "gmail",
-        auth: {
-          user: smtpUser,
-          pass: smtpPass,
-        },
-        connectionTimeout: 10000,
-        greetingTimeout: 10000,
-        socketTimeout: 15000,
-      }
-    : {
-        host,
-        port,
-        secure: port === 465,
-        auth: {
-          user: smtpUser,
-          pass: smtpPass,
-        },
-        connectionTimeout: 10000,
-        greetingTimeout: 10000,
-        socketTimeout: 15000,
-      };
+  const transportConfig = {
+    host,
+    port,
+    secure: isSecure, // false for port 587 (STARTTLS), true for port 465 (SSL)
+    family: 4, // Force IPv4 to prevent ENETUNREACH on systems without IPv6 routing
+    auth: {
+      user: smtpUser,
+      pass: smtpPass,
+    },
+    tls: {
+      rejectUnauthorized: false,
+    },
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
+  };
 
   const transporter = nodemailer.createTransport(transportConfig);
 

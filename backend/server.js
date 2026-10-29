@@ -4,6 +4,11 @@ const dotenv = require("dotenv");
 // Load environment variables strictly from the backend/.env file BEFORE importing other local modules
 dotenv.config({ path: path.join(__dirname, ".env") });
 
+const dns = require("node:dns");
+if (dns.setDefaultResultOrder) {
+  dns.setDefaultResultOrder("ipv4first");
+}
+
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");

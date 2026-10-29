@@ -62,8 +62,12 @@ export default function NotificationBell({ onSelectNotification }) {
     }
     if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("touchstart", handleClickOutside);
     }
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
   }, [isOpen]);
 
   const handleToggle = () => {
@@ -148,74 +152,81 @@ export default function NotificationBell({ onSelectNotification }) {
       </button>
 
       {isOpen && (
-        <div className="notification-dropdown">
-          <div className="notification-dropdown__header">
-            <div>
-              <h4 className="notification-dropdown__title">Notifications</h4>
-              <span className="notification-dropdown__subtitle">
-                {unreadCount > 0
-                  ? `${unreadCount} unread update${unreadCount > 1 ? "s" : ""}`
-                  : "All caught up"}
-              </span>
-            </div>
-            {unreadCount > 0 && (
-              <button
-                className="notification-dropdown__mark-all"
-                onClick={handleMarkAllRead}
-                disabled={loading}
-              >
-                <CheckCheck size={14} />
-                <span>Mark all read</span>
-              </button>
-            )}
-          </div>
-
-          <div className="notification-dropdown__list">
-            {notifications.length === 0 ? (
-              <div className="notification-empty">
-                <Bell size={28} className="notification-empty__icon" />
-                <p>No notifications yet</p>
-                <span>You'll be notified when applicants submit resumes or ATS screening finishes.</span>
+        <>
+          <div
+            className="notification-backdrop"
+            onClick={() => setIsOpen(false)}
+            aria-hidden="true"
+          />
+          <div className="notification-dropdown">
+            <div className="notification-dropdown__header">
+              <div>
+                <h4 className="notification-dropdown__title">Notifications</h4>
+                <span className="notification-dropdown__subtitle">
+                  {unreadCount > 0
+                    ? `${unreadCount} unread update${unreadCount > 1 ? "s" : ""}`
+                    : "All caught up"}
+                </span>
               </div>
-            ) : (
-              notifications.map((notif) => (
-                <div
-                  key={notif._id}
-                  className={`notification-item ${!notif.isRead ? "notification-item--unread" : ""}`}
-                  onClick={() => handleClickItem(notif)}
+              {unreadCount > 0 && (
+                <button
+                  className="notification-dropdown__mark-all"
+                  onClick={handleMarkAllRead}
+                  disabled={loading}
                 >
-                  <div className="notification-item__icon-box">
-                    {getIcon(notif.type)}
-                  </div>
-                  <div className="notification-item__content">
-                    <div className="notification-item__top">
-                      <span className="notification-item__title">{notif.title}</span>
-                      <span className="notification-item__time">
-                        <Clock size={11} />
-                        {timeAgo(notif.createdAt)}
-                      </span>
+                  <CheckCheck size={14} />
+                  <span>Mark all read</span>
+                </button>
+              )}
+            </div>
+
+            <div className="notification-dropdown__list">
+              {notifications.length === 0 ? (
+                <div className="notification-empty">
+                  <Bell size={28} className="notification-empty__icon" />
+                  <p>No notifications yet</p>
+                  <span>You'll be notified when applicants submit resumes or ATS screening finishes.</span>
+                </div>
+              ) : (
+                notifications.map((notif) => (
+                  <div
+                    key={notif._id}
+                    className={`notification-item ${!notif.isRead ? "notification-item--unread" : ""}`}
+                    onClick={() => handleClickItem(notif)}
+                  >
+                    <div className="notification-item__icon-box">
+                      {getIcon(notif.type)}
                     </div>
-                    <p className="notification-item__message">{notif.message}</p>
-                    {notif.job?.jobTitle && (
-                      <span className="notification-item__job-pill">
-                        {notif.job.jobTitle}
-                      </span>
+                    <div className="notification-item__content">
+                      <div className="notification-item__top">
+                        <span className="notification-item__title">{notif.title}</span>
+                        <span className="notification-item__time">
+                          <Clock size={11} />
+                          {timeAgo(notif.createdAt)}
+                        </span>
+                      </div>
+                      <p className="notification-item__message">{notif.message}</p>
+                      {notif.job?.jobTitle && (
+                        <span className="notification-item__job-pill">
+                          {notif.job.jobTitle}
+                        </span>
+                      )}
+                    </div>
+                    {!notif.isRead && (
+                      <button
+                        className="notification-item__read-btn"
+                        onClick={(e) => handleMarkAsRead(e, notif._id)}
+                        title="Mark as read"
+                      >
+                        <Check size={13} />
+                      </button>
                     )}
                   </div>
-                  {!notif.isRead && (
-                    <button
-                      className="notification-item__read-btn"
-                      onClick={(e) => handleMarkAsRead(e, notif._id)}
-                      title="Mark as read"
-                    >
-                      <Check size={13} />
-                    </button>
-                  )}
-                </div>
-              ))
-            )}
+                ))
+              )}
+            </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );

@@ -1,50 +1,35 @@
-import React, { useState } from "react";
-import {
-  Search,
-  Sparkles,
-  BriefcaseBusiness,
-  Users
-} from "lucide-react";
+import React from "react";
+import { Users, Search, FileText, LayoutDashboard } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import TalentBridgeLogo from "../TalentBridgeLogo/TalentBridgeLogo";
 import heroImg from "./hero.png";
 import { useAuthModal } from "../../context/AuthModalContext";
 import "./HeroSection.css";
 
-const ICON_SIZE = 22;
-const ICON_STROKE = 1.75;
-
-const FEATURES = [
-  {
-    id: "search-jobs",
-    Icon: Search,
-    title: "Search Jobs",
-    description: "Find the right opportunity",
-  },
-  {
-    id: "build-resume",
-    Icon: Sparkles,
-    title: "Build Resume",
-    description: "AI-powered resume builder",
-  },
-  {
-    id: "apply-easily",
-    Icon: BriefcaseBusiness,
-    title: "Apply Easily",
-    description: "One-click application",
-  },
-];
-
 function HeroSection() {
-  const { openModal } = useAuthModal();
-  const [searchQuery, setSearchQuery] = useState("");
+  const navigate = useNavigate();
+  const { user, openModal } = useAuthModal();
 
-  const handleSearchAction = (e) => {
-    if (e) e.preventDefault();
-    openModal("login");
+  const handleSearchClick = () => {
+    navigate("/seeker/jobs");
   };
 
-  const handleFeatureClick = (id) => {
-    openModal("login");
+  const handleBuildResumeClick = () => {
+    if (user && (user.role === "jobseeker" || user.role === "seeker")) {
+      navigate("/seeker/jobs");
+    } else {
+      openModal("signup");
+    }
+  };
+
+  const handleDashboardClick = () => {
+    if (user && user.role === "recruiter") {
+      navigate("/recruiter");
+    } else if (user && (user.role === "jobseeker" || user.role === "seeker")) {
+      navigate("/seeker/jobs");
+    } else {
+      openModal("role");
+    }
   };
 
   return (
@@ -61,32 +46,71 @@ function HeroSection() {
           Find Jobs. Build Career. Shape Your Future.
         </p>
 
-        {/* ── Interactive Hero Search Bar ── */}
-
-
-        {/* ── 3 Key Features: Search Jobs, Build Resume, Apply Easily ── */}
-        <ul className="hero__features">
-          {FEATURES.map(({ id, Icon, title, description }) => (
-            <li
-              className="feature feature--clickable"
-              key={id}
-              onClick={() => handleFeatureClick(id)}
-              role="button"
-              tabIndex={0}
-              title={`Click to ${title}`}
+        {/* Quick Action Circular Buttons */}
+        <div className="hero__circular-actions" role="group" aria-label="Hero Quick Actions">
+          <div
+            className="hero__circular-item"
+            onClick={handleSearchClick}
+          >
+            <button
+              type="button"
+              className="hero__circular-btn hero__circular-btn--search"
+              id="hero-circle-btn-search"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleSearchClick();
+              }}
+              aria-label="Search"
+              title="Search"
             >
-              <span className="feature__icon-circle">
-                <Icon
-                  size={ICON_SIZE}
-                  strokeWidth={ICON_STROKE}
-                  aria-hidden="true"
-                />
-              </span>
-              <h2 className="feature__title">{title}</h2>
-              <p className="feature__description">{description}</p>
-            </li>
-          ))}
-        </ul>
+              <Search className="hero__circular-icon" size={22} strokeWidth={2.2} />
+              <span className="sr-only">Search</span>
+            </button>
+            <span className="hero__circular-label">Search</span>
+          </div>
+
+          <div
+            className="hero__circular-item"
+            onClick={handleBuildResumeClick}
+          >
+            <button
+              type="button"
+              className="hero__circular-btn hero__circular-btn--resume"
+              id="hero-circle-btn-resume"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleBuildResumeClick();
+              }}
+              aria-label="Build Resume"
+              title="Build Resume"
+            >
+              <FileText className="hero__circular-icon" size={22} strokeWidth={2.2} />
+              <span className="sr-only">Build Resume</span>
+            </button>
+            <span className="hero__circular-label">Build Resume</span>
+          </div>
+
+          <div
+            className="hero__circular-item"
+            onClick={handleDashboardClick}
+          >
+            <button
+              type="button"
+              className="hero__circular-btn hero__circular-btn--dashboard"
+              id="hero-circle-btn-dashboard"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDashboardClick();
+              }}
+              aria-label="Create Dashboard"
+              title="Create Dashboard"
+            >
+              <LayoutDashboard className="hero__circular-icon" size={22} strokeWidth={2.2} />
+              <span className="sr-only">Create Dashboard</span>
+            </button>
+            <span className="hero__circular-label">Create Dashboard</span>
+          </div>
+        </div>
 
         {/* Hero Mockup Scene Image with Create Account Card */}
         <div className="hero__image-wrapper">
