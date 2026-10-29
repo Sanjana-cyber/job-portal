@@ -211,6 +211,16 @@ const interviewSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
+    zoomLink: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+    interviewTiming: {
+      type: String,
+      default: "",
+      trim: true,
+    },
     status: {
       type: String,
       enum: ["not_started", "in_progress", "completed", "expired", "abandoned"],

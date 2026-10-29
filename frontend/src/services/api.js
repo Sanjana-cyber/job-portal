@@ -225,9 +225,10 @@ export const deleteApplication = async (applicationId) => {
   return res.data;
 };
 
-export const selectCandidateForInterview = async (applicationId, resend = false) => {
-  const res = await api.post(`/applications/${applicationId}/select`, { resend });
-  return res.data; // { success, alreadySelected, emailSent, message, data }
+export const selectCandidateForInterview = async (applicationId, payload = {}) => {
+  const body = typeof payload === "boolean" ? { resend: payload } : payload;
+  const res = await api.post(`/applications/${applicationId}/select`, body);
+  return res.data; // { success, emailSent, emailError, message, data, invitationUrl, invitationToken }
 };
 
 export const verifyInterviewInvitation = async (token) => {

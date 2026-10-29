@@ -493,6 +493,13 @@ exports.getApplicationResume = async (req, res, next) => {
 // Recruiter selects a candidate and dispatches a secure interview invitation
 exports.selectCandidateForInterview = async (req, res, next) => {
   try {
+    const {
+      zoomLink = "",
+      interviewTiming = "",
+      notes = "",
+      resend = false,
+    } = req.body || {};
+
     const application = await Application.findById(req.params.id)
       .populate({
         path: "job",
@@ -517,33 +524,6 @@ exports.selectCandidateForInterview = async (req, res, next) => {
       return next(new ErrorResponse("Not authorized to select candidates for this job", 403));
     }
 
-    // Prevent duplicate emails when the same candidate is selected repeatedly
-    const isAlreadySelected = application.status === "selected";
-    const hasActiveToken =
-      application.interviewInvitation?.tokenHash &&
-      application.interviewInvitation?.expiresAt &&
-      new Date(application.interviewInvitation.expiresAt) > new Date();
-
-    const isResend = req.query.resend === "true" || req.body.resend === true;
-
-    if (isAlreadySelected && hasActiveToken && !isResend) {
-      const rawToken = crypto.randomBytes(32).toString("hex");
-      const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
-      application.interviewInvitation.tokenHash = tokenHash;
-      await application.save();
-      const frontendUrl = (process.env.FRONTEND_URL || "http://localhost:5173").trim().replace(/\/+$/, "");
-      const invitationUrl = `${frontendUrl}/interview-invitation?token=${rawToken}`;
-      return res.status(200).json({
-        success: true,
-        alreadySelected: true,
-        emailSent: false,
-        message: "Candidate has already been selected. Opening interview schedule page.",
-        data: application,
-        invitationUrl,
-        invitationToken: rawToken,
-      });
-    }
-
     // Candidate contact details
     const candidateName =
       application.applicantName || application.applicant?.name || "Candidate";
@@ -555,6 +535,11 @@ exports.selectCandidateForInterview = async (req, res, next) => {
         new ErrorResponse("Cannot select candidate: no email address is on file for this application", 400)
       );
     }
+
+    // Zoom link and interview timing resolution
+    const finalZoomLink = (zoomLink || application.interviewInvitation?.zoomLink || "").trim();
+    const finalInterviewTiming = (interviewTiming || application.interviewInvitation?.interviewTiming || "").trim();
+    const finalNotes = (notes || application.interviewInvitation?.notes || "").trim();
 
     // Generate secure unpredictable raw token
     const rawToken = crypto.randomBytes(32).toString("hex");
@@ -572,8 +557,35 @@ exports.selectCandidateForInterview = async (req, res, next) => {
       expiresAt,
       sentAt: new Date(),
       status: "sent",
+      zoomLink: finalZoomLink,
+      interviewTiming: finalInterviewTiming,
+      notes: finalNotes,
     };
     await application.save();
+
+    // Sync or create Interview model record
+    try {
+      const Interview = require("../models/Interview");
+      await Interview.findOneAndUpdate(
+        { application: application._id },
+        {
+          application: application._id,
+          job: application.job._id,
+          candidate: application.applicant?._id || null,
+          candidateName,
+          candidateEmail,
+          recruiter: recruiterId,
+          invitationTokenHash: tokenHash,
+          zoomLink: finalZoomLink,
+          interviewTiming: finalInterviewTiming,
+          status: "not_started",
+          expiresAt,
+        },
+        { upsert: true, new: true, setDefaultsOnInsert: true }
+      );
+    } catch (syncErr) {
+      console.warn("[applicationController] Non-fatal Interview sync error:", syncErr.message);
+    }
 
     // Construct secure invitation URL
     const frontendUrl = (process.env.FRONTEND_URL || "http://localhost:5173").trim().replace(/\/+$/, "");
@@ -583,33 +595,40 @@ exports.selectCandidateForInterview = async (req, res, next) => {
     const companyName =
       application.job.recruiter?.companyName || "Talent Bridge Partner";
 
-    // Attempt email dispatch
+    // Dispatch actual email to candidate
     let emailResult = null;
+    let emailSent = false;
+    let emailError = null;
+
     try {
       emailResult = await sendEmail({
         to: candidateEmail,
-        subject: "Congratulations! You Have Been Selected for the Next Stage",
+        subject: `🎉 Congratulations! You are Selected for an Interview - ${jobTitle} at ${companyName}`,
         html: getInterviewInvitationEmailTemplate({
           candidateName,
           jobTitle,
           companyName,
+          zoomLink: finalZoomLink,
+          interviewTiming: finalInterviewTiming,
+          notes: finalNotes,
           invitationUrl,
         }),
       });
+
+      if (emailResult?.skipped) {
+        emailSent = false;
+        emailError = emailResult.reason;
+        application.interviewInvitation.status = "failed";
+        await application.save();
+      } else {
+        emailSent = true;
+      }
     } catch (emailErr) {
       console.error("[applicationController] Email sending error:", emailErr.message);
-      // Mark as failed in invitation metadata to allow clean retry
+      emailSent = false;
+      emailError = emailErr.message;
       application.interviewInvitation.status = "failed";
       await application.save();
-
-      return res.status(200).json({
-        success: true,
-        emailSent: false,
-        warning: `Candidate was marked as selected, but email delivery failed (${emailErr.message}). You can safely retry.`,
-        data: application,
-        invitationUrl,
-        invitationToken: rawToken,
-      });
     }
 
     // Notify candidate in-app if registered
@@ -618,7 +637,7 @@ exports.selectCandidateForInterview = async (req, res, next) => {
         recipient: application.applicant._id,
         type: "application_status",
         title: "Selected for Interview",
-        message: `Congratulations! You have been selected for the next stage for ${jobTitle} at ${companyName}.`,
+        message: `Congratulations! You have been selected for an interview for ${jobTitle} at ${companyName}.${finalInterviewTiming ? ` Scheduled: ${finalInterviewTiming}.` : ""}`,
         job: application.job._id,
         application: application._id,
       }).catch((err) => {
@@ -626,13 +645,15 @@ exports.selectCandidateForInterview = async (req, res, next) => {
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-      emailSent: emailResult?.skipped ? false : true,
-      emailSkipped: !!emailResult?.skipped,
-      message: emailResult?.skipped
-        ? `Candidate marked as selected. (Email dispatch skipped: ${emailResult.reason})`
-        : `Candidate successfully selected and invitation email sent to ${candidateEmail}.`,
+      emailSent,
+      emailError,
+      message: emailSent
+        ? `Candidate successfully selected! Selection email with Zoom link and interview timing was sent to ${candidateEmail}.`
+        : emailError
+        ? `Candidate marked as Selected, but email could not be delivered (${emailError}). Please verify SMTP credentials in backend/.env.`
+        : `Candidate marked as Selected.`,
       data: application,
       invitationUrl,
       invitationToken: rawToken,
@@ -717,6 +738,9 @@ exports.verifyInterviewInvitation = async (req, res, next) => {
         jobType,
         location,
         expiresAt: application.interviewInvitation.expiresAt,
+        zoomLink: application.interviewInvitation.zoomLink || "",
+        interviewTiming: application.interviewInvitation.interviewTiming || "",
+        notes: application.interviewInvitation.notes || "",
       },
     });
   } catch (err) {

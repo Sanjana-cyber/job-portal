@@ -275,3 +275,126 @@
   border-top: 1px solid #e2e8f0;
   background-color: #ffffff;
 }
+
+/* ── Zoom Meeting Box ────────────────────────────────────────────────────── */
+.interview-zoom-box {
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+}
+
+.interview-zoom-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid #e2e8f0;
+  flex-wrap: wrap;
+}
+
+.interview-zoom-badge {
+  display: inline-block;
+  background-color: #0284c7;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.3rem 0.75rem;
+  border-radius: 6px;
+}
+
+.interview-timing-badge {
+  display: inline-block;
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.3rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid #bfdbfe;
+}
+
+.interview-zoom-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-bottom: 1.25rem;
+}
+
+.interview-zoom-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  font-size: 0.92rem;
+}
+
+.interview-zoom-label {
+  font-weight: 600;
+  color: #475569;
+  min-width: 125px;
+  flex-shrink: 0;
+}
+
+.interview-zoom-val--timing {
+  font-weight: 700;
+  color: #1e3a8a;
+  font-size: 0.98rem;
+}
+
+.interview-zoom-val--note {
+  color: #334155;
+  font-style: italic;
+}
+
+.interview-zoom-link {
+  color: #2563eb;
+  word-break: break-all;
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+.interview-zoom-pending {
+  margin: 0;
+  color: #94a3b8;
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+.interview-zoom-action {
+  text-align: center;
+  padding-top: 0.5rem;
+}
+
+.interview-zoom-btn {
+  display: inline-block;
+  background-color: #2563eb;
+  color: #ffffff;
+  padding: 0.85rem 2rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 700;
+  text-decoration: none;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+  transition: all 0.16s ease;
+}
+
+.interview-zoom-btn:hover {
+  background-color: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(37, 99, 235, 0.3);
+}
+
+.interview-prep-tip {
+  font-size: 0.88rem;
+  color: #64748b;
+  line-height: 1.5;
+  margin: 0;
+  text-align: center;
+}
+

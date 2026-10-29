@@ -18,6 +18,11 @@ import {
   Sparkles,
   Link2,
   HelpCircle,
+  Video,
+  Calendar,
+  Edit3,
+  Copy,
+  Check,
 } from "lucide-react";
 import TalentBridgeLogo from "../../components/TalentBridgeLogo/TalentBridgeLogo";
 import {
@@ -69,11 +74,32 @@ export default function AtsRankingPage({ job, onBack }) {
   const [retryingId, setRetryingId] = useState(null);
   const [selectingId, setSelectingId] = useState(null);
   const [confirmCandidate, setConfirmCandidate] = useState(null);
+  const [modalZoomLink, setModalZoomLink] = useState("");
+  const [modalInterviewTiming, setModalInterviewTiming] = useState("");
+  const [modalNotes, setModalNotes] = useState("");
+  const [detailZoomLink, setDetailZoomLink] = useState("");
+  const [detailInterviewTiming, setDetailInterviewTiming] = useState("");
+  const [detailNotes, setDetailNotes] = useState("");
+  const [detailCopied, setDetailCopied] = useState(false);
   const [feedbackMessage, setFeedbackMessage] = useState(null);
   const [showSortMenu, setShowSortMenu] = useState(false);
   const sortRef = useRef(null);
   const pollRef = useRef(null);
   const isPollingRef = useRef(false);
+
+  // Sync candidate detail inputs whenever selected candidate changes
+  useEffect(() => {
+    if (selectedCandidate) {
+      setDetailZoomLink(selectedCandidate.interviewInvitation?.zoomLink || "");
+      setDetailInterviewTiming(selectedCandidate.interviewInvitation?.interviewTiming || "");
+      setDetailNotes(selectedCandidate.interviewInvitation?.notes || "");
+    }
+  }, [
+    selectedCandidate?._id,
+    selectedCandidate?.interviewInvitation?.sentAt,
+    selectedCandidate?.interviewInvitation?.zoomLink,
+    selectedCandidate?.interviewInvitation?.interviewTiming,
+  ]);
 
   // ── Fetch applications ───────────────────────────────────────────────────────
   const fetchApplications = useCallback(
@@ -229,47 +255,86 @@ export default function AtsRankingPage({ job, onBack }) {
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
+  const handleCopyZoomLink = (link) => {
+    if (!link) return;
+    navigator.clipboard.writeText(link);
+    setDetailCopied(true);
+    setTimeout(() => setDetailCopied(false), 2000);
+  };
+
   const handleOpenSelectModal = (app) => {
     setConfirmCandidate(app);
+    const existingZoom =
+      selectedCandidate && selectedCandidate._id === app._id && detailZoomLink !== ""
+        ? detailZoomLink
+        : app.interviewInvitation?.zoomLink || "";
+    const existingTiming =
+      selectedCandidate && selectedCandidate._id === app._id && detailInterviewTiming !== ""
+        ? detailInterviewTiming
+        : app.interviewInvitation?.interviewTiming || "";
+    const existingNotes =
+      selectedCandidate && selectedCandidate._id === app._id && detailNotes !== ""
+        ? detailNotes
+        : app.interviewInvitation?.notes || "";
+
+    setModalZoomLink(existingZoom);
+    setModalInterviewTiming(existingTiming);
+    setModalNotes(existingNotes);
   };
 
   const handleConfirmSelection = async (resend = false) => {
     if (!confirmCandidate) return;
     const appId = confirmCandidate._id;
+    const candidateEmail =
+      confirmCandidate.applicantEmail || confirmCandidate.applicant?.email || "the seeker";
     setSelectingId(appId);
     try {
-      const res = await selectCandidateForInterview(appId, resend);
+      const res = await selectCandidateForInterview(appId, {
+        zoomLink: modalZoomLink.trim(),
+        interviewTiming: modalInterviewTiming.trim(),
+        notes: modalNotes.trim(),
+        resend,
+      });
+
       if (res?.success) {
-        const updatedInvitation = res.data?.interviewInvitation || {
-          status: res.emailSent ? "sent" : "failed",
-          sentAt: new Date(),
+        const updatedApp = res.data || {
+          ...confirmCandidate,
+          status: "selected",
+          interviewInvitation: {
+            zoomLink: modalZoomLink.trim(),
+            interviewTiming: modalInterviewTiming.trim(),
+            notes: modalNotes.trim(),
+            status: res.emailSent ? "sent" : "failed",
+            sentAt: new Date(),
+          },
         };
+
         setApplications((prev) =>
-          prev.map((a) =>
-            a._id === appId
-              ? { ...a, status: "selected", interviewInvitation: updatedInvitation }
-              : a
-          )
+          prev.map((a) => (a._id === appId ? { ...a, ...updatedApp } : a))
         );
         setSelectedCandidate((prev) =>
-          prev && prev._id === appId
-            ? { ...prev, status: "selected", interviewInvitation: updatedInvitation }
-            : prev
+          prev && prev._id === appId ? { ...prev, ...updatedApp } : prev
         );
-        setFeedbackMessage({
-          type: "success",
-          text: "Candidate selected! Shifting to interview schedule page...",
-        });
+        setDetailZoomLink(modalZoomLink.trim());
+        setDetailInterviewTiming(modalInterviewTiming.trim());
+        setDetailNotes(modalNotes.trim());
 
-        const targetUrl =
-          res.invitationUrl ||
-          (res.invitationToken
-            ? `/interview-invitation?token=${res.invitationToken}`
-            : `/interview-invitation`);
-
-        setTimeout(() => {
-          window.location.href = targetUrl;
-        }, 500);
+        if (res.emailSent) {
+          setFeedbackMessage({
+            type: "success",
+            text: `🎉 Selection email with Zoom link and interview timing was successfully sent to ${candidateEmail}!`,
+          });
+        } else if (res.emailError) {
+          setFeedbackMessage({
+            type: "warning",
+            text: `⚠️ Candidate selected, but email delivery failed (${res.emailError}). Please verify SMTP settings in backend/.env.`,
+          });
+        } else {
+          setFeedbackMessage({
+            type: "info",
+            text: res.message || "Candidate selected successfully.",
+          });
+        }
       } else {
         setFeedbackMessage({
           type: "error",
@@ -284,6 +349,70 @@ export default function AtsRankingPage({ job, onBack }) {
     } finally {
       setSelectingId(null);
       setConfirmCandidate(null);
+    }
+  };
+
+  const handleSaveAndSendInterview = async () => {
+    if (!selectedCandidate) return;
+    const appId = selectedCandidate._id;
+    const candidateEmail =
+      selectedCandidate.applicantEmail || selectedCandidate.applicant?.email || "the seeker";
+    setSelectingId(appId);
+    try {
+      const res = await selectCandidateForInterview(appId, {
+        zoomLink: detailZoomLink.trim(),
+        interviewTiming: detailInterviewTiming.trim(),
+        notes: detailNotes.trim(),
+        resend: selectedCandidate.status === "selected",
+      });
+
+      if (res?.success) {
+        const updatedApp = res.data || {
+          ...selectedCandidate,
+          status: "selected",
+          interviewInvitation: {
+            zoomLink: detailZoomLink.trim(),
+            interviewTiming: detailInterviewTiming.trim(),
+            notes: detailNotes.trim(),
+            status: res.emailSent ? "sent" : "failed",
+            sentAt: new Date(),
+          },
+        };
+
+        setApplications((prev) =>
+          prev.map((a) => (a._id === appId ? { ...a, ...updatedApp } : a))
+        );
+        setSelectedCandidate(updatedApp);
+
+        if (res.emailSent) {
+          setFeedbackMessage({
+            type: "success",
+            text: `🎉 Selection email with Zoom link and interview timing was successfully sent to ${candidateEmail}!`,
+          });
+        } else if (res.emailError) {
+          setFeedbackMessage({
+            type: "warning",
+            text: `⚠️ Candidate selected, but email delivery failed (${res.emailError}). Please verify SMTP settings in backend/.env.`,
+          });
+        } else {
+          setFeedbackMessage({
+            type: "info",
+            text: res.message || "Candidate interview details updated and email dispatched.",
+          });
+        }
+      } else {
+        setFeedbackMessage({
+          type: "error",
+          text: res?.message || "Failed to dispatch interview email.",
+        });
+      }
+    } catch (err) {
+      setFeedbackMessage({
+        type: "error",
+        text: err.message || "Failed to dispatch interview email.",
+      });
+    } finally {
+      setSelectingId(null);
     }
   };
 
@@ -313,18 +442,18 @@ export default function AtsRankingPage({ job, onBack }) {
   const q = searchQuery.trim().toLowerCase();
   const filteredScored = q
     ? sortedScored.filter(
-        (a) =>
-          (a.applicantName || "").toLowerCase().includes(q) ||
-          (a.applicantEmail || "").toLowerCase().includes(q)
-      )
+      (a) =>
+        (a.applicantName || "").toLowerCase().includes(q) ||
+        (a.applicantEmail || "").toLowerCase().includes(q)
+    )
     : sortedScored;
 
   const filteredPending = q
     ? pendingApps.filter(
-        (a) =>
-          (a.applicantName || "").toLowerCase().includes(q) ||
-          (a.applicantEmail || "").toLowerCase().includes(q)
-      )
+      (a) =>
+        (a.applicantName || "").toLowerCase().includes(q) ||
+        (a.applicantEmail || "").toLowerCase().includes(q)
+    )
     : pendingApps;
 
   const SORT_LABELS = {
@@ -384,7 +513,7 @@ export default function AtsRankingPage({ job, onBack }) {
               onClick={() => setFeedbackMessage(null)}
               aria-label="Dismiss notification"
             >
-              
+
             </button>
           </div>
         )}
@@ -416,8 +545,8 @@ export default function AtsRankingPage({ job, onBack }) {
                   {selectingId === selectedCandidate._id
                     ? "Processing…"
                     : selectedCandidate.status === "selected"
-                    ? "Selected · Resend Invite"
-                    : "Select Candidate"}
+                      ? "Selected · Resend Invite"
+                      : "Select Candidate"}
                 </button>
                 <button
                   type="button"
@@ -482,11 +611,11 @@ export default function AtsRankingPage({ job, onBack }) {
 
                   <div className="ats-profile-hero__meta">
                     <div className="ats-profile-hero__meta-item">
-                      <Briefcase size={14} className="ats-profile-hero__meta-icon" />
+
                       <span>{job?.jobTitle || "Job Position"}</span>
                     </div>
                     <div className="ats-profile-hero__meta-item">
-                      <MapPin size={14} className="ats-profile-hero__meta-icon" />
+
                       <span>
                         {selectedCandidate.applicantLocation ||
                           selectedCandidate.applicantAddress ||
@@ -511,7 +640,7 @@ export default function AtsRankingPage({ job, onBack }) {
                       <span>{selectedCandidate.status === "selected" ? "Selected" : "Senior"}</span>
                     </span>
                     <span className="ats-hero-chip ats-hero-chip--plain">
-                      +Tags
+                     
                     </span>
                   </div>
                 </div>
@@ -632,11 +761,182 @@ export default function AtsRankingPage({ job, onBack }) {
                           {selectedCandidate.interviewInvitation?.sentAt ? (
                             <span style={{ color: "#059669", fontWeight: 600 }}>
                               Sent on {new Date(selectedCandidate.interviewInvitation.sentAt).toLocaleDateString()}
+                              {selectedCandidate.interviewInvitation?.interviewTiming && (
+                                <span style={{ display: "block", color: "#2563eb", fontSize: "0.82rem", marginTop: "2px" }}>
+                                  🕒 {selectedCandidate.interviewInvitation.interviewTiming}
+                                </span>
+                              )}
                             </span>
                           ) : (
-                            <span style={{ color: "#64748b" }}>Not sent yet</span>
+                            <span style={{ color: "#64748b" }}>Not scheduled yet</span>
                           )}
                         </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* ── Zoom Meeting & Interview Schedule Card ── */}
+                <div className="ats-hero-card ats-zoom-card" id={`ats-zoom-section-${selectedCandidate._id}`}>
+                  <div className="ats-hero-card__header ats-zoom-card__header">
+                    <div className="ats-zoom-card__title-wrap">
+                      <div className="ats-zoom-icon-badge">
+                        <Video size={16} />
+                      </div>
+                      <div>
+                        <h2 className="ats-hero-card__title">Zoom Meeting & Interview Schedule</h2>
+                        <span className="ats-zoom-card__subtitle">Configure Zoom link and timing to dispatch to the seeker</span>
+                      </div>
+                    </div>
+                    <span
+                      className={`ats-zoom-status-pill ats-zoom-status-pill--${
+                        selectedCandidate.interviewInvitation?.status === "sent"
+                          ? "sent"
+                          : selectedCandidate.interviewInvitation?.status === "failed"
+                          ? "failed"
+                          : selectedCandidate.status === "selected"
+                          ? "selected"
+                          : "none"
+                      }`}
+                    >
+                      {selectedCandidate.interviewInvitation?.status === "sent"
+                        ? "✓ Invite Dispatched"
+                        : selectedCandidate.interviewInvitation?.status === "failed"
+                        ? "⚠️ Delivery Failed"
+                        : selectedCandidate.status === "selected"
+                        ? "Selected"
+                        : "Not Scheduled"}
+                    </span>
+                  </div>
+
+                  <div className="ats-hero-card__body ats-zoom-card__body">
+                    <p className="ats-zoom-intro">
+                      Set the Zoom meeting URL and interview date/time below. When you select or update this candidate, an official selection email containing the Zoom link and schedule will be immediately sent to <strong>{selectedCandidate.applicantEmail || selectedCandidate.applicant?.email || "the candidate"}</strong>.
+                    </p>
+
+                    <div className="ats-zoom-form">
+                      {/* Zoom Meeting Link */}
+                      <div className="ats-zoom-form-group">
+                        <label className="ats-zoom-label" htmlFor="ats-zoom-link-input">
+                          <Video size={13} className="ats-zoom-label-icon" />
+                          <span>Zoom Meeting URL</span>
+                        </label>
+                        <div className="ats-zoom-input-wrap">
+                          <input
+                            id="ats-zoom-link-input"
+                            type="url"
+                            className="ats-zoom-input"
+                            placeholder="https://zoom.us/j/1234567890 (or paste your Zoom invite link)"
+                            value={detailZoomLink}
+                            onChange={(e) => setDetailZoomLink(e.target.value)}
+                          />
+                          {detailZoomLink && (
+                            <div className="ats-zoom-input-actions">
+                              <button
+                                type="button"
+                                className="ats-zoom-tool-btn"
+                                onClick={() => handleCopyZoomLink(detailZoomLink)}
+                                title="Copy Zoom meeting URL"
+                              >
+                                {detailCopied ? <Check size={13} color="#16a34a" /> : <Copy size={13} />}
+                                <span>{detailCopied ? "Copied" : "Copy"}</span>
+                              </button>
+                              <a
+                                href={detailZoomLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="ats-zoom-tool-btn ats-zoom-tool-btn--join"
+                                title="Open Zoom link in new tab"
+                              >
+                                <ExternalLink size={13} />
+                                <span>Join</span>
+                              </a>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Interview Timing */}
+                      <div className="ats-zoom-form-group">
+                        <label className="ats-zoom-label" htmlFor="ats-interview-timing-input">
+                          <Calendar size={13} className="ats-zoom-label-icon" />
+                          <span>Interview Timing & Date</span>
+                        </label>
+                        <input
+                          id="ats-interview-timing-input"
+                          type="text"
+                          className="ats-zoom-input"
+                          placeholder="e.g. Tomorrow at 3:00 PM EST or Nov 2, 2026, 2:30 PM"
+                          value={detailInterviewTiming}
+                          onChange={(e) => setDetailInterviewTiming(e.target.value)}
+                        />
+                      </div>
+
+                      {/* Recruiter Notes */}
+                      <div className="ats-zoom-form-group">
+                        <label className="ats-zoom-label" htmlFor="ats-interview-notes-input">
+                          <Edit3 size={13} className="ats-zoom-label-icon" />
+                          <span>Recruiter Note / Instructions (Optional)</span>
+                        </label>
+                        <textarea
+                          id="ats-interview-notes-input"
+                          className="ats-zoom-textarea"
+                          rows={2}
+                          placeholder="Special instructions (e.g. Please join 5 minutes early with webcam active and have your portfolio ready)..."
+                          value={detailNotes}
+                          onChange={(e) => setDetailNotes(e.target.value)}
+                        />
+                      </div>
+
+                      {/* Sent summary if applicable */}
+                      {selectedCandidate.interviewInvitation?.sentAt && (
+                        <div className="ats-zoom-sent-box">
+                          <div className="ats-zoom-sent-row">
+                            <span className="ats-zoom-sent-label">Last Dispatched:</span>
+                            <span className="ats-zoom-sent-value">
+                              {new Date(selectedCandidate.interviewInvitation.sentAt).toLocaleString()}
+                            </span>
+                          </div>
+                          <div className="ats-zoom-sent-row">
+                            <span className="ats-zoom-sent-label">Candidate Email:</span>
+                            <span className="ats-zoom-sent-value">
+                              {selectedCandidate.applicantEmail || selectedCandidate.applicant?.email}
+                            </span>
+                          </div>
+                          {selectedCandidate.interviewInvitation.interviewTiming && (
+                            <div className="ats-zoom-sent-row">
+                              <span className="ats-zoom-sent-label">Scheduled Timing:</span>
+                              <span className="ats-zoom-sent-value" style={{ color: "#1d4ed8", fontWeight: 700 }}>
+                                🕒 {selectedCandidate.interviewInvitation.interviewTiming}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Submit / Dispatch button */}
+                      <div className="ats-zoom-footer-actions">
+                        <button
+                          type="button"
+                          className="ats-btn ats-btn--select ats-zoom-send-btn"
+                          onClick={handleSaveAndSendInterview}
+                          disabled={selectingId === selectedCandidate._id}
+                          id="ats-zoom-submit-btn"
+                        >
+                          {selectingId === selectedCandidate._id ? (
+                            "Sending Selection Email…"
+                          ) : selectedCandidate.status === "selected" ? (
+                            <>
+                              <Mail size={14} />
+                              <span>Update Schedule & Resend Email</span>
+                            </>
+                          ) : (
+                            <>
+                              <Mail size={14} />
+                              <span>Select Candidate & Send Email with Zoom Link</span>
+                            </>
+                          )}
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -887,6 +1187,12 @@ export default function AtsRankingPage({ job, onBack }) {
                                       <span className="ats-player-name">{name}</span>
                                       <span className="ats-player-sub">
                                         {app.applicantLocation || app.applicantEmail || "Applicant"}
+                                        {app.interviewInvitation?.zoomLink && (
+                                          <span className="ats-table-zoom-pill" title={`Zoom scheduled: ${app.interviewInvitation.interviewTiming || 'Pending timing'}`}>
+                                            <Video size={10} />
+                                            <span>Zoom</span>
+                                          </span>
+                                        )}
                                       </span>
                                     </div>
                                   </div>
@@ -966,6 +1272,12 @@ export default function AtsRankingPage({ job, onBack }) {
                                         <span className="ats-player-name">{name}</span>
                                         <span className="ats-player-sub">
                                           {app.applicantLocation || app.applicantEmail || "Applicant"}
+                                          {app.interviewInvitation?.zoomLink && (
+                                            <span className="ats-table-zoom-pill" title={`Zoom scheduled: ${app.interviewInvitation.interviewTiming || 'Pending timing'}`}>
+                                              <Video size={10} />
+                                              <span>Zoom</span>
+                                            </span>
+                                          )}
                                         </span>
                                       </div>
                                     </div>
@@ -1056,10 +1368,59 @@ export default function AtsRankingPage({ job, onBack }) {
                   </span>
                 </div>
               </div>
+
+              {/* Modal Inputs for Zoom Link, Timing, Notes */}
+              <div className="ats-modal__inputs">
+                <div className="ats-modal__field">
+                  <label className="ats-modal__input-label" htmlFor="modal-zoom-link-input">
+                    <Video size={13} />
+                    <span>Zoom Meeting URL</span>
+                  </label>
+                  <input
+                    type="url"
+                    id="modal-zoom-link-input"
+                    className="ats-modal__input"
+                    placeholder="https://zoom.us/j/1234567890 (or paste your Zoom invite)"
+                    value={modalZoomLink}
+                    onChange={(e) => setModalZoomLink(e.target.value)}
+                  />
+                </div>
+
+                <div className="ats-modal__field">
+                  <label className="ats-modal__input-label" htmlFor="modal-interview-timing-input">
+                    <Calendar size={13} />
+                    <span>Interview Timing & Date</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="modal-interview-timing-input"
+                    className="ats-modal__input"
+                    placeholder="e.g. Tomorrow at 3:00 PM EST or Nov 2, 2026, 2:30 PM"
+                    value={modalInterviewTiming}
+                    onChange={(e) => setModalInterviewTiming(e.target.value)}
+                  />
+                </div>
+
+                <div className="ats-modal__field">
+                  <label className="ats-modal__input-label" htmlFor="modal-notes-input">
+                    <Edit3 size={13} />
+                    <span>Recruiter Note / Instructions (Optional)</span>
+                  </label>
+                  <textarea
+                    id="modal-notes-input"
+                    className="ats-modal__textarea"
+                    rows={2}
+                    placeholder="Any special notes or preparation requirements for the candidate..."
+                    value={modalNotes}
+                    onChange={(e) => setModalNotes(e.target.value)}
+                  />
+                </div>
+              </div>
+
               <p className="ats-modal__notice">
                 {confirmCandidate.status === "selected"
-                  ? "This candidate has already been selected. Confirming will generate a fresh secure link and re-dispatch the interview invitation email."
-                  : "Upon confirmation, this candidate's status will update to Selected, and an automated congratulations email with a secure interview invitation link will be sent to their email."}
+                  ? "This candidate has already been selected. Confirming will update their interview schedule and dispatch an updated selection email with the Zoom link and timing to their inbox."
+                  : "Upon confirmation, this candidate's status will update to Selected, and an official selection email containing the Zoom meeting link and interview timing will be sent directly to their email address."}
               </p>
             </div>
             <div className="ats-modal__footer">
@@ -1079,8 +1440,8 @@ export default function AtsRankingPage({ job, onBack }) {
                 {selectingId === confirmCandidate._id
                   ? "Sending Invitation…"
                   : confirmCandidate.status === "selected"
-                  ? "Resend Invitation Email"
-                  : "Confirm Selection & Send Invite"}
+                    ? "Resend Invitation Email"
+                    : "Confirm Selection & Send Invite"}
               </button>
             </div>
           </div>

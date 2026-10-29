@@ -158,28 +158,76 @@ export default function InterviewInvitationPage() {
               Dear {invitationData?.candidateName || "Candidate"},
             </div>
             <p className="interview-card__text">
-              Congratulations! You have been selected to proceed to the next stage of the recruitment process for the position of <strong>{invitationData?.jobTitle}</strong> at <strong>{invitationData?.companyName}</strong>.
-            </p>
-            <p className="interview-card__text">
-              Click the button below to access your interview session. Please ensure you are in a quiet environment when you begin.
+              Congratulations! You have been selected to proceed to the interview stage for the position of <strong>{invitationData?.jobTitle}</strong> at <strong>{invitationData?.companyName}</strong>.
             </p>
 
-            {/* Actions */}
-            <div className="interview-action-section">
-              <button
-                className="interview-primary-btn"
-                onClick={() => setShowAiNotice(true)}
-                id="continue-interview-btn"
-              >
-                Continue to Interview
-              </button>
+            {/* Scheduled Zoom Meeting Box */}
+            <div className="interview-zoom-box">
+              <div className="interview-zoom-header">
+                <span className="interview-zoom-badge">Zoom Video Conference</span>
+                {invitationData?.interviewTiming && (
+                  <span className="interview-timing-badge">
+                    🕒 {invitationData.interviewTiming}
+                  </span>
+                )}
+              </div>
 
-              {showAiNotice && (
-                <div className="interview-notice-box" id="interview-ai-notice">
-                  <strong>Interview Session Preparation</strong>
-                  The AI interview experience will be available here. Your invitation has been successfully authenticated, and this stage is currently in preparation. Thank you for your patience!
+              <div className="interview-zoom-details">
+                <div className="interview-zoom-row">
+                  <span className="interview-zoom-label">Interview Timing:</span>
+                  <span className="interview-zoom-val interview-zoom-val--timing">
+                    {invitationData?.interviewTiming || "To be confirmed by recruiter"}
+                  </span>
+                </div>
+
+                {invitationData?.zoomLink ? (
+                  <div className="interview-zoom-row">
+                    <span className="interview-zoom-label">Meeting URL:</span>
+                    <a
+                      href={invitationData.zoomLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="interview-zoom-link"
+                    >
+                      {invitationData.zoomLink}
+                    </a>
+                  </div>
+                ) : (
+                  <p className="interview-zoom-pending">
+                    Your recruiter will share the direct meeting link prior to the session.
+                  </p>
+                )}
+
+                {invitationData?.notes && (
+                  <div className="interview-zoom-row">
+                    <span className="interview-zoom-label">Recruiter Note:</span>
+                    <span className="interview-zoom-val interview-zoom-val--note">
+                      {invitationData.notes}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {invitationData?.zoomLink && (
+                <div className="interview-zoom-action">
+                  <a
+                    href={invitationData.zoomLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="interview-zoom-btn"
+                    id="join-zoom-btn"
+                  >
+                    Join Zoom Meeting
+                  </a>
                 </div>
               )}
+            </div>
+
+            {/* Additional Information */}
+            <div className="interview-action-section">
+              <p className="interview-prep-tip">
+                Please ensure you have a stable internet connection and are in a quiet room with your camera enabled 5 minutes before your scheduled start time.
+              </p>
             </div>
           </div>
         )}

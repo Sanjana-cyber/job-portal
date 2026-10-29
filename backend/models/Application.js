@@ -35,6 +35,9 @@ const applicationSchema = new mongoose.Schema(
       tokenHash: { type: String, default: null },
       expiresAt: { type: Date, default: null },
       sentAt: { type: Date, default: null },
+      zoomLink: { type: String, default: "" },
+      interviewTiming: { type: String, default: "" },
+      notes: { type: String, default: "" },
       status: {
         type: String,
         enum: ["none", "sent", "failed", "completed"],
