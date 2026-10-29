@@ -1,6 +1,8 @@
-import React, { useState, useRef } from "react";
-import { ArrowLeft, Upload, CheckCircle2, X, MapPin } from "lucide-react";
+import React, { useState, useRef, useEffect } from "react";
+import { ArrowLeft, Upload, CheckCircle2, X, MapPin, Sparkles } from "lucide-react";
+import { useAuthModal } from "../context/AuthModalContext";
 import "./ApplyForm.css";
+
 const getApiBase = () => {
   const envUrl =
     import.meta.env.VITE_API_URL ||
@@ -22,16 +24,90 @@ const GENDER_OPTIONS = [
   { label: "Others" }
 ];
 
+/* ── Helper: Convert Base64 dataURL to a File object ─────────────────────── */
+function dataURLtoFile(dataurl, filename) {
+  try {
+    const arr = dataurl.split(",");
+    const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new File([u8arr], filename, { type: mime });
+  } catch {
+    return new File(["Dashboard Resume Document"], filename, {
+      type: "application/pdf",
+    });
+  }
+}
+
+/* ── Helper: Check if Candidate Dashboard is filled ─────────────────────── */
+function getDashboardProfile() {
+  try {
+    const saved = localStorage.getItem("tb_seeker_dashboard_profile");
+    if (!saved) return null;
+    const p = JSON.parse(saved);
+    // Verified filled if isFilled flag is true or essential candidate details are present
+    const isFilled = Boolean(
+      p.isFilled ||
+      (p.firstName && p.email && (p.phone || p.location || (p.skills && p.skills.length > 0) || p.headline || p.resumeFileName))
+    );
+    return isFilled ? p : null;
+  } catch {
+    return null;
+  }
+}
+
 export default function ApplyForm({ job, onBack }) {
-  const [form, setForm] = useState({
-    applicantName: "",
-    applicantEmail: "",
-    applicantPhone: "",
-    gender: "",
-    location: "",
-    coverLetter: "",
+  const { user } = useAuthModal();
+  const dashboard = getDashboardProfile();
+
+  // If dashboard is filled: automatic pre-fill with all candidate information
+  // If dashboard is NOT filled: leave fields blank for manual entry
+  const [form, setForm] = useState(() => {
+    if (dashboard) {
+      return {
+        applicantName: dashboard.firstName || (user?.name ? user.name.split(" ")[0] : ""),
+        applicantLastName: dashboard.lastName || (user?.name ? user.name.split(" ").slice(1).join(" ") : ""),
+        applicantEmail: dashboard.email || user?.email || "",
+        applicantPhone: dashboard.phone || "",
+        gender: dashboard.gender || "",
+        location: dashboard.location || "",
+        coverLetter:
+          dashboard.about ||
+          (dashboard.headline
+            ? `Passionate ${dashboard.headline} applying for ${job?.jobTitle || "this position"}.`
+            : ""),
+      };
+    }
+
+    // Default: unfilled manually
+    return {
+      applicantName: "",
+      applicantLastName: "",
+      applicantEmail: user?.email || "",
+      applicantPhone: "",
+      gender: "",
+      location: "",
+      coverLetter: "",
+    };
   });
-  const [resumeFile, setResumeFile] = useState(null);
+
+  const [resumeFile, setResumeFile] = useState(() => {
+    if (dashboard?.resumeFileName) {
+      if (dashboard.resumeBase64) {
+        return dataURLtoFile(dashboard.resumeBase64, dashboard.resumeFileName);
+      }
+      return new File(["Dashboard Resume Document"], dashboard.resumeFileName, {
+        type: dashboard.resumeType || "application/pdf",
+      });
+    }
+    return null;
+  });
+
+  const [autofilledFromDashboard, setAutofilledFromDashboard] = useState(Boolean(dashboard));
   const [dragOver, setDragOver] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -39,14 +115,28 @@ export default function ApplyForm({ job, onBack }) {
   const fileInputRef = useRef(null);
 
   const company =
-    job.companyName ||
-    job.recruiter?.companyName ||
+    job?.companyName ||
+    job?.recruiter?.companyName ||
     "the company";
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((p) => ({ ...p, [name]: value }));
     if (error) setError("");
+  };
+
+  const handleClearToManual = () => {
+    setForm({
+      applicantName: "",
+      applicantLastName: "",
+      applicantEmail: "",
+      applicantPhone: "",
+      gender: "",
+      location: "",
+      coverLetter: "",
+    });
+    setResumeFile(null);
+    setAutofilledFromDashboard(false);
   };
 
   const handleFile = (file) => {
@@ -67,16 +157,25 @@ export default function ApplyForm({ job, onBack }) {
   const handleDrop = (e) => {
     e.preventDefault();
     setDragOver(false);
-    handleFile(e.dataTransfer.files[0]);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleFile(e.dataTransfer.files[0]);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!form.applicantName.trim()) return setError("Full name is required.");
+    const fullApplicantName = [form.applicantName, form.applicantLastName]
+      .filter(Boolean)
+      .join(" ")
+      .trim();
+
+    if (!fullApplicantName) return setError("First name is required.");
     if (!form.applicantEmail.trim()) return setError("Email is required.");
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.applicantEmail))
       return setError("Enter a valid email address.");
+    if (!form.applicantPhone.trim())
+      return setError("Mobile number is required.");
     if (!resumeFile) return setError("Please attach your resume.");
 
     setLoading(true);
@@ -84,9 +183,11 @@ export default function ApplyForm({ job, onBack }) {
 
     try {
       const fd = new FormData();
-      fd.append("applicantName", form.applicantName.trim());
+      fd.append("applicantName", fullApplicantName);
       fd.append("applicantEmail", form.applicantEmail.trim());
       fd.append("applicantPhone", form.applicantPhone.trim());
+      if (form.gender) fd.append("gender", form.gender);
+      if (form.location) fd.append("location", form.location);
       fd.append("coverLetter", form.coverLetter.trim());
       fd.append("resume", resumeFile);
 
@@ -156,6 +257,25 @@ export default function ApplyForm({ job, onBack }) {
 
           <h2 className="af-card__heading">Application Form</h2>
 
+          {autofilledFromDashboard && (
+            <div className="af-autofill-banner" role="status">
+              <div className="af-autofill-banner__left">
+                <Sparkles size={16} className="af-autofill-banner__icon" />
+                <span>
+                  <strong>Auto-filled from Dashboard:</strong> Your candidate profile information was automatically loaded.
+                </span>
+              </div>
+              <button
+                type="button"
+                className="af-autofill-banner__clear"
+                onClick={handleClearToManual}
+                title="Clear all fields to fill manually"
+              >
+                Clear to Fill Manually
+              </button>
+            </div>
+          )}
+
           {error && (
             <div className="af-error">
               <X size={14} /> {error}
@@ -192,6 +312,8 @@ export default function ApplyForm({ job, onBack }) {
                   className="af-input"
                   type="text"
                   name="applicantLastName"
+                  value={form.applicantLastName || ""}
+                  onChange={handleChange}
                   autoComplete="family-name"
                 />
               </div>

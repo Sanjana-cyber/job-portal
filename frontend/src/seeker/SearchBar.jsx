@@ -14,6 +14,7 @@ import { Search, X } from "lucide-react";
 export default function SearchBar({
   value = "",
   onChange,
+  onKeyDown,
   placeholder = "Search jobs by title, skill, or location…",
   variant = "navbar",
   id = "seeker-search-input",
@@ -54,6 +55,7 @@ export default function SearchBar({
         placeholder={placeholder}
         value={localValue}
         onChange={handleChange}
+        onKeyDown={onKeyDown}
         autoComplete="off"
       />
       {localValue && (

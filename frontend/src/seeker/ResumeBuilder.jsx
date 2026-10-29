@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import TalentBridgeLogo from "../components/TalentBridgeLogo/TalentBridgeLogo";
+import SeekerNavbar from "./SeekerNavbar";
 import { useAuthModal } from "../context/AuthModalContext";
 import "./ResumeBuilder.css";
 
@@ -469,56 +470,43 @@ export default function ResumeBuilder() {
         </div>
       )}
 
-      {/* ── Top Header Bar ── */}
-      <header className="rb-header">
-        <div className="rb-header__left">
-          <button
-            type="button"
-            className="rb-back-btn"
-            onClick={() => navigate("/")}
-            title="Return to Home Hero Section"
-            id="rb-back-home-btn"
-          >
-            <ArrowLeft size={15} />
-            <span>Home</span>
-          </button>
+      {/* ── Top Seeker Navbar (identical to Jobs page) ── */}
+      <SeekerNavbar
+        activeTab="resume"
+        onTabChange={(tab) => {
+          if (tab === "jobs") navigate("/seeker/jobs");
+          else if (tab === "dashboard") navigate("/seeker/create-dashboard");
+        }}
+      />
 
-          <div
-            className="rb-logo-wrap"
-            onClick={() => navigate("/")}
-            title="TalentBridge - Return to Home"
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") navigate("/"); }}
-          >
-            <TalentBridgeLogo variant="paperplane" size={24} />
-            <span className="rb-logo-text">TalentBridge</span>
-            <span className="rb-badge">Resume Builder</span>
+      {/* ── Builder Action Sub-Toolbar ── */}
+      <div className="rb-sub-toolbar">
+        <div className="rb-sub-toolbar__left">
+
+
+          {/* Mobile View Switcher */}
+          <div className="rb-mobile-toggle">
+            <button
+              type="button"
+              className={`rb-toggle-btn ${mobileView === "form" ? "active" : ""}`}
+              onClick={() => setMobileView("form")}
+            >
+              <FileText size={14} />
+              <span>Edit Form</span>
+            </button>
+            <button
+              type="button"
+              className={`rb-toggle-btn ${mobileView === "preview" ? "active" : ""}`}
+              onClick={() => setMobileView("preview")}
+            >
+              <Eye size={14} />
+              <span>Live Preview</span>
+            </button>
           </div>
         </div>
 
-        {/* Mobile View Switcher */}
-        <div className="rb-mobile-toggle">
-          <button
-            type="button"
-            className={`rb-toggle-btn ${mobileView === "form" ? "active" : ""}`}
-            onClick={() => setMobileView("form")}
-          >
-            <Edit3Icon size={14} />
-            <span>Edit Form</span>
-          </button>
-          <button
-            type="button"
-            className={`rb-toggle-btn ${mobileView === "preview" ? "active" : ""}`}
-            onClick={() => setMobileView("preview")}
-          >
-            <Eye size={14} />
-            <span>Live Preview</span>
-          </button>
-        </div>
-
-        {/* Top Header Actions */}
-        <div className="rb-header__right">
+        {/* Builder Actions: Theme, Reset, Print, Download */}
+        <div className="rb-sub-toolbar__right">
           {/* Theme Palette */}
           <div className="rb-theme-selector" title="Choose Template Accent">
             <LayoutTemplate size={15} className="rb-theme-icon" />
@@ -540,7 +528,6 @@ export default function ResumeBuilder() {
               <span className="dot dot--slate" />
               <span>Slate</span>
             </button>
-
           </div>
 
           <button
@@ -582,50 +569,8 @@ export default function ResumeBuilder() {
               </>
             )}
           </button>
-
-          {/* User Auth & Logout Controls */}
-          {user ? (
-            <div className="rb-user-controls">
-              <div
-                className="rb-user-pill"
-                title={`Signed in as ${user.name || user.email || "Job Seeker"}`}
-                onClick={() => setActiveTab("account")}
-              >
-                <div className="rb-user-avatar">
-                  {user.name
-                    ? user.name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()
-                    : "U"}
-                </div>
-                <span className="rb-user-name hide-sm">
-                  {user.name || user.email?.split("@")[0] || "Seeker"}
-                </span>
-              </div>
-
-              <button
-                type="button"
-                className="rb-btn rb-btn--logout"
-                onClick={() => setShowLogoutModal(true)}
-                id="rb-logout-btn"
-                title="Log out of TalentBridge"
-              >
-                <LogOut size={15} />
-                <span>Logout</span>
-              </button>
-            </div>
-          ) : (
-            <button
-              type="button"
-              className="rb-btn rb-btn--login"
-              onClick={() => openModal("login", "jobseeker")}
-              id="rb-login-btn"
-              title="Sign in to save and sync your resume"
-            >
-              <LogIn size={15} />
-              <span>Sign In</span>
-            </button>
-          )}
         </div>
-      </header>
+      </div>
 
       {/* ── Main Split-Screen Workspace ── */}
       <div className="rb-workspace">

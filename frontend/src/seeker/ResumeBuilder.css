@@ -13,7 +13,7 @@
   --rb-card-bg: #ffffff;
   --rb-text-main: #0f172a;
   --rb-text-muted: #64748b;
-  --rb-header-h: 60px;
+  --rb-header-h: 126px;
 }
 
 /* ── Color Theme Palettes ── */
@@ -48,9 +48,9 @@
   box-sizing: border-box;
 }
 
-/* ── Header ── */
-.rb-header {
-  height: var(--rb-header-h);
+/* ── Builder Action Sub-Toolbar (Directly below SeekerNavbar) ── */
+.rb-sub-toolbar {
+  height: 52px;
   background: #ffffff;
   border-bottom: 1.5px solid var(--rb-border);
   display: flex;
@@ -58,9 +58,36 @@
   justify-content: space-between;
   padding: 0 1.5rem;
   position: sticky;
-  top: 0;
-  z-index: 50;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  top: 74px;
+  z-index: 45;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  flex-shrink: 0;
+}
+
+.rb-sub-toolbar__left {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.rb-sub-toolbar__title-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+}
+
+.rb-sub-toolbar__sparkle {
+  color: #2563eb;
+}
+
+.rb-sub-toolbar__right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .rb-header__left {
@@ -1417,6 +1444,25 @@
   }
 }
 
+@media (max-width: 860px) {
+  .rb-sub-toolbar {
+    height: auto;
+    padding: 0.5rem 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .rb-sub-toolbar__title-badge {
+    display: none;
+  }
+  .rb-mobile-toggle {
+    display: inline-flex;
+  }
+  .rb-workspace {
+    height: auto;
+    min-height: calc(100vh - 120px);
+  }
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════ */
 /*  PRINT MEDIA STYLES — For crystal-sharp native A4 PDF Export              */
 /* ═══════════════════════════════════════════════════════════════════════════ */
@@ -1433,6 +1479,7 @@
   }
 
   .rb-header,
+  .rb-sub-toolbar,
   .rb-form-pane,
   .rb-preview-toolbar,
   .seeker-toast,

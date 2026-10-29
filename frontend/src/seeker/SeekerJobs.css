@@ -31,7 +31,7 @@
   color: var(--sk-text-dark);
 }
 
-/* ─── NAVBAR (Matching Recruiter Navbar Professional Styling) ───────────── */
+/* ─── NAVBAR (Broader, Professional Styling without Brand Logo/Name) ───────────── */
 .seeker-navbar {
   position: sticky;
   top: 0;
@@ -40,44 +40,20 @@
   color: #ffffff;
   display: flex;
   align-items: center;
-  padding: 0 2rem;
-  height: 60px;
-  gap: 1rem;
-  box-shadow: 0 2px 12px rgba(10, 37, 88, 0.18);
+  padding: 0 4rem;
+  height: 74px;
+  gap: 1.5rem;
+  box-shadow: 0 3px 16px rgba(10, 37, 88, 0.22);
 }
 
 .seeker-navbar__brand {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  text-decoration: none;
-  flex-shrink: 0;
-  cursor: pointer;
-  user-select: none;
-}
-
-.seeker-navbar__logo-wrapper {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #ffffff;
-  border-radius: 7px;
-  padding: 3px;
-  line-height: 1;
-}
-
-.seeker-navbar__brand-name {
-  display: block;
-  font-weight: 800;
-  font-size: 1rem;
-  letter-spacing: 0.06em;
-  color: #ffffff;
+  display: none !important;
 }
 
 .seeker-navbar__search {
   flex: 1;
-  max-width: 360px;
-  margin: 0 1rem;
+  max-width: 480px;
+  margin: 0;
 }
 
 .seeker-navbar .seeker-search {
@@ -89,7 +65,7 @@
 
 .seeker-navbar .seeker-search__icon {
   position: absolute;
-  left: 0.75rem;
+  left: 0.95rem;
   color: rgba(255, 255, 255, 0.65);
   display: flex;
   align-items: center;
@@ -98,12 +74,12 @@
 
 .seeker-navbar .seeker-search__input {
   width: 100%;
-  padding: 0.48rem 2rem 0.48rem 2.35rem;
-  border-radius: 24px;
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  padding: 0.62rem 2.2rem 0.62rem 2.7rem;
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
   background: rgba(255, 255, 255, 0.12);
   color: #ffffff;
-  font-size: 0.87rem;
+  font-size: 0.93rem;
   outline: none;
   transition: all 0.2s;
   font-family: inherit;
@@ -115,20 +91,20 @@
 
 .seeker-navbar .seeker-search__input:focus {
   background: rgba(255, 255, 255, 0.22);
-  border-color: rgba(255, 255, 255, 0.6);
-  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.25);
+  border-color: rgba(255, 255, 255, 0.65);
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.28);
 }
 
 .seeker-navbar .seeker-search__clear {
   position: absolute;
-  right: 0.6rem;
+  right: 0.75rem;
   background: none;
   border: none;
   color: rgba(255, 255, 255, 0.65);
   cursor: pointer;
   display: flex;
   align-items: center;
-  padding: 2px;
+  padding: 3px;
 }
 
 .seeker-navbar .seeker-search__clear:hover {
@@ -138,7 +114,7 @@
 .seeker-navbar__nav {
   display: flex;
   align-items: center;
-  gap: 0;
+  gap: 0.5rem;
   margin-left: auto;
   height: 100%;
 }
@@ -147,20 +123,20 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0 1.25rem;
+  padding: 0 1.6rem;
   height: 100%;
-  font-size: 0.86rem;
+  font-size: 0.94rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.72);
+  color: rgba(255, 255, 255, 0.75);
   cursor: pointer;
-  border-bottom: 3px solid transparent;
+  border-bottom: 3.5px solid transparent;
   transition: all 0.2s ease;
   white-space: nowrap;
   background: none;
   border-top: none;
   border-left: none;
   border-right: none;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.015em;
   font-family: inherit;
 }
 
@@ -181,42 +157,65 @@
 .seeker-navbar__right {
   display: flex;
   align-items: center;
-  gap: 0.7rem;
-  margin-left: 1rem;
+  gap: 0.9rem;
+  margin-left: 1.5rem;
   flex-shrink: 0;
 }
 
 .seeker-navbar__avatar {
-  width: 34px;
-  height: 34px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background-color: var(--color-royal, #2563eb);
   color: #ffffff;
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: 0.92rem;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  border: 2px solid rgba(255, 255, 255, 0.25);
+  border: 2px solid rgba(255, 255, 255, 0.3);
   transition: border-color 0.2s;
 }
 
 .seeker-navbar__avatar:hover {
-  border-color: rgba(255, 255, 255, 0.6);
+  border-color: rgba(255, 255, 255, 0.7);
 }
 
 .seeker-navbar__logout {
   background: none;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  color: rgba(255, 255, 255, 0.85);
-  padding: 0.35rem 0.75rem;
-  border-radius: 6px;
-  font-size: 0.78rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.9);
+  padding: 0.45rem 1rem;
+  border-radius: 7px;
+  font-size: 0.84rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
   font-family: inherit;
+}
+
+.seeker-navbar__logout:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.6);
+  color: #ffffff;
+}
+
+.seeker-navbar__signin {
+  background: var(--color-royal, #2563eb);
+  border: none;
+  color: #ffffff;
+  padding: 0.45rem 1.15rem;
+  border-radius: 7px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.seeker-navbar__signin:hover {
+  background: #1d4ed8;
 }
 
 .seeker-navbar__logout:hover {

@@ -387,3 +387,24 @@
   border-color: #94a3b8;
   color: #0f172a;
 }
+
+.cd-back-to-jobs-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  color: #2563eb;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 0.5rem;
+  transition: color 0.15s;
+  font-family: inherit;
+}
+
+.cd-back-to-jobs-btn:hover {
+  color: #1d4ed8;
+  text-decoration: underline;
+}

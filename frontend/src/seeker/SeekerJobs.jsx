@@ -7,6 +7,7 @@ import SearchBar from "./SearchBar";
 import ViewJobPage from "../pages/recruiter/ViewJobPage";
 import ApplyForm from "./ApplyForm";
 import CreateDashboardForm from "./CreateDashboardForm";
+import SeekerNavbar from "./SeekerNavbar";
 import {
   MapPin,
   Clock,
@@ -159,6 +160,17 @@ export default function SeekerJobs() {
     fetchJobs();
   }, [fetchJobs]);
 
+  // Sync search query from URL if navigating from another page (e.g. Dashboard, ResumeBuilder)
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const q = params.get("search");
+      if (q) setSearchQuery(q);
+    } catch {
+      // ignore
+    }
+  }, []);
+
   /* ── Filtering & Searching ──────────────────────────────────────────────── */
   const filteredJobs = useMemo(() => {
     let result = [...jobs];
@@ -308,96 +320,15 @@ export default function SeekerJobs() {
       )}
 
       {/* ── Top Navbar (Professional Dark Navy matching Recruiter Navbar) ── */}
-      <nav className="seeker-navbar" id="seeker-navbar">
-        {/* Brand Logo & Title */}
-        <div
-          className="seeker-navbar__brand"
-          onClick={() => {
-            navigate("/");
-            window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
-          }}
-          role="button"
-          tabIndex={0}
-          title="Return to Home Hero Section"
-        >
-
-        
-        </div>
-
-        {/* Global SearchBar */}
-        <div className="seeker-navbar__search">
-          <SearchBar
-            value={searchQuery}
-            onChange={setSearchQuery}
-            placeholder="Search jobs by title, skills, company…"
-            variant="navbar"
-            id="seeker-navbar-search"
-          />
-        </div>
-
-        {/* Nav Tabs: Jobs, Create Dashboard, Build Resume */}
-        <div className="seeker-navbar__nav">
-          <button
-            type="button"
-            className={`seeker-navbar__nav-item${!showCreateDashboard ? " seeker-navbar__nav-item--active" : ""}`}
-            onClick={() => setShowCreateDashboard(false)}
-            id="seeker-nav-jobs"
-            title="Browse all available jobs"
-          >
-            Jobs
-          </button>
-
-          <button
-            type="button"
-            className={`seeker-navbar__nav-item${showCreateDashboard ? " seeker-navbar__nav-item--active" : ""}`}
-            onClick={() => setShowCreateDashboard(true)}
-            id="seeker-nav-create-dashboard"
-            title="Create your candidate dashboard with profile image"
-          >
-            Create Dashboard
-          </button>
-
-          <button
-            type="button"
-            className="seeker-navbar__nav-item"
-            onClick={() => navigate("/seeker/resume-builder")}
-            id="seeker-nav-resume-builder"
-            title="Create Professional Resume"
-          >
-            Build Resume
-          </button>
-        </div>
-
-        {/* Profile & Logout / Sign in */}
-        <div className="seeker-navbar__right">
-          {user ? (
-            <>
-              <div
-                className="seeker-navbar__avatar"
-                title={user.name || "Job Seeker"}
-                onClick={() => setShowCreateDashboard(true)}
-              >
-                {initials}
-              </div>
-              <button
-                className="seeker-navbar__logout"
-                onClick={logout}
-                id="seeker-logout-btn"
-              >
-                Logout
-              </button>
-            </>
-          ) : (
-            <button
-              className="seeker-navbar__signin"
-              onClick={() => openModal && openModal("login")}
-              id="seeker-signin-btn"
-            >
-              Sign In
-            </button>
-          )}
-        </div>
-      </nav>
+      <SeekerNavbar
+        activeTab={showCreateDashboard ? "dashboard" : "jobs"}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        onTabChange={(tab) => {
+          if (tab === "dashboard") setShowCreateDashboard(true);
+          else if (tab === "jobs") setShowCreateDashboard(false);
+        }}
+      />
 
       {/* ── Hero Section ─────────────────────────────────────────────────── */}
       <header className="seeker-hero">

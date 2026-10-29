@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   Upload,
@@ -16,6 +17,7 @@ import {
   ShieldCheck
 } from "lucide-react";
 import TalentBridgeLogo from "../components/TalentBridgeLogo/TalentBridgeLogo";
+import SeekerNavbar from "./SeekerNavbar";
 import "./ApplyForm.css";
 import "./CreateDashboardForm.css";
 
@@ -30,6 +32,8 @@ const GENDER_OPTIONS = [
 ];
 
 export default function CreateDashboardForm({ onBack, user }) {
+  const navigate = useNavigate();
+
   // Load initial form from localStorage draft or logged-in user
   const [form, setForm] = useState(() => {
     try {
@@ -43,14 +47,16 @@ export default function CreateDashboardForm({ onBack, user }) {
       lastName: user?.name ? user.name.split(" ").slice(1).join(" ") : "",
       email: user?.email || "",
       phone: "",
-      gender: "Male",
-      location: "Bangalore, India",
-      headline: "Full Stack Engineer & Cloud Developer",
-      experienceYears: "3",
-      about: "Passionate software engineer experienced in building fast, scalable web applications and cloud services.",
-      skills: ["React.js", "Node.js", "JavaScript", "MongoDB", "REST APIs"],
+      gender: "",
+      location: "",
+      headline: "",
+      experienceYears: "",
+      about: "",
+      skills: [],
       profileImage: null,
       resumeFileName: null,
+      resumeBase64: null,
+      isFilled: false,
     };
   });
 
@@ -133,8 +139,24 @@ export default function CreateDashboardForm({ onBack, user }) {
       return;
     }
     setResumeFile(file);
-    setForm((p) => ({ ...p, resumeFileName: file.name }));
+    setForm((p) => ({
+      ...p,
+      resumeFileName: file.name,
+      resumeType: file.type || "application/pdf",
+    }));
     setError("");
+
+    // Read as Base64 to store in dashboard profile for auto-filling apply forms
+    const reader = new FileReader();
+    reader.onload = () => {
+      setForm((p) => ({
+        ...p,
+        resumeBase64: reader.result,
+        resumeFileName: file.name,
+        resumeType: file.type || "application/pdf",
+      }));
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleResumeDrop = (e) => {
@@ -178,6 +200,7 @@ export default function CreateDashboardForm({ onBack, user }) {
       try {
         const payload = {
           ...form,
+          isFilled: true,
           updatedAt: new Date().toISOString(),
         };
         localStorage.setItem("tb_seeker_dashboard_profile", JSON.stringify(payload));
@@ -194,11 +217,20 @@ export default function CreateDashboardForm({ onBack, user }) {
     const fullName = `${form.firstName} ${form.lastName}`.trim();
     return (
       <div className="af-page">
-        <div className="af-header">
-          <button className="af-back" onClick={onBack} aria-label="Back">
-            <ArrowLeft size={16} /> Back to Listings
-          </button>
-        </div>
+        {/* ── Top Navbar (identical to Jobs page) ── */}
+        <SeekerNavbar
+          activeTab="dashboard"
+          onTabChange={(tab) => {
+            if (tab === "jobs") {
+              if (onBack) onBack();
+              else navigate("/seeker/jobs");
+            } else if (tab === "resume") {
+              navigate("/seeker/resume-builder");
+            } else if (tab === "dashboard") {
+              setSubmitted(false);
+            }
+          }}
+        />
 
         <div className="af-success cd-success">
           <div className="af-success__icon cd-success__icon">
@@ -277,35 +309,40 @@ export default function CreateDashboardForm({ onBack, user }) {
   /* ── Create Dashboard Form Screen ───────────────────────────────────────── */
   return (
     <div className="af-page">
-      {/* ── Top Header Bar (breadcrumb-style, identical to ApplyForm) ─────── */}
-      <div className="af-header">
-        <button className="af-back" onClick={onBack} aria-label="Back">
-          <ArrowLeft size={16} />
-        </button>
-        <div className="af-header__logo">
-          <TalentBridgeLogo variant="paperplane" size={24} />
-        </div>
-        <div className="af-header__job">
-          <p className="af-header__title">Create Candidate Dashboard</p>
-          <p className="af-header__company">
-            TalentBridge Career Portal &bull; Candidate Hub
-          </p>
-        </div>
-      </div>
+      {/* ── Top Navbar (identical to Jobs page) ─────── */}
+      <SeekerNavbar
+        activeTab="dashboard"
+        onTabChange={(tab) => {
+          if (tab === "jobs") {
+            if (onBack) onBack();
+            else navigate("/seeker/jobs");
+          } else if (tab === "resume") {
+            navigate("/seeker/resume-builder");
+          }
+        }}
+      />
 
       {/* ── Scrollable Body with Card ───────────────────────────────────────── */}
       <div className="af-body">
         <div className="af-card cd-card">
           <div className="cd-header-flex">
             <div>
+              {onBack && (
+                <button
+                  type="button"
+                  className="cd-back-to-jobs-btn"
+                  onClick={onBack}
+                  title="Return to job listings"
+                >
+                  <ArrowLeft size={14} /> Back to Job Listings
+                </button>
+              )}
               <h2 className="af-card__heading">Candidate Dashboard Form</h2>
               <p className="cd-card-sub">
                 Complete your profile and dashboard so companies can contact and hire you directly.
               </p>
             </div>
-            <span className="cd-status-badge">
-              <Sparkles size={14} /> Profile Setup
-            </span>
+            
           </div>
 
           {error && (

@@ -1,6 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import TalentBridgeLogo from "../components/TalentBridgeLogo/TalentBridgeLogo";
 import SearchBar from "./SearchBar";
 import { useAuthModal } from "../context/AuthModalContext";
 import "./SeekerJobs.css";
@@ -28,13 +27,17 @@ export default function SeekerNavbar({
   const { user, logout, openModal } = useAuthModal();
   const [internalQuery, setInternalQuery] = useState(searchQuery);
 
+  useEffect(() => {
+    setInternalQuery(searchQuery);
+  }, [searchQuery]);
+
   const initials = user?.name
     ? user.name
-        .split(" ")
-        .map((n) => n[0])
-        .slice(0, 2)
-        .join("")
-        .toUpperCase()
+      .split(" ")
+      .map((n) => n[0])
+      .slice(0, 2)
+      .join("")
+      .toUpperCase()
     : "JS";
 
   const handleBrandClick = () => {
@@ -61,44 +64,38 @@ export default function SeekerNavbar({
     }
   };
 
-  const handleSearchSubmit = (val) => {
+  const handleSearchChange = (val) => {
     setInternalQuery(val);
     if (onSearchChange) {
       onSearchChange(val);
-    } else {
-      navigate(`/seeker/jobs?search=${encodeURIComponent(val)}`);
+    }
+  };
+
+  const handleSearchKeyDown = (e) => {
+    if (e.key === "Enter") {
+      if (onSearchChange) {
+        onSearchChange(internalQuery);
+      } else {
+        navigate(`/seeker/jobs?search=${encodeURIComponent(internalQuery)}`);
+      }
     }
   };
 
   return (
     <nav className="seeker-navbar" id="seeker-navbar">
-      {/* Brand Logo & Title */}
-      <div
-        className="seeker-navbar__brand"
-        onClick={handleBrandClick}
-        role="button"
-        tabIndex={0}
-        title="Return to Home Hero Section"
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") handleBrandClick();
-        }}
-      >
-        <div className="seeker-navbar__logo-wrapper">
-          <TalentBridgeLogo variant="paperplane" size={24} />
+      {/* SearchBar — rendered on Jobs page only */}
+      {activeTab === "jobs" && (
+        <div className="seeker-navbar__search">
+          <SearchBar
+            value={searchQuery}
+            onChange={onSearchChange}
+            onKeyDown={handleSearchKeyDown}
+            placeholder="Search jobs by title, skills, company…"
+            variant="navbar"
+            id="seeker-navbar-search"
+          />
         </div>
-        <span className="seeker-navbar__brand-name">TALENT BRIDGE</span>
-      </div>
-
-      {/* SearchBar */}
-      <div className="seeker-navbar__search">
-        <SearchBar
-          value={onSearchChange ? searchQuery : internalQuery}
-          onChange={onSearchChange || handleSearchSubmit}
-          placeholder="Search jobs by title, skills, company…"
-          variant="navbar"
-          id="seeker-navbar-search"
-        />
-      </div>
+      )}
 
       {/* Nav Tabs (Clean text headings without icons) */}
       <div className="seeker-navbar__nav">
