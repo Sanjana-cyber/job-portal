@@ -27,6 +27,7 @@ const AuthModalContext = createContext(null);
 export function AuthModalProvider({ children }) {
   const [isOpen, setIsOpen] = useState(false);
   const [initialView, setInitialView] = useState("role");
+  const [initialRole, setInitialRole] = useState(null);
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true); // true until session check finishes
 
@@ -64,13 +65,17 @@ export function AuthModalProvider({ children }) {
 
   // ── Modal controls ───────────────────────────────────────────────────────
 
-  /** Open the auth modal. view: "role" | "login" | "signup" */
-  const openModal = useCallback((view = "role") => {
+  /** Open the auth modal. view: "role" | "login" | "signup", role: "jobseeker" | "recruiter" */
+  const openModal = useCallback((view = "role", role = null) => {
     setInitialView(view);
+    setInitialRole(role || (view === "role" ? null : "jobseeker"));
     setIsOpen(true);
   }, []);
 
-  const closeModal = useCallback(() => setIsOpen(false), []);
+  const closeModal = useCallback(() => {
+    setIsOpen(false);
+    setInitialRole(null);
+  }, []);
 
   /** Called by AuthModal after a successful login/register */
   const handleAuthSuccess = useCallback((userData) => {
@@ -100,6 +105,7 @@ export function AuthModalProvider({ children }) {
       {isOpen && (
         <AuthModal
           initialView={initialView}
+          initialRole={initialRole}
           onClose={closeModal}
           onSuccess={handleAuthSuccess}
         />

@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import Modal from "./Modal";
 import RoleSelect from "./RoleSelect";
 import AuthForm from "./AuthForm";
@@ -10,9 +10,19 @@ import "./Auth.css";
  *  "login"  – login form for the chosen role
  *  "signup" – registration form for the chosen role
  */
-export default function AuthModal({ initialView = "role", onClose, onSuccess }) {
+export default function AuthModal({ initialView = "role", initialRole = null, onClose, onSuccess }) {
   const [view, setView] = useState(initialView);
-  const [role, setRole] = useState(null);
+  const [role, setRole] = useState(initialRole || (initialView !== "role" ? "jobseeker" : null));
+
+  // Sync role if initialRole or initialView changes
+  React.useEffect(() => {
+    if (initialRole) {
+      setRole(initialRole);
+    } else if (initialView !== "role" && !role) {
+      setRole("jobseeker");
+    }
+    setView(initialView);
+  }, [initialView, initialRole]);
 
   const handleRoleSelect = (selectedRole) => {
     setRole(selectedRole);

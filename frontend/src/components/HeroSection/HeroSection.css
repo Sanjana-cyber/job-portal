@@ -576,96 +576,534 @@
     }
 }
 
-/* ---------- Hero Search Bar ---------- */
-.hero__search-container {
-    width: 100%;
-    max-width: 760px;
-    margin: 10px auto 32px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    position: relative;
-    z-index: 5;
-}
+/* ═══════════════════════════════════════════════════════════════════════════ */
+/*  Hero Search Section & "First login then search for job" Dialog Styling    */
+/* ═══════════════════════════════════════════════════════════════════════════ */
 
-.hero__search-form {
+.hero__search-section {
     width: 100%;
-    display: flex;
-    align-items: center;
+    max-width: 1080px;
+    margin: 18px auto 36px;
+    padding: 24px 28px;
     background: #ffffff;
-    padding: 6px 8px 6px 18px;
-    border-radius: 40px;
-    box-shadow: 0 10px 30px rgba(10, 37, 88, 0.12), 0 2px 6px rgba(10, 37, 88, 0.04);
-    border: 1.5px solid rgba(96, 165, 250, 0.3);
-    transition: all 0.25s ease;
-    cursor: pointer;
+    border-radius: 16px;
+    box-shadow: 0 16px 40px rgba(10, 37, 88, 0.08), 0 2px 10px rgba(10, 37, 88, 0.04);
+    border: 1.5px solid #e2e8f0;
+    text-align: left;
+    animation: heroSearchSlideDown 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    z-index: 10;
 }
 
-.hero__search-form:hover,
-.hero__search-form:focus-within {
-    border-color: #2563eb;
-    box-shadow: 0 14px 36px rgba(37, 99, 235, 0.18), 0 2px 8px rgba(37, 99, 235, 0.08);
-    transform: translateY(-2px);
+@keyframes heroSearchSlideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-.hero__search-input-wrap {
+/* ── Top Banner: First login then search for job ── */
+.hero__search-banner {
     display: flex;
     align-items: center;
-    flex: 1;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 18px;
+    background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%);
+    border: 1.5px solid #bfdbfe;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.hero__search-banner-info {
+    display: flex;
+    align-items: center;
     gap: 12px;
 }
 
-.hero__search-icon {
+.hero__search-banner-icon {
     color: #2563eb;
+    background: #dbeafe;
+    padding: 8px;
+    border-radius: 10px;
+    width: 36px;
+    height: 36px;
     flex-shrink: 0;
+    box-sizing: content-box;
 }
 
-.hero__search-input {
-    width: 100%;
-    border: none;
-    outline: none;
-    font-family: var(--font-heading);
-    font-size: 0.98rem;
-    color: var(--color-navy, #0a2558);
-    background: transparent;
-    cursor: pointer;
+.hero__search-banner-title {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #1e3a8a;
+    letter-spacing: -0.01em;
 }
 
-.hero__search-input::placeholder {
-    color: #8393af;
-    font-size: 0.92rem;
+.hero__search-banner-sub {
+    font-size: 0.82rem;
+    color: #4b5563;
+    margin: 2px 0 0;
 }
 
-.hero__search-btn {
+.hero__search-banner-actions {
     display: flex;
     align-items: center;
     gap: 8px;
-    background: linear-gradient(135deg, #2563eb 0%, #1a3fa8 100%);
-    color: #ffffff;
-    border: none;
-    border-radius: 30px;
-    padding: 12px 24px;
-    font-family: var(--font-heading);
-    font-size: 0.92rem;
-    font-weight: 700;
-    cursor: pointer;
-    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
-    transition: all 0.2s ease;
     flex-shrink: 0;
 }
 
-.hero__search-btn:hover {
-    background: linear-gradient(135deg, #1d4ed8 0%, #163499 100%);
-    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+.hero__search-banner-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 15px;
+    font-size: 0.83rem;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    font-family: inherit;
+}
+
+.hero__search-banner-btn--login {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    color: #ffffff;
+    border: none;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.28);
+}
+
+.hero__search-banner-btn--login:hover {
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
     transform: translateY(-1px);
 }
 
-@media (max-width: 640px) {
-    .hero__search-btn span {
-        display: none;
+.hero__search-banner-btn--register {
+    background: #ffffff;
+    color: #2563eb;
+    border: 1.5px solid #bfdbfe;
+}
+
+.hero__search-banner-btn--register:hover {
+    background: #eff6ff;
+    border-color: #93c5fd;
+}
+
+/* ── Header Bar: SearchBar + Close button ── */
+.hero__search-bar-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.hero__search-bar-wrap {
+    flex: 1;
+}
+
+.hero__search-close-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 16px;
+    border-radius: 24px;
+    border: 1.5px solid #e2e8f0;
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 0.84rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    flex-shrink: 0;
+}
+
+.hero__search-close-btn:hover {
+    background: #fee2e2;
+    color: #dc2626;
+    border-color: #fca5a5;
+}
+
+/* ── Category Chips in Hero ── */
+.hero__search-categories {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    margin-bottom: 14px;
+    scrollbar-width: none;
+}
+.hero__search-categories::-webkit-scrollbar {
+    display: none;
+}
+
+/* ── Sub-bar: Modes & Status ── */
+.hero__search-subbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 0;
+    border-top: 1px solid #f1f5f9;
+    border-bottom: 1px solid #f1f5f9;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.hero__search-workmodes {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.hero__search-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.86rem;
+    color: #64748b;
+    margin-bottom: 14px;
+}
+
+.hero__search-count {
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.hero__search-query-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #eff6ff;
+    color: #2563eb;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: 1px solid #bfdbfe;
+}
+
+.hero__search-query-clear {
+    background: none;
+    border: none;
+    color: #2563eb;
+    cursor: pointer;
+    font-size: 1rem;
+    line-height: 1;
+    padding: 0;
+}
+
+/* ── Loading & Empty states ── */
+.hero__search-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 44px 20px;
+    color: #64748b;
+    gap: 12px;
+}
+
+.hero__search-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #e2e8f0;
+    border-top-color: #2563eb;
+    border-radius: 50%;
+    animation: heroSpin 0.7s linear infinite;
+}
+
+@keyframes heroSpin {
+    to { transform: rotate(360deg); }
+}
+
+.hero__search-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 40px 20px;
+    background: #f8fafc;
+    border-radius: 12px;
+    border: 1px dashed #cbd5e1;
+}
+
+.hero__search-empty-icon {
+    color: #94a3b8;
+    margin-bottom: 12px;
+}
+
+.hero__search-empty-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 6px;
+}
+
+.hero__search-empty-text {
+    font-size: 0.88rem;
+    color: #64748b;
+    max-width: 440px;
+    margin: 0 0 16px;
+}
+
+.hero__search-reset-btn {
+    padding: 8px 18px;
+    background: #2563eb;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.18s;
+}
+
+.hero__search-reset-btn:hover {
+    background: #1d4ed8;
+}
+
+/* ── Jobs Grid in Hero (Same CSS as Seeker jobs) ── */
+.hero__jobs-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.hero__job-card {
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+    transition: all 0.2s ease !important;
+}
+
+.hero__job-card:hover {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.12) !important;
+    transform: translateY(-2px);
+}
+
+/* ── "First login then search for job" Dialog Modal ── */
+.tb-login-dialog-modal {
+    max-width: 460px;
+    width: 90%;
+    border-radius: 20px;
+    padding: 32px 26px;
+    background: #ffffff;
+    box-shadow: 0 24px 60px rgba(10, 37, 88, 0.22);
+    text-align: center;
+    position: relative;
+    animation: tbModalZoomIn 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes tbModalZoomIn {
+    from {
+        opacity: 0;
+        transform: scale(0.92);
     }
-    .hero__search-btn {
-        padding: 10px 14px;
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.tb-login-dialog-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.tb-login-dialog-icon-wrap {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border: 2px solid #bfdbfe;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #2563eb;
+    margin-bottom: 16px;
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.15);
+}
+
+.tb-login-dialog-heading {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #0a2558;
+    letter-spacing: -0.02em;
+    margin: 0 0 10px;
+}
+
+.tb-login-dialog-message {
+    font-size: 0.92rem;
+    color: #4b5563;
+    line-height: 1.55;
+    margin: 0 0 24px;
+}
+
+.tb-login-dialog-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+}
+
+.tb-login-dialog-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px 18px;
+    font-size: 0.94rem;
+    font-weight: 700;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    font-family: inherit;
+}
+
+.tb-login-dialog-btn--login {
+    background: linear-gradient(135deg, #2563eb 0%, #1a3fa8 100%);
+    color: #ffffff;
+    border: none;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+}
+
+.tb-login-dialog-btn--login:hover {
+    background: linear-gradient(135deg, #1d4ed8 0%, #163499 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.45);
+}
+
+.tb-login-dialog-btn--create {
+    background: #ffffff;
+    color: #2563eb;
+    border: 1.5px solid #bfdbfe;
+}
+
+.tb-login-dialog-btn--create:hover {
+    background: #eff6ff;
+    border-color: #93c5fd;
+    transform: translateY(-1px);
+}
+
+.tb-login-dialog-dismiss {
+    margin-top: 14px;
+    background: none;
+    border: none;
+    color: #64748b;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+    transition: color 0.15s;
+}
+
+.tb-login-dialog-dismiss:hover {
+    color: #1e293b;
+}
+
+/* ── Job Details Modal inside Hero ── */
+.hero__job-modal {
+    max-width: 600px;
+    width: 90%;
+    border-radius: 18px;
+    padding: 28px;
+    background: #ffffff;
+    max-height: 85vh;
+    overflow-y: auto;
+    text-align: left;
+}
+
+.hero__job-modal-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.hero__job-modal-title {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #0a2558;
+    margin: 0 0 6px;
+}
+
+.hero__job-modal-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 20px;
+}
+
+.hero__job-modal-body {
+    border-top: 1px solid #f1f5f9;
+    border-bottom: 1px solid #f1f5f9;
+    padding: 16px 0;
+    margin-bottom: 20px;
+}
+
+.hero__job-modal-body h4 {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 8px;
+}
+
+.hero__job-modal-body p {
+    font-size: 0.88rem;
+    color: #475569;
+    line-height: 1.6;
+    margin: 0 0 16px;
+}
+
+.hero__job-modal-skills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.hero__job-modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+@media (max-width: 768px) {
+    .hero__search-section {
+        padding: 18px 14px;
+        margin: 14px auto 28px;
+    }
+
+    .hero__search-banner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .hero__search-banner-actions {
+        width: 100%;
+        display: flex;
+        gap: 8px;
+    }
+
+    .hero__search-banner-btn {
+        flex: 1;
+        justify-content: center;
+    }
+
+    .hero__search-subbar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
     }
 }
 
