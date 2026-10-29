@@ -1,5 +1,5 @@
 import React from "react";
-import { Users, Search, FileText, LayoutDashboard } from "lucide-react";
+import { Users, Search, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import TalentBridgeLogo from "../TalentBridgeLogo/TalentBridgeLogo";
 import heroImg from "./hero.png";
@@ -8,7 +8,7 @@ import "./HeroSection.css";
 
 function HeroSection() {
   const navigate = useNavigate();
-  const { user, openModal } = useAuthModal();
+  const { openModal } = useAuthModal();
 
   const handleSearchClick = () => {
     navigate("/seeker/jobs");
@@ -18,18 +18,8 @@ function HeroSection() {
     navigate("/seeker/resume-builder");
   };
 
-  const handleDashboardClick = () => {
-    if (user && user.role === "recruiter") {
-      navigate("/recruiter");
-    } else if (user && (user.role === "jobseeker" || user.role === "seeker")) {
-      navigate("/seeker/jobs");
-    } else {
-      openModal("role");
-    }
-  };
-
   return (
-    <section className="hero">
+    <section className="hero" id="hero">
       <div className="hero__dots" aria-hidden="true" />
 
       <div className="hero__content">
@@ -59,7 +49,7 @@ function HeroSection() {
               aria-label="Search"
               title="Search"
             >
-              <Search className="hero__circular-icon" size={22} strokeWidth={2.2} />
+              <Search className="hero__circular-icon" size={28} strokeWidth={2.4} />
               <span className="sr-only">Search</span>
             </button>
             <span className="hero__circular-label">Search</span>
@@ -80,31 +70,10 @@ function HeroSection() {
               aria-label="Build Resume"
               title="Build Resume"
             >
-              <FileText className="hero__circular-icon" size={22} strokeWidth={2.2} />
+              <FileText className="hero__circular-icon" size={28} strokeWidth={2.4} />
               <span className="sr-only">Build Resume</span>
             </button>
             <span className="hero__circular-label hero__circular-label--resume">Build Resume</span>
-          </div>
-
-          <div
-            className="hero__circular-item"
-            onClick={handleDashboardClick}
-          >
-            <button
-              type="button"
-              className="hero__circular-btn hero__circular-btn--dashboard"
-              id="hero-circle-btn-dashboard"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDashboardClick();
-              }}
-              aria-label="Create Dashboard"
-              title="Create Dashboard"
-            >
-              <LayoutDashboard className="hero__circular-icon" size={22} strokeWidth={2.2} />
-              <span className="sr-only">Create Dashboard</span>
-            </button>
-            <span className="hero__circular-label">Create Dashboard</span>
           </div>
         </div>
 

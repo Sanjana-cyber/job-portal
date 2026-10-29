@@ -5,6 +5,7 @@ import React, {
   useEffect,
   useCallback,
 } from "react";
+import { useNavigate } from "react-router-dom";
 import AuthModal from "../components/Auth/AuthModal";
 import { getMe, logoutUser } from "../services/api";
 import tokenService from "../services/tokenService";
@@ -18,18 +19,33 @@ import tokenService from "../services/tokenService";
  *   user        – current user object, or null if not logged in
  *   openModal   – opens the auth modal (view: "role" | "login" | "signup")
  *   closeModal  – closes the auth modal
- *   logout      – logs the user out and clears state
+ *   logout      – logs the user out, clears state, and navigates to hero section
  *   isLoading   – true while the initial session check is in flight
  */
 
 const AuthModalContext = createContext(null);
 
 export function AuthModalProvider({ children }) {
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [initialView, setInitialView] = useState("role");
   const [initialRole, setInitialRole] = useState(null);
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true); // true until session check finishes
+
+  // Helper to ensure viewport reaches the first hero section
+  const navigateToHeroSection = useCallback(() => {
+    navigate("/", { replace: true });
+    window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+    setTimeout(() => {
+      const hero = document.getElementById("hero");
+      if (hero) {
+        hero.scrollIntoView({ behavior: "smooth", block: "start" });
+      } else {
+        window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+      }
+    }, 60);
+  }, [navigate]);
 
   // ── Session restore on mount ─────────────────────────────────────────────
   // Restore user session if a saved token exists. If no token is stored,
@@ -53,15 +69,16 @@ export function AuthModalProvider({ children }) {
 
   // ── Auto-logout on 401 ───────────────────────────────────────────────────
   // api.js dispatches "auth:expired" whenever any request returns 401.
-  // We listen here so the whole app reacts consistently.
+  // We listen here so the whole app reacts consistently and returns to hero.
   useEffect(() => {
     const handleExpired = () => {
       setUser(null);
       setIsOpen(false);
+      navigateToHeroSection();
     };
     window.addEventListener("auth:expired", handleExpired);
     return () => window.removeEventListener("auth:expired", handleExpired);
-  }, []);
+  }, [navigateToHeroSection]);
 
   // ── Modal controls ───────────────────────────────────────────────────────
 
@@ -87,14 +104,16 @@ export function AuthModalProvider({ children }) {
 
   const logout = useCallback(async () => {
     try {
-      await logoutUser(); // asks backend to clear the HttpOnly cookie
+      await logoutUser(); // asks backend to clear the HttpOnly cookie and clears tokenService
     } catch {
       // Even if the request fails (e.g. already expired), clear local state
     } finally {
       setUser(null);
       setIsOpen(false);
+      // Navigate to the first hero section from anywhere in the app
+      navigateToHeroSection();
     }
-  }, []);
+  }, [navigateToHeroSection]);
 
   return (
     <AuthModalContext.Provider
