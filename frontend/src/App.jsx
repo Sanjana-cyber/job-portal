@@ -6,6 +6,7 @@ import RecruiterPage from "./pages/recruiter/RecruiterPage.jsx";
 import SeekerJobs from "./seeker/SeekerJobs.jsx";
 import ResumeBuilder from "./seeker/ResumeBuilder.jsx";
 import InterviewInvitationPage from "./pages/candidate/InterviewInvitationPage.jsx";
+import CreateDashboardForm from "./seeker/CreateDashboardForm.jsx";
 import LogoutPage from "./pages/LogoutPage.jsx";
 import { AuthModalProvider, useAuthModal } from "./context/AuthModalContext.jsx";
 import "./index.css";
@@ -25,6 +26,16 @@ function AppContent() {
       {/* Route for Seeker Resume Builder */}
       <Route path="/seeker/resume-builder" element={<ResumeBuilder />} />
       <Route path="/seeker/resume" element={<ResumeBuilder />} />
+
+      {/* Route for Seeker Create Dashboard */}
+      <Route
+        path="/seeker/create-dashboard"
+        element={<CreateDashboardForm onBack={() => window.history.back()} user={user} />}
+      />
+      <Route
+        path="/seeker/dashboard"
+        element={<CreateDashboardForm onBack={() => window.history.back()} user={user} />}
+      />
 
       {/* Standalone Logout Page */}
       <Route path="/logout" element={<LogoutPage />} />

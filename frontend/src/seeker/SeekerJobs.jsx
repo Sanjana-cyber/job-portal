@@ -6,9 +6,9 @@ import TalentBridgeLogo from "../components/TalentBridgeLogo/TalentBridgeLogo";
 import SearchBar from "./SearchBar";
 import ViewJobPage from "../pages/recruiter/ViewJobPage";
 import ApplyForm from "./ApplyForm";
+import CreateDashboardForm from "./CreateDashboardForm";
 import {
   MapPin,
-  Briefcase,
   Clock,
   CheckCircle,
   LayoutGrid,
@@ -20,8 +20,7 @@ import {
   Building,
   CheckCircle2,
   AlertCircle,
-  LogIn,
-  FileText
+  LogIn
 } from "lucide-react";
 import "./SeekerJobs.css";
 
@@ -133,6 +132,9 @@ export default function SeekerJobs() {
   // Application Modal state
   const [appliedJob, setAppliedJob] = useState(null);
   const [applySuccessModal, setApplySuccessModal] = useState(null);
+
+  // Create Dashboard view state
+  const [showCreateDashboard, setShowCreateDashboard] = useState(false);
 
   // Toast notification for login requirement
   const [toastMessage, setToastMessage] = useState(null);
@@ -260,6 +262,16 @@ export default function SeekerJobs() {
     return <ApplyForm job={appliedJob} onBack={() => setAppliedJob(null)} />;
   }
 
+  /* ── Render Create Dashboard View if triggered ──────────────────────────── */
+  if (showCreateDashboard) {
+    return (
+      <CreateDashboardForm
+        onBack={() => setShowCreateDashboard(false)}
+        user={user}
+      />
+    );
+  }
+
   /* ── Render Full Page View if a job is selected ─────────────────────────── */
   if (selectedJob) {
     return (
@@ -295,8 +307,22 @@ export default function SeekerJobs() {
         </div>
       )}
 
-      {/* ── Top Navbar ───────────────────────────────────────────────────────── */}
+      {/* ── Top Navbar (Professional Dark Navy matching Recruiter Navbar) ── */}
       <nav className="seeker-navbar" id="seeker-navbar">
+        {/* Brand Logo & Title */}
+        <div
+          className="seeker-navbar__brand"
+          onClick={() => {
+            navigate("/");
+            window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
+          }}
+          role="button"
+          tabIndex={0}
+          title="Return to Home Hero Section"
+        >
+
+        
+        </div>
 
         {/* Global SearchBar */}
         <div className="seeker-navbar__search">
@@ -309,37 +335,48 @@ export default function SeekerJobs() {
           />
         </div>
 
-        {/* Nav Tabs */}
+        {/* Nav Tabs: Jobs, Create Dashboard, Build Resume */}
         <div className="seeker-navbar__nav">
           <button
             type="button"
-            className="seeker-navbar__nav-item seeker-navbar__nav-item--resume"
+            className={`seeker-navbar__nav-item${!showCreateDashboard ? " seeker-navbar__nav-item--active" : ""}`}
+            onClick={() => setShowCreateDashboard(false)}
+            id="seeker-nav-jobs"
+            title="Browse all available jobs"
+          >
+            Jobs
+          </button>
+
+          <button
+            type="button"
+            className={`seeker-navbar__nav-item${showCreateDashboard ? " seeker-navbar__nav-item--active" : ""}`}
+            onClick={() => setShowCreateDashboard(true)}
+            id="seeker-nav-create-dashboard"
+            title="Create your candidate dashboard with profile image"
+          >
+            Create Dashboard
+          </button>
+
+          <button
+            type="button"
+            className="seeker-navbar__nav-item"
             onClick={() => navigate("/seeker/resume-builder")}
+            id="seeker-nav-resume-builder"
             title="Create Professional Resume"
           >
             Build Resume
           </button>
         </div>
 
-        {/* Work Mode Chips */}
-        <div className="seeker-navbar__workmodes">
-          {["all", "Remote", "Hybrid", "On-site"].map((arrangement) => (
-            <button
-              key={arrangement}
-              className={`seeker-navbar__wm-chip ${selectedArrangement.toLowerCase() === arrangement.toLowerCase() ? "seeker-navbar__wm-chip--active" : ""}`}
-              onClick={() => setSelectedArrangement(arrangement)}
-            >
-              {arrangement === "all" ? "All Modes" : arrangement}
-            </button>
-          ))}
-        </div>
-
-        {/* Sort + Profile & Logout */}
+        {/* Profile & Logout / Sign in */}
         <div className="seeker-navbar__right">
-
           {user ? (
             <>
-              <div className="seeker-navbar__avatar" title={user.name || "Job Seeker"}>
+              <div
+                className="seeker-navbar__avatar"
+                title={user.name || "Job Seeker"}
+                onClick={() => setShowCreateDashboard(true)}
+              >
                 {initials}
               </div>
               <button
@@ -352,8 +389,9 @@ export default function SeekerJobs() {
             </>
           ) : (
             <button
-              className="seeker-navbar__logout"
+              className="seeker-navbar__signin"
               onClick={() => openModal && openModal("login")}
+              id="seeker-signin-btn"
             >
               Sign In
             </button>
@@ -444,163 +482,163 @@ export default function SeekerJobs() {
       <main className="seeker-main">
         <div className="seeker-main__listings">
 
-        {/* Loading State */}
-        {loading && (
-          <div className="seeker-loading">
-            <p>Loading published opportunities…</p>
-          </div>
-        )}
-
-        {/* Error State */}
-        {!loading && error && (
-          <div className="seeker-empty">
-            <div className="seeker-empty__icon">
-              <AlertCircle size={28} />
+          {/* Loading State */}
+          {loading && (
+            <div className="seeker-loading">
+              <p>Loading published opportunities…</p>
             </div>
-            <h3 className="seeker-empty__title">Unable to Load Jobs</h3>
-            <p className="seeker-empty__text">{error}</p>
-            <button className="seeker-empty__btn" onClick={fetchJobs}>
-              Try Again
-            </button>
-          </div>
-        )}
+          )}
 
-        {/* Empty State */}
-        {!loading && !error && filteredJobs.length === 0 && (
-          <div className="seeker-empty">
-            <div className="seeker-empty__icon">
-          
-            </div>
-            <h3 className="seeker-empty__title">No Jobs Found</h3>
-            <p className="seeker-empty__text">
-              {searchQuery
-                ? `No opportunities match your search "${searchQuery}". Try adjusting your keywords or filters.`
-                : "There are currently no active job openings in this category. Check back soon!"}
-            </p>
-            {(searchQuery || selectedArrangement !== "all" || activeTab !== "all") && (
-              <button
-                className="seeker-empty__btn"
-                onClick={() => {
-                  setSearchQuery("");
-                  setActiveTab("all");
-                  setSelectedArrangement("all");
-                }}
-              >
-                Reset All Filters
+          {/* Error State */}
+          {!loading && error && (
+            <div className="seeker-empty">
+              <div className="seeker-empty__icon">
+                <AlertCircle size={28} />
+              </div>
+              <h3 className="seeker-empty__title">Unable to Load Jobs</h3>
+              <p className="seeker-empty__text">{error}</p>
+              <button className="seeker-empty__btn" onClick={fetchJobs}>
+                Try Again
               </button>
-            )}
-          </div>
-        )}
+            </div>
+          )}
 
-        {/* Jobs List / Grid */}
-        {!loading && !error && filteredJobs.length > 0 && (
-          <div className={viewMode === "grid" ? "seeker-grid" : "seeker-list"}>
-            {filteredJobs.map((job) => {
-              const company =
-                job.companyName ||
-                job.recruiter?.companyName ||
-                "";
-              const loc = formatLocation(job.acceptableLocations);
-              const salary = formatSalary(job);
-              const deadline = getDeadlineLabel(job.applicationDeadline);
-              const isClosed = job.status === "Closed" || deadline?.closed;
+          {/* Empty State */}
+          {!loading && !error && filteredJobs.length === 0 && (
+            <div className="seeker-empty">
+              <div className="seeker-empty__icon">
 
-              return (
-                <article
-                  key={job._id}
-                  className="seeker-card"
-                  id={`seeker-job-${job._id}`}
+              </div>
+              <h3 className="seeker-empty__title">No Jobs Found</h3>
+              <p className="seeker-empty__text">
+                {searchQuery
+                  ? `No opportunities match your search "${searchQuery}". Try adjusting your keywords or filters.`
+                  : "There are currently no active job openings in this category. Check back soon!"}
+              </p>
+              {(searchQuery || selectedArrangement !== "all" || activeTab !== "all") && (
+                <button
+                  className="seeker-empty__btn"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setActiveTab("all");
+                    setSelectedArrangement("all");
+                  }}
                 >
-                  {/* Top info */}
-                  <div>
-                    <div className="seeker-card__header">
-                      <div className="seeker-card__logo">
-                        <TalentBridgeLogo variant="paperplane" size={26} />
+                  Reset All Filters
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Jobs List / Grid */}
+          {!loading && !error && filteredJobs.length > 0 && (
+            <div className={viewMode === "grid" ? "seeker-grid" : "seeker-list"}>
+              {filteredJobs.map((job) => {
+                const company =
+                  job.companyName ||
+                  job.recruiter?.companyName ||
+                  "";
+                const loc = formatLocation(job.acceptableLocations);
+                const salary = formatSalary(job);
+                const deadline = getDeadlineLabel(job.applicationDeadline);
+                const isClosed = job.status === "Closed" || deadline?.closed;
+
+                return (
+                  <article
+                    key={job._id}
+                    className="seeker-card"
+                    id={`seeker-job-${job._id}`}
+                  >
+                    {/* Top info */}
+                    <div>
+                      <div className="seeker-card__header">
+                        <div className="seeker-card__logo">
+                          <TalentBridgeLogo variant="paperplane" size={26} />
+                        </div>
+                        <div className="seeker-card__info">
+                          <h3 className="seeker-card__title" title={job.jobTitle}>
+                            {job.jobTitle}
+                          </h3>
+                          <p className="seeker-card__company">
+                            <Building size={14} />
+                            <span>{company}</span>
+                          </p>
+                          <p className="seeker-card__location">
+                            <MapPin size={13} />
+                            <span>{loc}</span>
+                          </p>
+                        </div>
                       </div>
-                      <div className="seeker-card__info">
-                        <h3 className="seeker-card__title" title={job.jobTitle}>
-                          {job.jobTitle}
-                        </h3>
-                        <p className="seeker-card__company">
-                          <Building size={14} />
-                          <span>{company}</span>
-                        </p>
-                        <p className="seeker-card__location">
-                          <MapPin size={13} />
-                          <span>{loc}</span>
-                        </p>
+
+                      {/* Tags */}
+                      <div className="seeker-card__tags">
+                        {job.employmentType && (
+                          <span className="seeker-tag seeker-tag--blue">
+                            {job.employmentType}
+                          </span>
+                        )}
+                        {job.jobType && (
+                          <span className="seeker-tag seeker-tag--green">
+                            {job.jobType}
+                          </span>
+                        )}
+                        {job.level && (
+                          <span className="seeker-tag">{job.level}</span>
+                        )}
+                        {job.yearsOfExperience !== undefined && (
+                          <span className="seeker-tag">
+                            {job.yearsOfExperience === 0
+                              ? "Freshers (0 exp)"
+                              : `${job.yearsOfExperience}+ yrs exp`}
+                          </span>
+                        )}
+                        {job.requiredSkills?.slice(0, 2).map((skill, i) => (
+                          <span key={i} className="seeker-tag">
+                            {skill}
+                          </span>
+                        ))}
                       </div>
                     </div>
 
-                    {/* Tags */}
-                    <div className="seeker-card__tags">
-                      {job.employmentType && (
-                        <span className="seeker-tag seeker-tag--blue">
-                          {job.employmentType}
-                        </span>
-                      )}
-                      {job.jobType && (
-                        <span className="seeker-tag seeker-tag--green">
-                          {job.jobType}
-                        </span>
-                      )}
-                      {job.level && (
-                        <span className="seeker-tag">{job.level}</span>
-                      )}
-                      {job.yearsOfExperience !== undefined && (
-                        <span className="seeker-tag">
-                          {job.yearsOfExperience === 0
-                            ? "Freshers (0 exp)"
-                            : `${job.yearsOfExperience}+ yrs exp`}
-                        </span>
-                      )}
-                      {job.requiredSkills?.slice(0, 2).map((skill, i) => (
-                        <span key={i} className="seeker-tag">
-                          {skill}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
+                    {/* Footer */}
+                    <div className="seeker-card__footer">
+                      <div className="seeker-card__salary">
+                        <span className="seeker-card__salary-label">Compensation</span>
+                        <span className="seeker-card__salary-value">{salary}</span>
+                      </div>
 
-                  {/* Footer */}
-                  <div className="seeker-card__footer">
-                    <div className="seeker-card__salary">
-                      <span className="seeker-card__salary-label">Compensation</span>
-                      <span className="seeker-card__salary-value">{salary}</span>
-                    </div>
-
-                    <div className="seeker-card__actions">
-                      <button
-                        className="seeker-card__btn seeker-card__btn--view"
-                        onClick={() => setSelectedJob(job)}
-                        id={`btn-view-${job._id}`}
-                      >
-                        View Details
-                      </button>
-
-                      {isClosed ? (
+                      <div className="seeker-card__actions">
                         <button
-                          className="seeker-card__btn seeker-card__btn--closed"
-                          disabled
+                          className="seeker-card__btn seeker-card__btn--view"
+                          onClick={() => setSelectedJob(job)}
+                          id={`btn-view-${job._id}`}
                         >
-                          Closed
+                          View Details
                         </button>
-                      ) : (
-                        <button
-                          className="seeker-card__btn seeker-card__btn--apply"
-                          onClick={() => handleApply(job)}
-                          id={`btn-apply-${job._id}`}
-                        >
-                          <Send size={13} /> Apply Now
-                        </button>
-                      )}
+
+                        {isClosed ? (
+                          <button
+                            className="seeker-card__btn seeker-card__btn--closed"
+                            disabled
+                          >
+                            Closed
+                          </button>
+                        ) : (
+                          <button
+                            className="seeker-card__btn seeker-card__btn--apply"
+                            onClick={() => handleApply(job)}
+                            id={`btn-apply-${job._id}`}
+                          >
+                            <Send size={13} /> Apply Now
+                          </button>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-        )}
+                  </article>
+                );
+              })}
+            </div>
+          )}
         </div>{/* end seeker-main__listings */}
       </main>
 

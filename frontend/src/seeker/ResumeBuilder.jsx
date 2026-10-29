@@ -20,6 +20,8 @@ import {
   Globe,
   X,
   LogIn,
+  LogOut,
+  ShieldCheck,
   RefreshCw,
   Eye,
   CheckCircle2,
@@ -125,10 +127,24 @@ const INITIAL_RESUME_DATA = {
 
 export default function ResumeBuilder() {
   const navigate = useNavigate();
-  const { user, openModal } = useAuthModal();
+  const { user, openModal, logout } = useAuthModal();
 
-  // Active form section tab: "personal" | "summary" | "experience" | "education" | "projects" | "skills" | "certifications"
+  // Active form section tab: "personal" | "summary" | "experience" | "education" | "projects" | "skills" | "certifications" | "account"
   const [activeTab, setActiveTab] = useState("personal");
+
+  // Logout modal and progress state
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleConfirmLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+      await logout();
+    } finally {
+      setIsLoggingOut(false);
+      setShowLogoutModal(false);
+    }
+  };
 
   // Mobile view switch: "form" | "preview"
   const [mobileView, setMobileView] = useState("form");
@@ -456,8 +472,29 @@ export default function ResumeBuilder() {
       {/* ── Top Header Bar ── */}
       <header className="rb-header">
         <div className="rb-header__left">
+          <button
+            type="button"
+            className="rb-back-btn"
+            onClick={() => navigate("/")}
+            title="Return to Home Hero Section"
+            id="rb-back-home-btn"
+          >
+            <ArrowLeft size={15} />
+            <span>Home</span>
+          </button>
 
-
+          <div
+            className="rb-logo-wrap"
+            onClick={() => navigate("/")}
+            title="TalentBridge - Return to Home"
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") navigate("/"); }}
+          >
+            <TalentBridgeLogo variant="paperplane" size={24} />
+            <span className="rb-logo-text">TalentBridge</span>
+            <span className="rb-badge">Resume Builder</span>
+          </div>
         </div>
 
         {/* Mobile View Switcher */}
@@ -545,6 +582,48 @@ export default function ResumeBuilder() {
               </>
             )}
           </button>
+
+          {/* User Auth & Logout Controls */}
+          {user ? (
+            <div className="rb-user-controls">
+              <div
+                className="rb-user-pill"
+                title={`Signed in as ${user.name || user.email || "Job Seeker"}`}
+                onClick={() => setActiveTab("account")}
+              >
+                <div className="rb-user-avatar">
+                  {user.name
+                    ? user.name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()
+                    : "U"}
+                </div>
+                <span className="rb-user-name hide-sm">
+                  {user.name || user.email?.split("@")[0] || "Seeker"}
+                </span>
+              </div>
+
+              <button
+                type="button"
+                className="rb-btn rb-btn--logout"
+                onClick={() => setShowLogoutModal(true)}
+                id="rb-logout-btn"
+                title="Log out of TalentBridge"
+              >
+                <LogOut size={15} />
+                <span>Logout</span>
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              className="rb-btn rb-btn--login"
+              onClick={() => openModal("login", "jobseeker")}
+              id="rb-login-btn"
+              title="Sign in to save and sync your resume"
+            >
+              <LogIn size={15} />
+              <span>Sign In</span>
+            </button>
+          )}
         </div>
       </header>
 
@@ -802,6 +881,17 @@ export default function ResumeBuilder() {
             >
               <Award size={15} />
               <span>Certificates</span>
+            </button>
+            <button
+              type="button"
+              className={`rb-tab rb-tab--account ${activeTab === "account" ? "active" : ""}`}
+              onClick={() => setActiveTab("account")}
+              id="rb-tab-account"
+              title="Account & Session Settings"
+            >
+              <User size={15} />
+              <span>Account</span>
+              {user && <span className="rb-tab-dot" />}
             </button>
           </nav>
 
@@ -1318,9 +1408,194 @@ export default function ResumeBuilder() {
                 ))}
               </div>
             )}
+
+            {/* Tab: Account & Session / Logout */}
+            {activeTab === "account" && (
+              <div className="rb-section-card rb-account-card">
+                <div className="rb-section-header">
+                  <div className="rb-account-header-icon">
+                    <User size={22} />
+                  </div>
+                  <div>
+                    <h3 className="rb-section-title">Account &amp; Session</h3>
+                    <p className="rb-section-sub">
+                      Manage your session, view status, and sign out of TalentBridge.
+                    </p>
+                  </div>
+                </div>
+
+                {user ? (
+                  <div className="rb-account-details">
+                    <div className="rb-account-profile-box">
+                      <div className="rb-account-big-avatar">
+                        {user.name
+                          ? user.name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()
+                          : "U"}
+                      </div>
+                      <div className="rb-account-profile-info">
+                        <h4 className="rb-account-name">{user.name || "Authenticated User"}</h4>
+                        <p className="rb-account-email">{user.email}</p>
+                        <div className="rb-account-badges">
+                          <span className="rb-role-badge">
+                            {user.role === "recruiter" ? "Recruiter" : "Job Seeker"}
+                          </span>
+                          <span className="rb-status-badge">
+                            <span className="rb-status-pulse" /> Active Session
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="rb-account-card-panel">
+                      <div className="rb-panel-row">
+                        <div className="rb-panel-icon-wrap">
+                          <CheckCircle2 size={18} className="text-emerald" />
+                        </div>
+                        <div>
+                          <strong>Autosave Protected</strong>
+                          <p className="rb-panel-desc">
+                            Your resume draft is safely persisted in this browser's local cache.
+                          </p>
+                        </div>
+                      </div>
+                      <div className="rb-panel-row">
+                        <div className="rb-panel-icon-wrap">
+                          <ShieldCheck size={18} className="text-blue" />
+                        </div>
+                        <div>
+                          <strong>Secure Authentication</strong>
+                          <p className="rb-panel-desc">
+                            Your session is active. Logging out will clear your session and return you to the hero section.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Dedicated Logout Action Box */}
+                    <div className="rb-logout-action-box">
+                      <div className="rb-logout-box-text">
+                        <h5>Log Out of TalentBridge</h5>
+                        <p>
+                          Signing out will securely end your session and redirect you directly to the TalentBridge
+                          hero section on the home page.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        className="rb-btn-danger-logout"
+                        onClick={() => setShowLogoutModal(true)}
+                        id="rb-account-logout-btn"
+                      >
+                        <LogOut size={16} />
+                        <span>Log Out Now</span>
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="rb-account-guest-box">
+                    <div className="rb-guest-icon-wrap">
+                      <LogIn size={28} />
+                    </div>
+                    <h4>You Are Currently a Guest</h4>
+                    <p>
+                      Sign in or create an account to save your resume to the cloud, download without limits,
+                      and apply directly to jobs.
+                    </p>
+                    <button
+                      type="button"
+                      className="rb-btn rb-btn--download"
+                      onClick={() => openModal("login", "jobseeker")}
+                      id="rb-guest-login-btn"
+                    >
+                      <LogIn size={16} />
+                      <span>Sign In to Your Account</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </section>
       </div>
+
+      {/* ── Logout Confirmation Modal ── */}
+      {showLogoutModal && (
+        <div
+          className="rb-logout-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="logout-modal-title"
+        >
+          <div
+            className="rb-logout-backdrop"
+            onClick={() => !isLoggingOut && setShowLogoutModal(false)}
+          />
+          <div className="rb-logout-dialog">
+            <div className="rb-logout-dialog__icon-wrap">
+              <div className="rb-logout-dialog__icon-ring">
+                <LogOut size={26} className="rb-logout-dialog__icon" />
+              </div>
+            </div>
+
+            <h3 id="logout-modal-title" className="rb-logout-dialog__title">
+              Log Out of TalentBridge?
+            </h3>
+            <p className="rb-logout-dialog__desc">
+              Are you sure you want to end your current session? After logging out, you will be
+              redirected to the main hero section.
+            </p>
+
+            {user && (
+              <div className="rb-logout-user-preview">
+                <div className="rb-logout-user-avatar">
+                  {user.name
+                    ? user.name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()
+                    : "U"}
+                </div>
+                <div className="rb-logout-user-details">
+                  <span className="rb-logout-user-name">{user.name || "Job Seeker"}</span>
+                  <span className="rb-logout-user-email">{user.email}</span>
+                </div>
+              </div>
+            )}
+
+            <div className="rb-logout-dialog__note">
+              <CheckCircle2 size={15} className="text-emerald" />
+              <span>Your resume draft is safely preserved in this browser.</span>
+            </div>
+
+            <div className="rb-logout-dialog__actions">
+              <button
+                type="button"
+                className="rb-logout-btn rb-logout-btn--cancel"
+                onClick={() => setShowLogoutModal(false)}
+                disabled={isLoggingOut}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="rb-logout-btn rb-logout-btn--confirm"
+                onClick={handleConfirmLogout}
+                disabled={isLoggingOut}
+                id="rb-confirm-logout-btn"
+              >
+                {isLoggingOut ? (
+                  <>
+                    <div className="rb-spinner" />
+                    <span>Logging out…</span>
+                  </>
+                ) : (
+                  <>
+                    <LogOut size={16} />
+                    <span>Yes, Log Out</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

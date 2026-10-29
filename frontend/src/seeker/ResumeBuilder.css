@@ -879,6 +879,544 @@
   }
 }
 
+/* ── Header User Controls & Badges ── */
+.rb-badge {
+  background: #eff6ff;
+  color: #2563eb;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 6px;
+  border: 1px solid #bfdbfe;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.rb-user-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rb-user-pill {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 10px 4px 4px;
+  border-radius: 20px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.rb-user-pill:hover {
+  background: #e2e8f0;
+  border-color: #cbd5e1;
+}
+
+.rb-user-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rb-user-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #334155;
+  max-width: 110px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rb-btn--logout {
+  background: #ffffff;
+  color: #dc2626;
+  border: 1.5px solid #fecaca;
+  box-shadow: 0 1px 3px rgba(220, 38, 38, 0.08);
+}
+
+.rb-btn--logout:hover {
+  background: #fef2f2;
+  border-color: #f87171;
+  color: #b91c1c;
+  transform: translateY(-1px);
+}
+
+.rb-btn--login {
+  background: #eff6ff;
+  color: #2563eb;
+  border: 1.5px solid #bfdbfe;
+}
+
+.rb-btn--login:hover {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.rb-tab--account {
+  margin-top: auto;
+  border-top: 1px dashed var(--rb-border);
+  padding-top: 10px;
+}
+
+.rb-tab-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10b981;
+  margin-left: 4px;
+}
+
+/* ── Account & Session Section (In-Editor Page) ── */
+.rb-account-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.rb-account-header-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: #eff6ff;
+  color: #2563eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rb-account-details {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.rb-account-profile-box {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: #f8fafc;
+  border: 1px solid var(--rb-border);
+  border-radius: 14px;
+  padding: 1.25rem;
+}
+
+.rb-account-big-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: #ffffff;
+  font-size: 1.25rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+  flex-shrink: 0;
+}
+
+.rb-account-profile-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rb-account-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.rb-account-email {
+  font-size: 0.85rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.rb-account-badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.rb-role-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: #eff6ff;
+  color: #2563eb;
+  padding: 2px 8px;
+  border-radius: 6px;
+  border: 1px solid #bfdbfe;
+}
+
+.rb-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: #ecfdf5;
+  color: #059669;
+  padding: 2px 8px;
+  border-radius: 6px;
+  border: 1px solid #a7f3d0;
+}
+
+.rb-status-pulse {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
+}
+
+.rb-account-card-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #ffffff;
+  border: 1px solid var(--rb-border);
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.rb-panel-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.rb-panel-icon-wrap {
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.rb-panel-desc {
+  font-size: 0.82rem;
+  color: #64748b;
+  margin: 2px 0 0 0;
+}
+
+.rb-logout-action-box {
+  background: #fef2f2;
+  border: 1.5px solid #fecaca;
+  border-radius: 14px;
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.rb-logout-box-text h5 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #991b1b;
+  margin: 0 0 4px 0;
+}
+
+.rb-logout-box-text p {
+  font-size: 0.82rem;
+  color: #b91c1c;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.rb-btn-danger-logout {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: #ffffff;
+  border: none;
+  padding: 0.65rem 1.2rem;
+  border-radius: 9px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(239, 68, 68, 0.3);
+  transition: all 0.18s ease;
+  white-space: nowrap;
+}
+
+.rb-btn-danger-logout:hover {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  box-shadow: 0 5px 14px rgba(239, 68, 68, 0.4);
+  transform: translateY(-1px);
+}
+
+.rb-account-guest-box {
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+  background: #f8fafc;
+  border: 1px dashed var(--rb-border);
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.rb-guest-icon-wrap {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #eff6ff;
+  color: #2563eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.rb-account-guest-box h4 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 0.5rem 0;
+}
+
+.rb-account-guest-box p {
+  font-size: 0.86rem;
+  color: #64748b;
+  max-width: 380px;
+  line-height: 1.45;
+  margin: 0 0 1.5rem 0;
+}
+
+/* ── Logout Confirmation Modal ── */
+.rb-logout-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  animation: rbFadeIn 0.2s ease-out forwards;
+}
+
+.rb-logout-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(6px);
+}
+
+.rb-logout-dialog {
+  position: relative;
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 2rem;
+  max-width: 440px;
+  width: 100%;
+  box-shadow:
+    0 12px 32px -4px rgba(15, 23, 42, 0.16),
+    0 24px 60px -8px rgba(37, 99, 235, 0.14);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-sizing: border-box;
+  animation: rbScaleIn 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes rbFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes rbScaleIn {
+  from { opacity: 0; transform: scale(0.92) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.rb-logout-dialog__icon-wrap {
+  margin-bottom: 1rem;
+}
+
+.rb-logout-dialog__icon-ring {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: #fef2f2;
+  border: 2px solid #fee2e2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rb-logout-dialog__icon {
+  color: #ef4444;
+}
+
+.rb-logout-dialog__title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 0.5rem 0;
+}
+
+.rb-logout-dialog__desc {
+  font-size: 0.88rem;
+  color: #64748b;
+  margin: 0 0 1.25rem 0;
+  line-height: 1.45;
+}
+
+.rb-logout-user-preview {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f8fafc;
+  border: 1px solid var(--rb-border);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  text-align: left;
+  box-sizing: border-box;
+}
+
+.rb-logout-user-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.rb-logout-user-details {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.rb-logout-user-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rb-logout-user-email {
+  font-size: 0.78rem;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rb-logout-dialog__note {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #065f46;
+  border-radius: 10px;
+  padding: 0.6rem 0.85rem;
+  font-size: 0.78rem;
+  margin-bottom: 1.5rem;
+  text-align: left;
+  box-sizing: border-box;
+}
+
+.rb-logout-dialog__actions {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.rb-logout-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0.75rem 1.25rem;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  border: none;
+  font-family: inherit;
+}
+
+.rb-logout-btn--cancel {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+}
+
+.rb-logout-btn--cancel:hover:not(:disabled) {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.rb-logout-btn--confirm {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.28);
+}
+
+.rb-logout-btn--confirm:hover:not(:disabled) {
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.38);
+  transform: translateY(-1px);
+}
+
+.rb-logout-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+@media (max-width: 640px) {
+  .rb-logout-action-box {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .rb-btn-danger-logout {
+    width: 100%;
+    justify-content: center;
+  }
+  .rb-logout-dialog {
+    padding: 1.5rem 1.25rem;
+  }
+  .rb-logout-dialog__actions {
+    flex-direction: column-reverse;
+  }
+  .rb-logout-btn {
+    width: 100%;
+  }
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════ */
 /*  PRINT MEDIA STYLES — For crystal-sharp native A4 PDF Export              */
 /* ═══════════════════════════════════════════════════════════════════════════ */
