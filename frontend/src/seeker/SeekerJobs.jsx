@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuthModal } from "../context/AuthModalContext";
 import { api } from "../services/api";
 import TalentBridgeLogo from "../components/TalentBridgeLogo/TalentBridgeLogo";
@@ -18,7 +19,9 @@ import {
   X,
   Building,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  LogIn,
+  FileText
 } from "lucide-react";
 import "./SeekerJobs.css";
 
@@ -111,6 +114,7 @@ function matchJobWithQuery(job, rawQuery) {
 }
 
 export default function SeekerJobs() {
+  const navigate = useNavigate();
   const { user, logout, openModal } = useAuthModal();
 
   // State
@@ -129,6 +133,9 @@ export default function SeekerJobs() {
   // Application Modal state
   const [appliedJob, setAppliedJob] = useState(null);
   const [applySuccessModal, setApplySuccessModal] = useState(null);
+
+  // Toast notification for login requirement
+  const [toastMessage, setToastMessage] = useState(null);
 
   /* ── Fetch Jobs from Existing Backend GET API ───────────────────────────── */
   const fetchJobs = useCallback(async () => {
@@ -220,9 +227,31 @@ export default function SeekerJobs() {
     .toUpperCase()
     .slice(0, 2);
 
-  /* ── Apply Handler — opens ApplyForm full page ──────────────────────────── */
+  /* ── Apply Handler — checks authentication first ──────────────────────────── */
   const handleApply = (job) => {
     if (job.status === "Closed") return;
+
+    if (!user) {
+      // 1. Show toast notification
+      setToastMessage("Please login first to apply for this job");
+
+      // 2. Open login dialog box shortly after toast
+      setTimeout(() => {
+        openModal("login", "jobseeker");
+      }, 700);
+
+      // Auto dismiss toast after 4s
+      setTimeout(() => {
+        setToastMessage(null);
+      }, 4000);
+      return;
+    }
+
+    if (user.role === "recruiter") {
+      alert("Recruiters cannot apply for jobs. Please log in as a job seeker.");
+      return;
+    }
+
     setAppliedJob(job);
   };
 
@@ -238,13 +267,34 @@ export default function SeekerJobs() {
         job={selectedJob}
         companyName={selectedJob.companyName || selectedJob.recruiter?.companyName}
         onBack={() => setSelectedJob(null)}
-        onApply={(job) => { setSelectedJob(null); setAppliedJob(job); }}
+        onApply={(job) => {
+          setSelectedJob(null);
+          handleApply(job);
+        }}
       />
     );
   }
 
   return (
     <div className="seeker-page">
+      {/* ── Toast Notification: Login first to apply ── */}
+      {toastMessage && (
+        <div className="seeker-toast" role="alert">
+          <div className="seeker-toast__content">
+            <LogIn size={18} className="seeker-toast__icon" />
+            <span className="seeker-toast__text">{toastMessage}</span>
+          </div>
+          <button
+            type="button"
+            className="seeker-toast__close"
+            onClick={() => setToastMessage(null)}
+            aria-label="Dismiss message"
+          >
+            <X size={14} />
+          </button>
+        </div>
+      )}
+
       {/* ── Top Navbar ───────────────────────────────────────────────────────── */}
       <nav className="seeker-navbar" id="seeker-navbar">
 
@@ -261,7 +311,14 @@ export default function SeekerJobs() {
 
         {/* Nav Tabs */}
         <div className="seeker-navbar__nav">
-
+          <button
+            type="button"
+            className="seeker-navbar__nav-item seeker-navbar__nav-item--resume"
+            onClick={() => navigate("/seeker/resume-builder")}
+            title="Create Professional Resume"
+          >
+            Build Resume
+          </button>
         </div>
 
         {/* Work Mode Chips */}

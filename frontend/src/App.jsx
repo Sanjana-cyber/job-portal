@@ -4,6 +4,7 @@ import HeroSection from "./components/HeroSection/HeroSection.jsx";
 import Footer from "./components/Footer/Footer.jsx";
 import RecruiterPage from "./pages/recruiter/RecruiterPage.jsx";
 import SeekerJobs from "./seeker/SeekerJobs.jsx";
+import ResumeBuilder from "./seeker/ResumeBuilder.jsx";
 import InterviewInvitationPage from "./pages/candidate/InterviewInvitationPage.jsx";
 import { AuthModalProvider, useAuthModal } from "./context/AuthModalContext.jsx";
 import "./index.css";
@@ -19,6 +20,10 @@ function AppContent() {
       {/* Route /seeker/jobs to display the job listing page */}
       <Route path="/seeker/jobs" element={<SeekerJobs />} />
       <Route path="/seeker" element={<SeekerJobs />} />
+
+      {/* Route for Seeker Resume Builder */}
+      <Route path="/seeker/resume-builder" element={<ResumeBuilder />} />
+      <Route path="/seeker/resume" element={<ResumeBuilder />} />
 
       {/* Recruiter route */}
       <Route
