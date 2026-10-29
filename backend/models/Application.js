@@ -28,8 +28,18 @@ const applicationSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "reviewed", "shortlisted", "rejected", "hired"],
+      enum: ["pending", "reviewed", "shortlisted", "selected", "rejected", "hired"],
       default: "pending",
+    },
+    interviewInvitation: {
+      tokenHash: { type: String, default: null },
+      expiresAt: { type: Date, default: null },
+      sentAt: { type: Date, default: null },
+      status: {
+        type: String,
+        enum: ["none", "sent", "failed", "completed"],
+        default: "none",
+      },
     },
     atsScore: { type: Number, default: null },
     matchedKeywords: [{ type: String }],

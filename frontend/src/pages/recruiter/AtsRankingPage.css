@@ -1,6 +1,8 @@
 /* ==========================================================================
-   TALENT BRIDGE — ATS CANDIDATE RANKING PAGE
-   Clean, corporate, professional theme matching recruiter dashboard.
+   TALENT BRIDGE — ATS CANDIDATE RANKING
+   Minimal, professional, table-based layout with neutral styling.
+   Dashboard displays Rank, Candidate Name, ATS Score, and Job Role.
+   Detailed profile and actions are on the dedicated Candidate Details view.
    ========================================================================== */
 
 /* ── Animation Helpers ─────────────────────────────────────────────────────── */
@@ -11,72 +13,96 @@
   animation: ats-spin 1s linear infinite;
 }
 
-/* ── Page Root ─────────────────────────────────────────────────────────────── */
+/* ── Page Canvas ─────────────────────────────────────────────────────────── */
 .ats-page {
   min-height: 100vh;
   width: 100%;
   background-color: #f8fafc;
-  font-family: var(--font-body, 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif);
   color: #0f172a;
+  font-family: var(--font-body, 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
   display: flex;
   flex-direction: column;
 }
 
-/* ── Top Navbar ─────────────────────────────────────────────────────────────── */
+/* ── Neutral Top Navigation (White Background, Dark Text) ─────────────────── */
 .ats-navbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 2rem;
-  height: 60px;
-  background-color: var(--color-navy, #0a2558);
-  color: #ffffff;
+  height: 56px;
+  background-color: #ffffff;
+  color: #0f172a;
+  border-bottom: 1px solid #e2e8f0;
   position: sticky;
   top: 0;
-  z-index: 100;
-  box-shadow: 0 2px 10px rgba(10, 37, 88, 0.16);
+  z-index: 50;
+}
+
+.ats-navbar__left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.ats-navbar__sep {
+  color: #cbd5e1;
+  font-size: 0.9rem;
+}
+
+.ats-navbar__title {
+  font-weight: 700;
+  color: #0a2558;
+  font-size: 0.92rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 480px;
 }
 
 .ats-back-btn {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #ffffff;
-  padding: 0.42rem 0.85rem;
-  border-radius: 7px;
+  background: transparent;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  padding: 0.38rem 0.8rem;
+  border-radius: 6px;
   font-size: 0.82rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.18s ease;
+  transition: all 0.15s ease;
   white-space: nowrap;
+  user-select: none;
+  pointer-events: auto;
 }
 
 .ats-back-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.35);
-  transform: translateX(-2px);
+  background-color: #f1f5f9;
+  border-color: #94a3b8;
+  color: #0f172a;
 }
 
 .ats-refresh-btn {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #ffffff;
-  padding: 0.42rem 0.85rem;
-  border-radius: 7px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  padding: 0.38rem 0.8rem;
+  border-radius: 6px;
   font-size: 0.82rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.18s ease;
+  transition: all 0.15s ease;
 }
 
 .ats-refresh-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.35);
+  background-color: #f1f5f9;
+  border-color: #94a3b8;
+  color: #0f172a;
 }
 
 .ats-refresh-btn:disabled {
@@ -84,56 +110,54 @@
   cursor: not-allowed;
 }
 
-/* ── Body Container ─────────────────────────────────────────────────────────── */
-.ats-body {
-  flex: 1;
-  max-width: 1200px;
+/* ── Content Container ───────────────────────────────────────────────────── */
+.ats-container {
+  max-width: 1180px;
   width: 100%;
   margin: 0 auto;
-  padding: 2rem 2rem 3.5rem;
+  padding: 1.75rem 2rem 4rem;
+  flex: 1;
 }
 
-/* ── Header ─────────────────────────────────────────────────────────────────── */
-.ats-header {
-  margin-bottom: 1.5rem;
-  padding-bottom: 1.25rem;
-  border-bottom: 1px solid #e2e8f0;
+/* ── Page Heading ────────────────────────────────────────────────────────── */
+.ats-page-heading {
+  margin-bottom: 1.25rem;
 }
 
-.ats-header__title {
-  font-size: 1.65rem;
+.ats-page-title {
+  font-size: 1.5rem;
   font-weight: 800;
-  color: var(--color-navy, #0a2558);
-  margin: 0 0 0.3rem;
-  letter-spacing: -0.01em;
+  color: #0a2558;
+  margin: 0 0 0.25rem;
+  letter-spacing: -0.02em;
 }
 
-.ats-header__subtitle {
-  font-size: 0.9rem;
+.ats-page-desc {
+  font-size: 0.88rem;
   color: #64748b;
   margin: 0;
 }
 
-/* ── Toolbar (Search & Sort) ───────────────────────────────────────────────── */
+/* ── Toolbar (Search & Sort) ─────────────────────────────────────────────── */
 .ats-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   flex-wrap: wrap;
 }
 
 .ats-search-wrap {
   position: relative;
   flex: 1;
-  max-width: 420px;
-  min-width: 260px;
+  max-width: 380px;
+  min-width: 240px;
 }
 
 .ats-search-icon {
   position: absolute;
-  left: 0.85rem;
+  left: 0.8rem;
   top: 50%;
   transform: translateY(-50%);
   color: #94a3b8;
@@ -142,31 +166,30 @@
 
 .ats-search-input {
   width: 100%;
-  padding: 0.6rem 2.2rem 0.6rem 2.4rem;
+  padding: 0.52rem 2rem 0.52rem 2.25rem;
   background-color: #ffffff;
   border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  font-size: 0.88rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
   color: #0f172a;
   outline: none;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
-  transition: border-color 0.18s, box-shadow 0.18s;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .ats-search-input:focus {
   border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
 }
 
 .ats-search-clear {
   position: absolute;
-  right: 0.65rem;
+  right: 0.6rem;
   top: 50%;
   transform: translateY(-50%);
   background: none;
   border: none;
   color: #94a3b8;
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   cursor: pointer;
   line-height: 1;
 }
@@ -183,17 +206,16 @@
 .ats-sort-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.45rem;
   background-color: #ffffff;
   border: 1px solid #cbd5e1;
-  border-radius: 8px;
+  border-radius: 6px;
   color: #334155;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 600;
-  padding: 0.58rem 1rem;
+  padding: 0.52rem 0.85rem;
   cursor: pointer;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
-  transition: all 0.18s;
+  transition: all 0.15s ease;
 }
 
 .ats-sort-btn:hover {
@@ -204,26 +226,26 @@
 .ats-sort-dropdown {
   position: absolute;
   right: 0;
-  top: calc(100% + 6px);
+  top: calc(100% + 4px);
   min-width: 200px;
   background-color: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
-  padding: 0.35rem 0;
+  border-radius: 6px;
+  box-shadow: 0 8px 18px -2px rgba(0, 0, 0, 0.08);
+  padding: 0.3rem 0;
   z-index: 50;
 }
 
 .ats-sort-option {
   width: 100%;
   text-align: left;
-  padding: 0.55rem 1rem;
+  padding: 0.5rem 0.9rem;
   background: none;
   border: none;
-  font-size: 0.84rem;
+  font-size: 0.82rem;
   color: #334155;
   cursor: pointer;
-  transition: background-color 0.15s;
+  transition: background-color 0.12s;
 }
 
 .ats-sort-option:hover {
@@ -236,710 +258,1235 @@
   font-weight: 600;
 }
 
-/* ── Candidate Section ──────────────────────────────────────────────────────── */
-.ats-section {
-  margin-bottom: 2.25rem;
-}
-
-.ats-section__header {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  margin-bottom: 1.15rem;
-}
-
-.ats-section__icon--scored {
-  color: #059669;
-}
-
-.ats-section__icon--pending {
-  color: #d97706;
-}
-
-.ats-section__title {
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: #0f172a;
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-}
-
-.ats-section__count {
-  font-size: 0.75rem;
-  font-weight: 600;
-  background-color: #e2e8f0;
-  color: #475569;
-  padding: 0.15rem 0.55rem;
-  border-radius: 999px;
-}
-
-/* ── Candidate Cards Grid / List ────────────────────────────────────────────── */
-.ats-cards {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.ats-card {
-  position: relative;
+/* ── Minimalist Leaderboard / Ranking Table (Matching reference layout) ───── */
+.ats-table-card--minimal {
   background-color: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 1.35rem 1.5rem;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
-  transition: border-color 0.18s, box-shadow 0.18s;
+  border: 1px solid #eef2f6;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.02);
 }
 
-.ats-card:hover {
-  border-color: #cbd5e1;
-  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.07);
+.ats-table-responsive {
+  width: 100%;
+  overflow-x: auto;
 }
 
-.ats-card--top-1 {
-  border-left: 4px solid #059669;
+.ats-table--minimal {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
 }
 
-.ats-card--top-2 {
-  border-left: 4px solid #2563eb;
+.ats-table--minimal thead th {
+  background-color: #ffffff;
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: #64748b;
+  padding: 13px 18px;
+  border-bottom: 1px solid #eef2f6;
+  white-space: nowrap;
 }
 
-.ats-card--top-3 {
-  border-left: 4px solid #d97706;
+.ats-table-row--minimal {
+  border-bottom: 1px solid #f8fafc;
+  cursor: pointer;
+  transition: background-color 0.12s ease;
 }
 
-/* Top rank badge */
-.ats-rank-badge {
-  display: inline-block;
-  font-size: 0.74rem;
-  font-weight: 700;
-  padding: 0.2rem 0.65rem;
-  border-radius: 6px;
-  margin-bottom: 0.85rem;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
+.ats-table-row--minimal:last-child {
+  border-bottom: none;
 }
 
-.ats-rank-badge--1 {
-  background-color: #ecfdf5;
-  color: #047857;
-  border: 1px solid #a7f3d0;
+.ats-table-row--minimal:hover {
+  background-color: #f8fafc;
 }
 
-.ats-rank-badge--2 {
-  background-color: #eff6ff;
-  color: #1d4ed8;
-  border: 1px solid #bfdbfe;
+.ats-table--minimal td {
+  padding: 12px 18px;
+  vertical-align: middle;
 }
 
-.ats-rank-badge--3 {
-  background-color: #fffbeb;
-  color: #b45309;
-  border: 1px solid #fde68a;
+/* Column: No. */
+.ats-th-no,
+.ats-td-no {
+  width: 50px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #64748b;
+  text-align: left;
+  padding-left: 20px;
 }
 
-/* Card Top (Identity + Score) */
-.ats-card__top {
+/* Column: Player name */
+.ats-th-player,
+.ats-td-player {
+  min-width: 240px;
+}
+
+.ats-player-cell {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 1.25rem;
-  flex-wrap: wrap;
+  gap: 0.95rem;
 }
 
-.ats-card__identity {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.ats-card__avatar {
-  width: 48px;
-  height: 48px;
+.ats-player-logo-badge {
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
-  color: #ffffff;
+  background: #eff6ff;
+  border: 1px solid #dbeafe;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
-  font-size: 1rem;
   flex-shrink: 0;
+  box-shadow: 0 1px 2px rgba(37, 99, 235, 0.06);
+  transition: transform 0.15s ease;
 }
 
-.ats-card__info {
+.ats-table-row--minimal:hover .ats-player-logo-badge {
+  transform: scale(1.05);
+}
+
+.ats-player-info {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.12rem;
 }
 
-.ats-card__name-row {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.ats-card__name {
-  font-size: 1.05rem;
+.ats-player-name {
+  font-size: 0.92rem;
   font-weight: 700;
   color: #0f172a;
 }
 
-.ats-card__rank-num {
-  font-size: 0.78rem;
-  font-weight: 700;
+.ats-player-sub {
+  font-size: 0.8rem;
+  color: #64748b;
+  font-weight: 400;
+}
+
+/* Column: Baseline ID */
+.ats-th-baseline,
+.ats-td-baseline {
+  width: 170px;
+}
+
+.ats-baseline-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background-color: #eff6ff;
+  border: 1px solid #dbeafe;
+  color: #2563eb;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.28rem 0.75rem;
+  border-radius: 14px;
+  letter-spacing: 0.02em;
+}
+
+.ats-baseline-icon {
+  color: #3b82f6;
+  flex-shrink: 0;
+}
+
+/* Column: Club */
+.ats-th-club,
+.ats-td-club {
+  min-width: 190px;
+}
+
+.ats-club-text {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+/* Column: Ranking ❔ */
+.ats-th-ranking,
+.ats-td-ranking {
+  width: 130px;
+  text-align: right;
+}
+
+.ats-th-ranking-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.ats-th-help-icon {
+  color: #94a3b8;
+  flex-shrink: 0;
+}
+
+.ats-ranking-num {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+}
+
+/* Column: +/- */
+.ats-th-diff,
+.ats-td-diff {
+  width: 65px;
+  text-align: right;
+  padding-right: 24px;
+}
+
+.ats-diff-num {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.ats-pending-badge {
+  font-size: 0.76rem;
+  font-weight: 600;
   color: #64748b;
   background-color: #f1f5f9;
-  padding: 0.1rem 0.45rem;
+  padding: 0.2rem 0.55rem;
   border-radius: 4px;
-}
-
-.ats-card__email {
-  font-size: 0.84rem;
-  color: #64748b;
-}
-
-/* Status badges */
-.ats-status-badge {
   display: inline-block;
-  align-self: flex-start;
+}
+
+/* ── Secondary Table: Awaiting Screening ─────────────────────────────────── */
+.ats-pending-section {
+  margin-top: 2rem;
+}
+
+.ats-subtable-heading {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0a2558;
+  margin: 0 0 0.75rem;
+}
+
+/* ── VIEW: Candidate Details Page (Exact Layout matching reference) ───────── */
+.ats-details-view {
+  animation: fadeIn 0.16s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(3px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Details Top Action Bar */
+.ats-details-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.ats-details-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: none;
+  border: none;
+  color: #2563eb;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.35rem 0.65rem;
+  margin-left: -0.65rem;
+  border-radius: 6px;
+  position: relative;
+  z-index: 10;
+  user-select: none;
+  pointer-events: auto;
+  transition: all 0.15s ease;
+}
+
+.ats-details-back-link:hover {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  text-decoration: none;
+}
+
+.ats-details-back-link:active {
+  transform: scale(0.98);
+}
+
+.ats-details-back-link:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+.ats-details-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+/* ── Profile Hero Header Card (Top of reference image) ───────────────────── */
+.ats-profile-hero {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1.25rem 1.5rem 0 1.5rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+}
+
+.ats-profile-hero__top {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5rem;
+}
+
+.ats-profile-hero__avatar-wrap {
+  flex-shrink: 0;
+}
+
+.ats-profile-hero__avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+  border: 2.5px solid #3b82f6;
+  color: #ffffff;
+  font-size: 1.5rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12);
+  letter-spacing: -0.02em;
+}
+
+.ats-profile-hero__info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.ats-profile-hero__name-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.ats-profile-hero__name {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ats-profile-hero__recruiter-badge {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 0.12rem 0.5rem;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: #475569;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.ats-profile-hero__recruiter-dot {
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 0.62rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ats-profile-hero__more-btn {
+  margin-left: auto;
+  color: #94a3b8;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s ease;
+}
+
+.ats-profile-hero__more-btn:hover {
+  color: #334155;
+  background-color: #f1f5f9;
+}
+
+.ats-profile-hero__meta {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  font-size: 0.84rem;
+  color: #475569;
+  flex-wrap: wrap;
+  margin-top: 0.1rem;
+}
+
+.ats-profile-hero__meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.ats-profile-hero__meta-icon {
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+.ats-profile-hero__chips {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.ats-hero-chip {
+  font-size: 0.74rem;
+  font-weight: 600;
+  padding: 0.2rem 0.65rem;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  user-select: none;
+}
+
+.ats-hero-chip--green {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+
+.ats-hero-chip__dot--green {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: #22c55e;
+}
+
+.ats-hero-chip--purple {
+  background-color: #f3e8ff;
+  color: #7e22ce;
+}
+
+.ats-hero-chip__dot--purple {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: #a855f7;
+}
+
+.ats-hero-chip--blue {
+  background-color: #e0f2fe;
+  color: #0369a1;
+}
+
+.ats-hero-chip--plain {
+  background-color: transparent;
+  color: #2563eb;
+  cursor: pointer;
+}
+
+.ats-hero-chip--plain:hover {
+  text-decoration: underline;
+}
+
+/* ── Tab Navigation Strip (Beneath profile in reference image) ────────────── */
+.ats-hero-tabs {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  border-top: 1px solid #eef2f6;
+  margin-top: 1.25rem;
+  overflow-x: auto;
+}
+
+.ats-hero-tab {
+  padding: 0.75rem 0.2rem;
+  background: none;
+  border: none;
+  border-bottom: 2.5px solid transparent;
+  color: #64748b;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.ats-hero-tab:hover {
+  color: #0f172a;
+}
+
+.ats-hero-tab--active {
+  color: #0f172a;
+  border-bottom-color: #2563eb;
+  font-weight: 700;
+}
+
+.ats-hero-tab__badge {
+  background-color: #e2e8f0;
+  color: #334155;
+  font-size: 0.65rem;
+  font-weight: 700;
+  border-radius: 10px;
+  padding: 0.05rem 0.45rem;
+}
+
+.ats-hero-tab__badge--green {
+  background-color: #16a34a;
+  color: #ffffff;
+}
+
+/* ── Two-Column Main Grid ─────────────────────────────────────────────────── */
+.ats-hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+@media (max-width: 960px) {
+  .ats-hero-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ats-hero-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+}
+
+.ats-hero-card__header {
+  background-color: #f4f6fa;
+  border-bottom: 1px solid #e5e9f0;
+  padding: 0.8rem 1.25rem;
+}
+
+.ats-hero-card__header--flex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.ats-hero-card__title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.ats-hero-card__add-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background-color: #2563eb;
+  color: #ffffff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.ats-hero-card__add-btn:hover {
+  background-color: #1d4ed8;
+}
+
+.ats-hero-card__body {
+  padding: 1.25rem;
+}
+
+/* Key-Value Details Table */
+.ats-kv-table {
+  display: flex;
+  flex-direction: column;
+}
+
+.ats-kv-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 0.85rem;
+}
+
+.ats-kv-row:last-child {
+  border-bottom: none;
+}
+
+.ats-kv-label {
+  color: #334155;
+  font-weight: 600;
+  width: 44%;
+  min-width: 170px;
+}
+
+.ats-kv-value {
+  color: #0f172a;
+  flex: 1;
+  text-align: left;
+}
+
+.ats-kv-score {
+  font-weight: 700;
+}
+
+.ats-kv-value--email {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.ats-kv-email-text {
+  word-break: break-all;
+}
+
+.ats-compose-btn {
+  background-color: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 16px;
+  padding: 0.24rem 0.85rem;
   font-size: 0.72rem;
   font-weight: 700;
-  padding: 0.15rem 0.55rem;
-  border-radius: 4px;
-  text-transform: uppercase;
   letter-spacing: 0.04em;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color 0.15s ease;
+}
+
+.ats-compose-btn:hover {
+  background-color: #1d4ed8;
+}
+
+.ats-resume-inline-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: none;
+  border: none;
+  color: #2563eb;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.ats-resume-inline-link:hover {
+  color: #1d4ed8;
+}
+
+/* ── Skills Wrap & Badges (Matching reference image) ───────────────────────── */
+.ats-skills-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.ats-skill-pill-img {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 0.22rem 0.65rem 0.22rem 0.25rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  transition: all 0.15s ease;
+}
+
+.ats-skill-pill-img:hover {
+  border-color: #cbd5e1;
+  background-color: #f8fafc;
+}
+
+.ats-skill-badge-num {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: #16a34a;
+  color: #ffffff;
+  font-size: 0.68rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ats-skill-badge-num--missing {
+  background-color: #f59e0b;
+}
+
+.ats-skill-pill-img--missing {
+  background-color: #fffbeb;
+  border-color: #fef3c7;
+}
+
+.ats-skill-label-text {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #1e293b;
+}
+
+/* ── Recent History Timeline (Matching reference image) ───────────────────── */
+.ats-history-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.ats-history-item {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 0.82rem;
+}
+
+.ats-history-item:last-child {
+  border-bottom: none;
+}
+
+.ats-history-item__avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background-color: #e0e7ff;
+  color: #3730a3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.ats-history-item__avatar--ai {
+  background-color: #f5f3ff;
+  color: #7c3aed;
+}
+
+.ats-history-item__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.ats-history-item__text {
+  color: #334155;
+  line-height: 1.45;
+}
+
+.ats-history-actor {
+  color: #2563eb;
+  font-weight: 600;
+}
+
+.ats-history-target {
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.ats-history-item__date {
+  font-size: 0.72rem;
+  color: #94a3b8;
   margin-top: 0.2rem;
 }
 
-.ats-status-badge--pending {
-  background-color: #f1f5f9;
+.ats-hero-eval-box {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 0.85rem 1rem;
+  margin-top: 0.85rem;
+  font-size: 0.82rem;
+  color: #334155;
+  line-height: 1.5;
+}
+
+.ats-hero-eval-title {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #0a2558;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.35rem;
+}
+
+.ats-hero-eval-text {
   color: #475569;
 }
 
-.ats-status-badge--reviewed {
+/* ── Status Pills & Action Buttons ────────────────────────────────────────── */
+.ats-status-pill {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.18rem 0.55rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.ats-status-pill--pending {
+  background-color: #f1f5f9;
+  color: #475569;
+}
+.ats-status-pill--reviewed {
   background-color: #eff6ff;
   color: #2563eb;
 }
-
-.ats-status-badge--shortlisted {
+.ats-status-pill--shortlisted {
   background-color: #ecfdf5;
   color: #059669;
 }
-
-.ats-status-badge--rejected {
+.ats-status-pill--selected {
+  background-color: #f5f3ff;
+  color: #7c3aed;
+  border: 1px solid #ddd6fe;
+}
+.ats-status-pill--rejected {
   background-color: #fff1f2;
   color: #e11d48;
 }
-
-.ats-status-badge--hired {
+.ats-status-pill--hired {
   background-color: #fdf4ff;
   color: #9333ea;
 }
 
-/* ── Score Dial (Clean Gauge) ──────────────────────────────────────────────── */
-.ats-score-dial {
-  display: flex;
-  align-items: center;
-  gap: 0.85rem;
-  background-color: #f8fafc;
-  border: 1px solid #e2e8f0;
-  padding: 0.5rem 0.85rem;
-  border-radius: 10px;
-}
-
-.ats-score-dial__svg {
-  width: 52px;
-  height: 52px;
-  flex-shrink: 0;
-}
-
-.ats-score-dial__track {
-  stroke: #e2e8f0;
-}
-
-/* Dynamic Fill Colors */
-.ats-score--high .ats-score-dial__fill {
-  stroke: #059669;
-}
-.ats-score--mid .ats-score-dial__fill {
-  stroke: #2563eb;
-}
-.ats-score--low .ats-score-dial__fill {
-  stroke: #d97706;
-}
-.ats-score--very-low .ats-score-dial__fill {
-  stroke: #e11d48;
-}
-
-.ats-score-dial__label {
-  display: flex;
-  align-items: baseline;
-  gap: 0.15rem;
-}
-
-.ats-score-dial__num {
-  font-size: 1.35rem;
-  font-weight: 800;
-  color: #0f172a;
-}
-
-.ats-score-dial__max {
-  font-size: 0.78rem;
-  color: #94a3b8;
+.ats-invitation-pill {
+  font-size: 0.72rem;
   font-weight: 600;
-}
-
-.ats-score-dial__grade {
-  font-size: 0.74rem;
-  font-weight: 700;
-  padding: 0.2rem 0.55rem;
-  border-radius: 4px;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-}
-
-.ats-score--high .ats-score-dial__grade {
-  background-color: #ecfdf5;
-  color: #047857;
-}
-
-.ats-score--mid .ats-score-dial__grade {
+  color: #2563eb;
   background-color: #eff6ff;
-  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+  padding: 0.15rem 0.55rem;
+  border-radius: 4px;
 }
 
-.ats-score--low .ats-score-dial__grade {
-  background-color: #fffbeb;
-  color: #b45309;
-}
-
-.ats-score--very-low .ats-score-dial__grade {
-  background-color: #fff1f2;
-  color: #be123c;
-}
-
-/* ── Skills Preview ─────────────────────────────────────────────────────────── */
-.ats-card__skills-preview {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.25rem;
-  margin-top: 1.15rem;
-  padding-top: 1.15rem;
-  border-top: 1px solid #f1f5f9;
-}
-
-@media (max-width: 640px) {
-  .ats-card__skills-preview {
-    grid-template-columns: 1fr;
-  }
-}
-
-.ats-skills-col {
-  display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
-}
-
-.ats-skills-col__label {
-  display: flex;
+.ats-btn {
+  display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-}
-
-.ats-skills-col__label--matched {
-  color: #059669;
-}
-
-.ats-skills-col__label--missing {
-  color: #64748b;
-}
-
-.ats-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-}
-
-.ats-tag {
-  font-size: 0.78rem;
-  font-weight: 500;
-  padding: 0.2rem 0.55rem;
+  padding: 0.46rem 0.95rem;
   border-radius: 6px;
-}
-
-.ats-tag--matched {
-  background-color: #f0fdf4;
-  color: #166534;
-  border: 1px solid #bbf7d0;
-}
-
-.ats-tag--missing {
-  background-color: #f8fafc;
-  color: #475569;
-  border: 1px solid #e2e8f0;
-}
-
-.ats-tag--more {
-  background-color: #f1f5f9;
-  color: #475569;
-  font-weight: 600;
-}
-
-.ats-tags__empty {
-  font-size: 0.8rem;
-  color: #94a3b8;
-  font-style: italic;
-}
-
-/* ── Expand Toggle ─────────────────────────────────────────────────────────── */
-.ats-card__expand-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  margin-top: 0.85rem;
-  background: none;
-  border: none;
-  color: #2563eb;
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
-  padding: 0;
-  transition: color 0.15s;
+  transition: all 0.15s ease;
 }
 
-.ats-card__expand-btn:hover {
-  color: #1d4ed8;
-  text-decoration: underline;
+.ats-btn--select {
+  background-color: #0a2558;
+  color: #ffffff;
+  border: 1px solid #0a2558;
 }
 
-/* ── Expanded Section ──────────────────────────────────────────────────────── */
-.ats-card__expanded {
-  margin-top: 1rem;
-  padding: 1.15rem;
-  background-color: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
+.ats-btn--select:hover:not(:disabled) {
+  background-color: #1e3a8a;
+  border-color: #1e3a8a;
 }
 
-.ats-expanded-skills {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.25rem;
-  margin-bottom: 1rem;
-}
-
-@media (max-width: 640px) {
-  .ats-expanded-skills {
-    grid-template-columns: 1fr;
-  }
-}
-
-.ats-explanation {
-  background-color: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-left: 4px solid #2563eb;
-  border-radius: 6px;
-  padding: 0.85rem 1rem;
-}
-
-.ats-explanation__header {
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: #0f172a;
-  margin-bottom: 0.3rem;
-}
-
-.ats-explanation__content {
-  font-size: 0.85rem;
-  color: #334155;
-  line-height: 1.55;
-}
-
-/* ── Card Footer (Decisions & Resume) ──────────────────────────────────────── */
-.ats-card__footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-top: 1.25rem;
-  padding-top: 1.15rem;
-  border-top: 1px solid #f1f5f9;
-  flex-wrap: wrap;
-}
-
-.ats-card__decision {
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-  flex-wrap: wrap;
-}
-
-.ats-action-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.45rem 0.85rem;
-  border-radius: 7px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.16s ease;
-  background-color: #ffffff;
-}
-
-.ats-action-btn--shortlist {
-  border: 1px solid #059669;
-  color: #059669;
-}
-
-.ats-action-btn--shortlist:hover:not(:disabled) {
+.ats-btn--selected {
   background-color: #ecfdf5;
+  color: #047857;
+  border-color: #a7f3d0;
 }
 
-.ats-action-btn--shortlist.ats-action-btn--active {
-  background-color: #059669;
+.ats-btn--selected:hover:not(:disabled) {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.ats-btn--reject {
+  background-color: #ffffff;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.ats-btn--reject:hover:not(:disabled) {
+  background-color: #fef2f2;
+}
+
+.ats-btn--rejected {
+  background-color: #fef2f2;
+  color: #dc2626;
+  border-color: #fecaca;
+}
+
+.ats-btn--resume {
+  background-color: #2563eb;
   color: #ffffff;
+  border: 1px solid #2563eb;
 }
 
-.ats-action-btn--reject {
-  border: 1px solid #e11d48;
-  color: #e11d48;
+.ats-btn--resume:hover:not(:disabled) {
+  background-color: #1d4ed8;
+  border-color: #1d4ed8;
 }
 
-.ats-action-btn--reject:hover:not(:disabled) {
-  background-color: #fff1f2;
+.ats-btn--retry,
+.ats-btn--secondary {
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #334155;
 }
 
-.ats-action-btn--reject.ats-action-btn--active {
-  background-color: #e11d48;
-  color: #ffffff;
+.ats-btn--retry:hover,
+.ats-btn--secondary:hover {
+  background-color: #f8fafc;
 }
 
-.ats-action-btn:disabled {
-  opacity: 0.6;
+.ats-btn:disabled {
+  opacity: 0.55;
   cursor: not-allowed;
 }
 
-.ats-status-select {
-  padding: 0.45rem 0.75rem;
+.ats-details-status-select {
+  padding: 0.45rem 0.8rem;
   background-color: #ffffff;
   border: 1px solid #cbd5e1;
-  border-radius: 7px;
+  border-radius: 6px;
   font-size: 0.82rem;
   color: #1e293b;
   cursor: pointer;
   outline: none;
-  transition: border-color 0.15s;
 }
 
-.ats-status-select:focus {
+.ats-details-status-select:focus {
   border-color: #2563eb;
 }
 
-.ats-resume-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  background-color: #2563eb;
-  color: #ffffff;
-  border: none;
-  border-radius: 7px;
-  padding: 0.48rem 0.95rem;
-  font-size: 0.82rem;
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow: 0 1px 2px rgba(37, 99, 235, 0.2);
-  transition: all 0.16s ease;
-}
-
-.ats-resume-btn:hover {
-  background-color: #1d4ed8;
-  transform: translateY(-1px);
-}
-
-.ats-resume-btn--sm {
-  padding: 0.35rem 0.75rem;
-  font-size: 0.76rem;
-}
-
-/* ── Pending / Unranked List ────────────────────────────────────────────────── */
-.ats-pending-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.ats-pending-card {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+/* ── States (Loading / Empty / Error) ─────────────────────────────────────── */
+.ats-state-box {
   background-color: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  padding: 0.9rem 1.25rem;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
-}
-
-.ats-pending-card__avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 0.88rem;
-  flex-shrink: 0;
-}
-
-.ats-pending-card__info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-  flex: 1;
-}
-
-.ats-pending-card__name {
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #0f172a;
-}
-
-.ats-pending-card__email {
-  font-size: 0.8rem;
-  color: #64748b;
-}
-
-.ats-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 0.25rem 0.65rem;
-  border-radius: 999px;
-}
-
-.ats-pill--failed {
-  background-color: #fff1f2;
-  color: #e11d48;
-}
-
-.ats-pill--processing {
-  background-color: #eff6ff;
-  color: #2563eb;
-}
-
-.ats-pill--pending {
-  background-color: #f1f5f9;
-  color: #475569;
-}
-
-.ats-pending-card__actions {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.ats-retry-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  background-color: #ffffff;
-  border: 1px solid #cbd5e1;
-  color: #334155;
-  padding: 0.35rem 0.75rem;
-  border-radius: 6px;
-  font-size: 0.76rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.ats-retry-btn:hover:not(:disabled) {
-  background-color: #f8fafc;
-  border-color: #94a3b8;
-}
-
-/* ── States (Loading / Error / Empty) ───────────────────────────────────────── */
-.ats-loading,
-.ats-error,
-.ats-empty {
-  background-color: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 3.5rem 2rem;
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
 }
 
 .ats-spinner {
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   border: 3px solid #e2e8f0;
   border-top-color: #2563eb;
   border-radius: 50%;
   animation: ats-spin 0.8s linear infinite;
-  margin-bottom: 1rem;
+  margin-bottom: 0.85rem;
 }
 
-.ats-loading span {
-  font-size: 0.92rem;
+.ats-state-box span {
+  font-size: 0.88rem;
   color: #64748b;
   font-weight: 500;
 }
 
-.ats-error {
-  color: #e11d48;
-}
-
-.ats-error h3 {
-  color: #0f172a;
-  font-size: 1.15rem;
-  margin: 0.8rem 0 0.35rem;
-}
-
-.ats-error p {
-  color: #64748b;
-  font-size: 0.88rem;
-  margin: 0 0 1.25rem;
-}
-
-.ats-error__retry,
-.ats-clear-search {
-  background-color: #2563eb;
-  color: #ffffff;
-  border: none;
-  border-radius: 7px;
-  padding: 0.55rem 1.15rem;
-  font-size: 0.84rem;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.ats-empty__icon {
-  color: #94a3b8;
-  margin-bottom: 0.75rem;
-}
-
-.ats-empty h3 {
+.ats-state-title {
   font-size: 1.15rem;
   font-weight: 700;
-  color: #0f172a;
+  color: #0a2558;
   margin: 0 0 0.35rem;
 }
 
-.ats-empty p {
-  font-size: 0.88rem;
+.ats-state-desc {
+  font-size: 0.86rem;
   color: #64748b;
   margin: 0 0 1.25rem;
+  max-width: 440px;
+}
+
+.ats-error-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+  padding: 0.85rem 1.15rem;
+  border-radius: 6px;
+  font-size: 0.86rem;
+  margin-bottom: 1.5rem;
+}
+
+/* ── Feedback Alert Banner ────────────────────────────────────────────────── */
+.ats-feedback-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.8rem 1.15rem;
+  border-radius: 6px;
+  font-size: 0.86rem;
+  margin-bottom: 1.25rem;
+  animation: fadeIn 0.16s ease-in-out;
+}
+
+.ats-feedback-banner--success {
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+}
+
+.ats-feedback-banner--warning {
+  background-color: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #92400e;
+}
+
+.ats-feedback-banner--error {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}
+
+.ats-feedback-banner__close {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.7;
+  padding: 0;
+}
+
+.ats-feedback-banner__close:hover {
+  opacity: 1;
+}
+
+/* ── Confirmation Modal ──────────────────────────────────────────────────── */
+.ats-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(10, 37, 88, 0.4);
+  backdrop-filter: blur(2px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.ats-modal {
+  background-color: #ffffff;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 16px 30px -4px rgba(10, 37, 88, 0.12);
+  overflow: hidden;
+}
+
+.ats-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.15rem 1.35rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.ats-modal__title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #0a2558;
+  margin: 0;
+}
+
+.ats-modal__close {
+  background: none;
+  border: none;
+  font-size: 1.35rem;
+  color: #94a3b8;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.ats-modal__close:hover {
+  color: #475569;
+}
+
+.ats-modal__body {
+  padding: 1.35rem;
+}
+
+.ats-modal__lead {
+  font-size: 0.92rem;
+  color: #1e293b;
+  margin: 0 0 0.85rem;
+  line-height: 1.5;
+}
+
+.ats-modal__details {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 0.75rem 0.95rem;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.ats-modal__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.84rem;
+}
+
+.ats-modal__label {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.ats-modal__val {
+  color: #0a2558;
+  font-weight: 700;
+}
+
+.ats-modal__notice {
+  font-size: 0.8rem;
+  color: #64748b;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.ats-modal__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  padding: 0.9rem 1.35rem;
+  background-color: #f8fafc;
+  border-top: 1px solid #f1f5f9;
+}
+
+.ats-modal__btn {
+  padding: 0.48rem 1rem;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.14s ease;
+}
+
+.ats-modal__btn--cancel {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+}
+
+.ats-modal__btn--cancel:hover:not(:disabled) {
+  background-color: #f1f5f9;
+}
+
+.ats-modal__btn--confirm {
+  background-color: #0a2558;
+  border: 1px solid #0a2558;
+  color: #ffffff;
+}
+
+.ats-modal__btn--confirm:hover:not(:disabled) {
+  background-color: #1e3a8a;
+  border-color: #1e3a8a;
+}
+
+.ats-modal__btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* ── Responsive Breakpoints ──────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .ats-container {
+    padding: 1.25rem 1rem 3rem;
+  }
+
+  .ats-details-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ats-details-actions {
+    width: 100%;
+  }
+
+  .ats-details-actions button,
+  .ats-details-actions select {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .ats-details-skills-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .ats-details-score-bar {
+    gap: 1.25rem;
+  }
+
+  .ats-details-divider {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .ats-page-title {
+    font-size: 1.35rem;
+  }
+
+  .ats-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ats-search-wrap {
+    max-width: 100%;
+  }
+
+  .ats-sort-btn {
+    width: 100%;
+    justify-content: space-between;
+  }
 }

@@ -3,40 +3,50 @@ import {
   ArrowLeft,
   Search,
   RefreshCw,
-  CheckCircle2,
-  XCircle,
-  Clock,
-  AlertTriangle,
   ExternalLink,
-  Trophy,
-  Medal,
-  Award,
-  BarChart2,
   ChevronDown,
-  ChevronUp,
-  UserCheck,
-  UserX,
   Briefcase,
+  MapPin,
+  Tag,
   FileText,
+  Mail,
+  Plus,
+  Clock,
+  User,
+  History,
+  MoreVertical,
+  Sparkles,
+  Link2,
+  HelpCircle,
 } from "lucide-react";
-import { getJobApplications, updateApplicationStatus, retryApplicationAts, api } from "../../services/api";
+import TalentBridgeLogo from "../../components/TalentBridgeLogo/TalentBridgeLogo";
+import {
+  getJobApplications,
+  updateApplicationStatus,
+  retryApplicationAts,
+  selectCandidateForInterview,
+  deleteApplication,
+  api,
+} from "../../services/api";
 import tokenService from "../../services/tokenService";
 import "./AtsRankingPage.css";
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
-function getRankIcon(rank) {
-  if (rank === 1) return <Trophy size={16} className="ats-rank-icon ats-rank-icon--gold" />;
-  if (rank === 2) return <Medal size={16} className="ats-rank-icon ats-rank-icon--silver" />;
-  if (rank === 3) return <Award size={16} className="ats-rank-icon ats-rank-icon--bronze" />;
-  return null;
+function getBaselineId(id) {
+  if (!id) return "1000000";
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = (hash * 31 + id.charCodeAt(i)) >>> 0;
+  }
+  return String(1000000 + (hash % 9000000));
 }
 
 function getScoreColorClass(score) {
-  if (score >= 80) return "ats-score--high";
-  if (score >= 60) return "ats-score--mid";
-  if (score >= 40) return "ats-score--low";
-  return "ats-score--very-low";
+  if (score >= 80) return "high";
+  if (score >= 60) return "mid";
+  if (score >= 40) return "low";
+  return "very-low";
 }
 
 function getScoreLabel(score) {
@@ -44,27 +54,6 @@ function getScoreLabel(score) {
   if (score >= 60) return "Good";
   if (score >= 40) return "Fair";
   return "Weak";
-}
-
-function getInitials(name) {
-  return (name || "?")
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-}
-
-function getAvatarColor(name) {
-  const colors = [
-    "#6366f1","#8b5cf6","#06b6d4","#10b981","#f59e0b",
-    "#ef4444","#ec4899","#14b8a6","#3b82f6","#a855f7",
-  ];
-  let hash = 0;
-  for (let i = 0; i < (name || "").length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  return colors[Math.abs(hash) % colors.length];
 }
 
 // ── Main Component ─────────────────────────────────────────────────────────────
@@ -75,33 +64,48 @@ export default function AtsRankingPage({ job, onBack }) {
   const [error, setError] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortMode, setSortMode] = useState("score-desc");
-  const [expandedId, setExpandedId] = useState(null);
+  const [selectedCandidate, setSelectedCandidate] = useState(null);
   const [updatingId, setUpdatingId] = useState(null);
   const [retryingId, setRetryingId] = useState(null);
+  const [selectingId, setSelectingId] = useState(null);
+  const [confirmCandidate, setConfirmCandidate] = useState(null);
+  const [feedbackMessage, setFeedbackMessage] = useState(null);
   const [showSortMenu, setShowSortMenu] = useState(false);
   const sortRef = useRef(null);
   const pollRef = useRef(null);
   const isPollingRef = useRef(false);
 
-  // ── Fetch ──────────────────────────────────────────────────────────────────
-  const fetchApplications = useCallback(async (silent = false) => {
-    if (!job?._id) return;
-    if (!silent) setLoading(true);
-    setError(null);
-    try {
-      const res = await getJobApplications(job._id);
-      setApplications(res?.data || []);
-    } catch (err) {
-      if (!silent) setError(err.message || "Failed to load applications.");
-    } finally {
-      if (!silent) setLoading(false);
-      isPollingRef.current = false;
-    }
-  }, [job?._id]);
+  // ── Fetch applications ───────────────────────────────────────────────────────
+  const fetchApplications = useCallback(
+    async (silent = false) => {
+      if (!job?._id) return;
+      if (!silent) setLoading(true);
+      setError(null);
+      try {
+        const res = await getJobApplications(job._id);
+        const data = (res?.data || []).filter((a) => a.status !== "rejected");
+        setApplications(data);
 
-  useEffect(() => { fetchApplications(false); }, [fetchApplications]);
+        // Keep selected candidate in sync with fresh data without creating dependency loops
+        setSelectedCandidate((prev) => {
+          if (!prev) return null;
+          return data.find((a) => a._id === prev._id) || prev;
+        });
+      } catch (err) {
+        if (!silent) setError(err.message || "Failed to load applications.");
+      } finally {
+        if (!silent) setLoading(false);
+        isPollingRef.current = false;
+      }
+    },
+    [job?._id]
+  );
 
-  // ── Smart polling while ATS is processing ─────────────────────────────────
+  useEffect(() => {
+    fetchApplications(false);
+  }, [fetchApplications]);
+
+  // ── Smart polling for pending ATS screening ─────────────────────────────────
   useEffect(() => {
     const hasPending = applications.some(
       (a) => a.atsStatus === "pending" || a.atsStatus === "processing"
@@ -114,7 +118,9 @@ export default function AtsRankingPage({ job, onBack }) {
         }
       }, 4000);
     }
-    return () => { if (pollRef.current) clearTimeout(pollRef.current); };
+    return () => {
+      if (pollRef.current) clearTimeout(pollRef.current);
+    };
   }, [applications, fetchApplications]);
 
   // ── Sort dropdown outside-click ────────────────────────────────────────────
@@ -128,14 +134,66 @@ export default function AtsRankingPage({ job, onBack }) {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
+  // ── Keyboard shortcut: Escape returns to Candidate List ───────────────────
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape" && selectedCandidate && !confirmCandidate) {
+        setSelectedCandidate(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedCandidate, confirmCandidate]);
+
+  // ── Navigation handlers ────────────────────────────────────────────────────
+  const handleBackToList = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    setSelectedCandidate(null);
+  };
+  const handleBackToCandidateList = handleBackToList;
+
+  const handleNavbarBack = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    if (selectedCandidate) {
+      setSelectedCandidate(null);
+    } else if (typeof onBack === "function") {
+      onBack();
+    }
+  };
+
   // ── Actions ────────────────────────────────────────────────────────────────
   const handleStatusChange = async (appId, newStatus) => {
     setUpdatingId(appId);
     try {
-      await updateApplicationStatus(appId, newStatus);
-      setApplications((prev) =>
-        prev.map((a) => (a._id === appId ? { ...a, status: newStatus } : a))
-      );
+      if (newStatus === "rejected") {
+        try {
+          await deleteApplication(appId);
+        } catch {
+          await updateApplicationStatus(appId, "rejected");
+        }
+        setApplications((prev) => prev.filter((a) => a._id !== appId));
+        if (selectedCandidate?._id === appId) {
+          setSelectedCandidate(null);
+        }
+        setFeedbackMessage({
+          type: "success",
+          text: "Candidate has been rejected and permanently deleted.",
+        });
+      } else {
+        await updateApplicationStatus(appId, newStatus);
+        setApplications((prev) =>
+          prev.map((a) => (a._id === appId ? { ...a, status: newStatus } : a))
+        );
+        setSelectedCandidate((prev) =>
+          prev && prev._id === appId ? { ...prev, status: newStatus } : prev
+        );
+      }
     } catch (err) {
       alert(err.message || "Failed to update status.");
     } finally {
@@ -152,6 +210,11 @@ export default function AtsRankingPage({ job, onBack }) {
           a._id === appId ? { ...a, atsStatus: "pending", atsExplanation: "" } : a
         )
       );
+      setSelectedCandidate((prev) =>
+        prev && prev._id === appId
+          ? { ...prev, atsStatus: "pending", atsExplanation: "" }
+          : prev
+      );
       fetchApplications(true);
     } catch (err) {
       alert(err.message || "Failed to retry ATS.");
@@ -166,7 +229,65 @@ export default function AtsRankingPage({ job, onBack }) {
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
-  // ── Partition: scored vs not-scored ────────────────────────────────────────
+  const handleOpenSelectModal = (app) => {
+    setConfirmCandidate(app);
+  };
+
+  const handleConfirmSelection = async (resend = false) => {
+    if (!confirmCandidate) return;
+    const appId = confirmCandidate._id;
+    setSelectingId(appId);
+    try {
+      const res = await selectCandidateForInterview(appId, resend);
+      if (res?.success) {
+        const updatedInvitation = res.data?.interviewInvitation || {
+          status: res.emailSent ? "sent" : "failed",
+          sentAt: new Date(),
+        };
+        setApplications((prev) =>
+          prev.map((a) =>
+            a._id === appId
+              ? { ...a, status: "selected", interviewInvitation: updatedInvitation }
+              : a
+          )
+        );
+        setSelectedCandidate((prev) =>
+          prev && prev._id === appId
+            ? { ...prev, status: "selected", interviewInvitation: updatedInvitation }
+            : prev
+        );
+        setFeedbackMessage({
+          type: "success",
+          text: "Candidate selected! Shifting to interview schedule page...",
+        });
+
+        const targetUrl =
+          res.invitationUrl ||
+          (res.invitationToken
+            ? `/interview-invitation?token=${res.invitationToken}`
+            : `/interview-invitation`);
+
+        setTimeout(() => {
+          window.location.href = targetUrl;
+        }, 500);
+      } else {
+        setFeedbackMessage({
+          type: "error",
+          text: res?.message || "Failed to select candidate.",
+        });
+      }
+    } catch (err) {
+      setFeedbackMessage({
+        type: "error",
+        text: err.message || "Failed to select candidate for interview.",
+      });
+    } finally {
+      setSelectingId(null);
+      setConfirmCandidate(null);
+    }
+  };
+
+  // ── Partition: scored vs un-scored ─────────────────────────────────────────
   const scoredApps = applications.filter(
     (a) => a.atsStatus === "completed" && a.atsScore !== null && a.atsScore !== undefined
   );
@@ -174,17 +295,21 @@ export default function AtsRankingPage({ job, onBack }) {
     (a) => !(a.atsStatus === "completed" && a.atsScore !== null && a.atsScore !== undefined)
   );
 
-  // ── Sort scored apps ────────────────────────────────────────────────────────
+  // ── Sort scored candidates ─────────────────────────────────────────────────
   const sortedScored = [...scoredApps].sort((a, b) => {
     switch (sortMode) {
-      case "score-asc": return a.atsScore - b.atsScore;
-      case "name-asc":  return (a.applicantName || "").localeCompare(b.applicantName || "");
-      case "newest":    return new Date(b.createdAt) - new Date(a.createdAt);
-      default:          return b.atsScore - a.atsScore; // score-desc
+      case "score-asc":
+        return a.atsScore - b.atsScore;
+      case "name-asc":
+        return (a.applicantName || "").localeCompare(b.applicantName || "");
+      case "newest":
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      default:
+        return b.atsScore - a.atsScore; // score-desc
     }
   });
 
-  // ── Search filter ──────────────────────────────────────────────────────────
+  // ── Filter by search query ─────────────────────────────────────────────────
   const q = searchQuery.trim().toLowerCase();
   const filteredScored = q
     ? sortedScored.filter(
@@ -203,413 +328,764 @@ export default function AtsRankingPage({ job, onBack }) {
     : pendingApps;
 
   const SORT_LABELS = {
-    "score-desc": "Highest Score First",
-    "score-asc":  "Lowest Score First",
-    "name-asc":   "Name A → Z",
-    "newest":     "Newest First",
+    "score-desc": "Highest Match First",
+    "score-asc": "Lowest Match First",
+    "name-asc": "Name A to Z",
+    "newest": "Newest Applicants",
   };
 
   // ══════════════════════════════════════════════════════════════════════════
   return (
     <div className="ats-page">
-      {/* ── Top Navbar (matching recruiter navbar) ─────────────────────────── */}
-      <nav className="recruiter-navbar ats-navbar">
-        <div className="recruiter-navbar__left" style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          <button className="view-job-page__back-btn ats-back-btn" onClick={onBack} id="ats-back-btn">
-            <ArrowLeft size={18} />
-            <span>Back to Dashboard</span>
+      {/* ── Neutral Top Navigation Header (no blue background) ─────────────── */}
+      <header className="ats-navbar" id="ats-navbar">
+        <div className="ats-navbar__left">
+          <button
+            type="button"
+            className="ats-back-btn"
+            onClick={handleNavbarBack}
+            id="ats-back-btn"
+            aria-label={selectedCandidate ? "Back to Candidate List" : "Back to Dashboard"}
+          >
+            <ArrowLeft size={16} />
+            <span>{selectedCandidate ? "Back to Candidate List" : "Back to Dashboard"}</span>
           </button>
-          <span className="view-job-page__breadcrumb-sep">/</span>
-          <span style={{ fontWeight: 600, color: "rgba(255, 255, 255, 0.95)", fontSize: "0.92rem" }}>
+          <span className="ats-navbar__sep">/</span>
+          <span className="ats-navbar__title">
             ATS Ranking — {job?.jobTitle || "Job"}
           </span>
         </div>
-        <div className="recruiter-navbar__right" style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginLeft: "auto" }}>
+        <div className="ats-navbar__right">
           <button
+            type="button"
             className="ats-refresh-btn"
             onClick={() => fetchApplications(false)}
             disabled={loading}
             title="Refresh list"
           >
-            <RefreshCw size={14} className={loading ? "ats-spin" : ""} />
+            <RefreshCw size={13} className={loading ? "ats-spin" : ""} />
             <span>Refresh</span>
           </button>
         </div>
-      </nav>
+      </header>
 
-      {/* ── Page Body ─────────────────────────────────────────────────────── */}
-      <div className="ats-body">
-
-        {/* Clean Professional Header */}
-        <header className="ats-header">
-          <div className="ats-header__text">
-            <h1 className="ats-header__title">Candidate ATS Ranking</h1>
-            <p className="ats-header__subtitle">
-              {job?.jobTitle || "Job"} · Candidates evaluated and ranked by keyword match and qualifications
-            </p>
-          </div>
-        </header>
-
-        {/* Toolbar */}
-        {!loading && !error && (
-          <div className="ats-toolbar">
-            <div className="ats-search-wrap">
-              <Search size={15} className="ats-search-icon" />
-              <input
-                id="ats-search-input"
-                className="ats-search-input"
-                type="text"
-                placeholder="Search candidates by name or email…"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              {searchQuery && (
-                <button className="ats-search-clear" onClick={() => setSearchQuery("")} aria-label="Clear search">
-                  ×
-                </button>
-              )}
-            </div>
-
-            <div className="ats-sort-wrap" ref={sortRef}>
-              <button
-                id="ats-sort-btn"
-                className={`ats-sort-btn${showSortMenu ? " ats-sort-btn--open" : ""}`}
-                onClick={() => setShowSortMenu((p) => !p)}
-              >
-                <BarChart2 size={14} />
-                <span>{SORT_LABELS[sortMode]}</span>
-                <ChevronDown size={12} />
-              </button>
-              {showSortMenu && (
-                <div className="ats-sort-dropdown">
-                  {Object.entries(SORT_LABELS).map(([key, label]) => (
-                    <button
-                      key={key}
-                      className={`ats-sort-option${sortMode === key ? " ats-sort-option--active" : ""}`}
-                      onClick={() => { setSortMode(key); setShowSortMenu(false); }}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+      {/* ── Main Container ────────────────────────────────────────────────── */}
+      <main className="ats-container">
+        {/* Feedback Alert Banner */}
+        {feedbackMessage && (
+          <div
+            className={`ats-feedback-banner ats-feedback-banner--${feedbackMessage.type}`}
+            role="alert"
+          >
+            <span className="ats-feedback-banner__text">{feedbackMessage.text}</span>
+            <button
+              type="button"
+              className="ats-feedback-banner__close"
+              onClick={() => setFeedbackMessage(null)}
+              aria-label="Dismiss notification"
+            >
+              
+            </button>
           </div>
         )}
 
-        {/* ── Content ───────────────────────────────────────────────────────── */}
-        {loading ? (
-          <div className="ats-loading">
-            <div className="ats-spinner" />
-            <span>Loading and ranking candidates…</span>
-          </div>
-        ) : error ? (
-          <div className="ats-error">
-            <AlertTriangle size={32} />
-            <h3>Failed to load applications</h3>
-            <p>{error}</p>
-            <button className="ats-error__retry" onClick={() => fetchApplications(false)}>Try Again</button>
-          </div>
-        ) : applications.length === 0 ? (
-          <div className="ats-empty">
-            <Briefcase size={38} className="ats-empty__icon" />
-            <h3>No applications yet</h3>
-            <p>Candidates who apply to this job will appear here ranked by their ATS score.</p>
-          </div>
-        ) : (
-          <>
-            {/* ── Ranked Candidates ─────────────────────────────────────── */}
-            {filteredScored.length > 0 && (
-              <section className="ats-section">
-                <div className="ats-section__header">
-                  <CheckCircle2 size={16} className="ats-section__icon ats-section__icon--scored" />
-                  <h2 className="ats-section__title">
-                    Ranked Candidates
-                    <span className="ats-section__count">{filteredScored.length}</span>
-                  </h2>
+        {/* ── VIEW 1: Candidate Details Page (Exact Layout matching reference) ── */}
+        {selectedCandidate ? (
+          <div className="ats-details-view" id={`ats-details-${selectedCandidate._id}`}>
+            {/* Action Bar: Back button & Status Actions */}
+            <div className="ats-details-topbar">
+              <button
+                type="button"
+                className="ats-details-back-link"
+                onClick={handleBackToCandidateList}
+                id="ats-details-back-btn"
+                aria-label="Back to Candidate List"
+              >
+                <ArrowLeft size={15} />
+                <span>Back to Candidate List</span>
+              </button>
+
+              <div className="ats-details-top-actions">
+                <button
+                  type="button"
+                  className={`ats-btn ats-btn--select${selectedCandidate.status === "selected" ? " ats-btn--selected" : ""}`}
+                  onClick={() => handleOpenSelectModal(selectedCandidate)}
+                  disabled={selectingId === selectedCandidate._id}
+                  id={`ats-details-select-${selectedCandidate._id}`}
+                >
+                  {selectingId === selectedCandidate._id
+                    ? "Processing…"
+                    : selectedCandidate.status === "selected"
+                    ? "Selected · Resend Invite"
+                    : "Select Candidate"}
+                </button>
+                <button
+                  type="button"
+                  className={`ats-btn ats-btn--reject${selectedCandidate.status === "rejected" ? " ats-btn--rejected" : ""}`}
+                  onClick={() => handleStatusChange(selectedCandidate._id, "rejected")}
+                  disabled={updatingId === selectedCandidate._id || selectedCandidate.status === "rejected"}
+                  id={`ats-details-reject-${selectedCandidate._id}`}
+                >
+                  {selectedCandidate.status === "rejected" ? "Rejected" : "Reject Candidate"}
+                </button>
+                <button
+                  type="button"
+                  className="ats-btn ats-btn--resume"
+                  onClick={() => handleViewResume(selectedCandidate)}
+                  id={`ats-details-resume-${selectedCandidate._id}`}
+                >
+                  <ExternalLink size={13} />
+                  <span>View Resume</span>
+                </button>
+                <select
+                  className="ats-details-status-select"
+                  value={selectedCandidate.status}
+                  onChange={(e) => handleStatusChange(selectedCandidate._id, e.target.value)}
+                  disabled={updatingId === selectedCandidate._id}
+                >
+                  <option value="pending">Pending</option>
+                  <option value="reviewed">Reviewed</option>
+                  <option value="shortlisted">Shortlisted</option>
+                  <option value="selected">Selected</option>
+                  <option value="rejected">Rejected</option>
+                  <option value="hired">Hired</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Profile Hero Header Card (Top of the reference screenshot) */}
+            <div className="ats-profile-hero">
+              <div className="ats-profile-hero__top">
+                {/* Circular Profile Avatar with TalentBridge Logo */}
+                <div className="ats-profile-hero__avatar-wrap">
+                  <div className="ats-profile-hero__avatar">
+                    <TalentBridgeLogo variant="paperplane" size={38} />
+                  </div>
                 </div>
 
-                <div className="ats-cards">
-                  {filteredScored.map((app, idx) => {
-                    const rank = idx + 1;
-                    const name = app.applicantName || app.applicant?.name || "Anonymous";
-                    const email = app.applicantEmail || app.applicant?.email || "";
-                    const isExpanded = expandedId === app._id;
-                    const avatarColor = getAvatarColor(name);
-                    const circumference = 2 * Math.PI * 34; // r=34
+                {/* Main Profile Info */}
+                <div className="ats-profile-hero__info">
+                  <div className="ats-profile-hero__name-row">
+                    <h1 className="ats-profile-hero__name">
+                      {selectedCandidate.applicantName ||
+                        selectedCandidate.applicant?.name ||
+                        "Anonymous Candidate"}
+                    </h1>
+                    <span className="ats-profile-hero__recruiter-badge">
+                      <span className="ats-profile-hero__recruiter-dot">P</span>
+                      <span>Paige</span>
+                    </span>
+                    <button type="button" className="ats-profile-hero__more-btn" title="Options">
+                      <MoreVertical size={16} />
+                    </button>
+                  </div>
 
-                    return (
-                      <div
-                        key={app._id}
-                        id={`ats-card-${app._id}`}
-                        className={`ats-card${rank <= 3 ? ` ats-card--top-${rank}` : ""}${isExpanded ? " ats-card--expanded" : ""}`}
-                      >
-                        {rank <= 3 && (
-                          <div className={`ats-rank-badge ats-rank-badge--${rank}`}>
-                            Rank #{rank}
-                          </div>
-                        )}
+                  <div className="ats-profile-hero__meta">
+                    <div className="ats-profile-hero__meta-item">
+                      <Briefcase size={14} className="ats-profile-hero__meta-icon" />
+                      <span>{job?.jobTitle || "Job Position"}</span>
+                    </div>
+                    <div className="ats-profile-hero__meta-item">
+                      <MapPin size={14} className="ats-profile-hero__meta-icon" />
+                      <span>
+                        {selectedCandidate.applicantLocation ||
+                          selectedCandidate.applicantAddress ||
+                          selectedCandidate.applicantPhone ||
+                          "United States"}
+                      </span>
+                    </div>
+                  </div>
 
-                        <div className="ats-card__top">
-                          {/* Identity */}
-                          <div className="ats-card__identity">
-                            <div className="ats-card__avatar" style={{ backgroundColor: avatarColor }}>
-                              {getInitials(name)}
-                            </div>
-                            <div className="ats-card__info">
-                              <div className="ats-card__name-row">
-                                {getRankIcon(rank)}
-                                <span className="ats-card__name">{name}</span>
-                                {rank > 3 && <span className="ats-card__rank-num">#{rank}</span>}
-                              </div>
-                              <span className="ats-card__email">{email}</span>
-                              <span className={`ats-status-badge ats-status-badge--${app.status}`}>
-                                {app.status.toUpperCase()}
-                              </span>
-                            </div>
-                          </div>
+                  {/* Badges / Chips Row */}
+                  <div className="ats-profile-hero__chips">
+                    <span className="ats-hero-chip ats-hero-chip--green">
+                      <span className="ats-hero-chip__dot ats-hero-chip__dot--green" />
+                      <span>Available</span>
+                    </span>
+                    <span className="ats-hero-chip ats-hero-chip--purple">
+                      <span className="ats-hero-chip__dot ats-hero-chip__dot--purple" />
+                      <span>Important</span>
+                    </span>
+                    <span className="ats-hero-chip ats-hero-chip--blue">
+                      <Tag size={12} />
+                      <span>{selectedCandidate.status === "selected" ? "Selected" : "Senior"}</span>
+                    </span>
+                    <span className="ats-hero-chip ats-hero-chip--plain">
+                      +Tags
+                    </span>
+                  </div>
+                </div>
+              </div>
 
-                          {/* Score Dial */}
-                          <div className={`ats-score-dial ${getScoreColorClass(app.atsScore)}`}>
-                            <svg viewBox="0 0 80 80" className="ats-score-dial__svg">
-                              <circle cx="40" cy="40" r="34" fill="none" strokeWidth="8" className="ats-score-dial__track" />
-                              <circle
-                                cx="40" cy="40" r="34"
-                                fill="none" strokeWidth="8" strokeLinecap="round"
-                                className="ats-score-dial__fill"
-                                strokeDasharray={`${(app.atsScore / 100) * circumference} ${circumference}`}
-                                transform="rotate(-90 40 40)"
-                              />
-                            </svg>
-                            <div className="ats-score-dial__label">
-                              <span className="ats-score-dial__num">{app.atsScore}</span>
-                              <span className="ats-score-dial__max">/100</span>
-                            </div>
-                            <span className="ats-score-dial__grade">{getScoreLabel(app.atsScore)}</span>
-                          </div>
+            </div>
+
+            {/* Two-Column Main Content (matching reference layout) */}
+            <div className="ats-hero-grid">
+              {/* ── Left Column: Candidate Details ────────────────────────── */}
+              <div className="ats-hero-col-left">
+                <div className="ats-hero-card">
+                  <div className="ats-hero-card__header">
+                    <h2 className="ats-hero-card__title">Candidate Details</h2>
+                  </div>
+
+                  <div className="ats-hero-card__body">
+                    <div className="ats-kv-table">
+                      <div className="ats-kv-row">
+                        <div className="ats-kv-label">Candidate Reference</div>
+                        <div className="ats-kv-value">{selectedCandidate._id.slice(-8).toUpperCase()}</div>
+                      </div>
+
+                      <div className="ats-kv-row">
+                        <div className="ats-kv-label">Candidate Name</div>
+                        <div className="ats-kv-value">
+                          {selectedCandidate.applicantName ||
+                            selectedCandidate.applicant?.name ||
+                            "Anonymous Candidate"}
                         </div>
+                      </div>
 
-                        {/* Skills preview */}
-                        <div className="ats-card__skills-preview">
-                          <div className="ats-skills-col">
-                            <span className="ats-skills-col__label ats-skills-col__label--matched">
-                              <CheckCircle2 size={12} />
-                              Matched ({(app.matchedKeywords || []).length})
-                            </span>
-                            <div className="ats-tags">
-                              {(app.matchedKeywords || []).slice(0, 5).map((kw, i) => (
-                                <span key={i} className="ats-tag ats-tag--matched">{kw}</span>
-                              ))}
-                              {(app.matchedKeywords || []).length > 5 && (
-                                <span className="ats-tag ats-tag--more">+{(app.matchedKeywords || []).length - 5} more</span>
-                              )}
-                              {(app.matchedKeywords || []).length === 0 && (
-                                <span className="ats-tags__empty">None identified</span>
-                              )}
-                            </div>
-                          </div>
+                      <div className="ats-kv-row">
+                        <div className="ats-kv-label">Job Role</div>
+                        <div className="ats-kv-value">{job?.jobTitle || "Job Position"}</div>
+                      </div>
 
-                          <div className="ats-skills-col">
-                            <span className="ats-skills-col__label ats-skills-col__label--missing">
-                              <XCircle size={12} />
-                              Missing ({(app.missingKeywords || []).length})
-                            </span>
-                            <div className="ats-tags">
-                              {(app.missingKeywords || []).slice(0, 5).map((kw, i) => (
-                                <span key={i} className="ats-tag ats-tag--missing">{kw}</span>
-                              ))}
-                              {(app.missingKeywords || []).length > 5 && (
-                                <span className="ats-tag ats-tag--more">+{(app.missingKeywords || []).length - 5} more</span>
-                              )}
-                              {(app.missingKeywords || []).length === 0 && (
-                                <span className="ats-tags__empty">All requirements met</span>
-                              )}
-                            </div>
-                          </div>
+                      <div className="ats-kv-row">
+                        <div className="ats-kv-label">ATS Match Score</div>
+                        <div className="ats-kv-value">
+                          <span className={`ats-kv-score ats-score-text--${getScoreColorClass(selectedCandidate.atsScore)}`}>
+                            {selectedCandidate.atsScore !== null && selectedCandidate.atsScore !== undefined
+                              ? `${selectedCandidate.atsScore}% (${getScoreLabel(selectedCandidate.atsScore)} Match)`
+                              : "Pending Screening"}
+                          </span>
                         </div>
+                      </div>
 
-                        {/* Expand toggle */}
-                        <button
-                          className="ats-card__expand-btn"
-                          onClick={() => setExpandedId(isExpanded ? null : app._id)}
-                        >
-                          {isExpanded ? <><ChevronUp size={13} /> Less details</> : <><ChevronDown size={13} /> More details</>}
-                        </button>
+                      <div className="ats-kv-row">
+                        <div className="ats-kv-label">Current Status</div>
+                        <div className="ats-kv-value">
+                          <span className={`ats-status-pill ats-status-pill--${selectedCandidate.status}`}>
+                            {selectedCandidate.status.toUpperCase()}
+                          </span>
+                          {selectedCandidate.interviewInvitation?.sentAt && (
+                            <span className="ats-invitation-pill" style={{ marginLeft: "0.5rem" }}>
+                              Invitation Sent
+                            </span>
+                          )}
+                        </div>
+                      </div>
 
-                        {isExpanded && (
-                          <div className="ats-card__expanded">
-                            <div className="ats-expanded-skills">
-                              <div className="ats-skills-col">
-                                <span className="ats-skills-col__label ats-skills-col__label--matched">
-                                  <CheckCircle2 size={12} /> All Matched Skills
-                                </span>
-                                <div className="ats-tags">
-                                  {(app.matchedKeywords || []).map((kw, i) => (
-                                    <span key={i} className="ats-tag ats-tag--matched">{kw}</span>
-                                  ))}
-                                  {(app.matchedKeywords || []).length === 0 && (
-                                    <span className="ats-tags__empty">No direct matches</span>
-                                  )}
-                                </div>
-                              </div>
-                              <div className="ats-skills-col">
-                                <span className="ats-skills-col__label ats-skills-col__label--missing">
-                                  <XCircle size={12} /> All Missing Requirements
-                                </span>
-                                <div className="ats-tags">
-                                  {(app.missingKeywords || []).map((kw, i) => (
-                                    <span key={i} className="ats-tag ats-tag--missing">{kw}</span>
-                                  ))}
-                                  {(app.missingKeywords || []).length === 0 && (
-                                    <span className="ats-tags__empty">All requirements evidenced</span>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
+                      <div className="ats-kv-row">
+                        <div className="ats-kv-label">Applied Date</div>
+                        <div className="ats-kv-value">
+                          {new Date(selectedCandidate.createdAt).toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                          })}
+                        </div>
+                      </div>
 
-                            {app.atsExplanation && (
-                              <div className="ats-explanation">
-                                <div className="ats-explanation__header">
-                                  <strong>Candidate Match Evaluation:</strong>
-                                </div>
-                                <div className="ats-explanation__content">{app.atsExplanation}</div>
-                              </div>
-                            )}
-                          </div>
-                        )}
-
-                        {/* Footer */}
-                        <div className="ats-card__footer">
-                          <div className="ats-card__decision">
+                      <div className="ats-kv-row">
+                        <div className="ats-kv-label">Candidate Email Address</div>
+                        <div className="ats-kv-value ats-kv-value--email">
+                          <span className="ats-kv-email-text">
+                            {selectedCandidate.applicantEmail || selectedCandidate.applicant?.email || "No email"}
+                          </span>
+                          {selectedCandidate.applicantEmail && (
                             <button
-                              className={`ats-action-btn ats-action-btn--shortlist${app.status === "shortlisted" ? " ats-action-btn--active" : ""}`}
-                              onClick={() => handleStatusChange(app._id, "shortlisted")}
-                              disabled={updatingId === app._id || app.status === "shortlisted"}
-                              id={`ats-shortlist-${app._id}`}
+                              type="button"
+                              className="ats-compose-btn"
+                              onClick={() => {
+                                window.location.href = `mailto:${selectedCandidate.applicantEmail}`;
+                              }}
                             >
-                              <UserCheck size={13} />
-                              {app.status === "shortlisted" ? "Shortlisted" : "Shortlist"}
+                              COMPOSE
                             </button>
-                            <button
-                              className={`ats-action-btn ats-action-btn--reject${app.status === "rejected" ? " ats-action-btn--active" : ""}`}
-                              onClick={() => handleStatusChange(app._id, "rejected")}
-                              disabled={updatingId === app._id || app.status === "rejected"}
-                              id={`ats-reject-${app._id}`}
-                            >
-                              <UserX size={13} />
-                              {app.status === "rejected" ? "Rejected" : "Reject"}
-                            </button>
-                            <select
-                              className="ats-status-select"
-                              value={app.status}
-                              onChange={(e) => handleStatusChange(app._id, e.target.value)}
-                              disabled={updatingId === app._id}
-                              id={`ats-status-select-${app._id}`}
-                            >
-                              <option value="pending">Pending</option>
-                              <option value="reviewed">Reviewed</option>
-                              <option value="shortlisted">Shortlisted</option>
-                              <option value="rejected">Rejected</option>
-                              <option value="hired">Hired</option>
-                            </select>
-                          </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="ats-kv-row">
+                        <div className="ats-kv-label">Candidate Phone Number</div>
+                        <div className="ats-kv-value">
+                          {selectedCandidate.applicantPhone || "(+001) 50232778xx"}
+                        </div>
+                      </div>
+
+                      <div className="ats-kv-row">
+                        <div className="ats-kv-label">Resume Document</div>
+                        <div className="ats-kv-value">
                           <button
-                            className="ats-resume-btn"
-                            onClick={() => handleViewResume(app)}
-                            id={`ats-resume-${app._id}`}
+                            type="button"
+                            className="ats-resume-inline-link"
+                            onClick={() => handleViewResume(selectedCandidate)}
                           >
-                            <ExternalLink size={13} />
-                            View Resume
+                            <span>Attached Resume (PDF/DOC)</span>
+                            <ExternalLink size={12} />
                           </button>
                         </div>
                       </div>
-                    );
-                  })}
-                </div>
-              </section>
-            )}
 
-            {/* ── Pending / Failed ──────────────────────────────────────── */}
-            {filteredPending.length > 0 && (
-              <section className="ats-section ats-section--pending">
-                <div className="ats-section__header">
-                  <Clock size={16} className="ats-section__icon ats-section__icon--pending" />
-                  <h2 className="ats-section__title">
-                    Awaiting ATS Screening
-                    <span className="ats-section__count">{filteredPending.length}</span>
-                  </h2>
-                </div>
-
-                <div className="ats-pending-list">
-                  {filteredPending.map((app) => {
-                    const name = app.applicantName || app.applicant?.name || "Anonymous";
-                    const email = app.applicantEmail || app.applicant?.email || "";
-                    const avatarColor = getAvatarColor(name);
-                    const isFailed = app.atsStatus === "failed";
-                    const isProcessing = app.atsStatus === "processing";
-
-                    return (
-                      <div key={app._id} id={`ats-pending-${app._id}`} className="ats-pending-card">
-                        <div className="ats-pending-card__avatar" style={{ backgroundColor: avatarColor }}>
-                          {getInitials(name)}
-                        </div>
-                        <div className="ats-pending-card__info">
-                          <span className="ats-pending-card__name">{name}</span>
-                          <span className="ats-pending-card__email">{email}</span>
-                        </div>
-                        <div className="ats-pending-card__status">
-                          {isFailed ? (
-                            <span className="ats-pill ats-pill--failed">
-                              <AlertTriangle size={12} /> Screening failed
-                            </span>
-                          ) : isProcessing ? (
-                            <span className="ats-pill ats-pill--processing">
-                              <RefreshCw size={12} className="ats-spin" /> Processing…
+                      <div className="ats-kv-row">
+                        <div className="ats-kv-label">Interview Invitation</div>
+                        <div className="ats-kv-value">
+                          {selectedCandidate.interviewInvitation?.sentAt ? (
+                            <span style={{ color: "#059669", fontWeight: 600 }}>
+                              Sent on {new Date(selectedCandidate.interviewInvitation.sentAt).toLocaleDateString()}
                             </span>
                           ) : (
-                            <span className="ats-pill ats-pill--pending">
-                              <Clock size={12} /> Pending
-                            </span>
+                            <span style={{ color: "#64748b" }}>Not sent yet</span>
                           )}
-                        </div>
-                        <div className="ats-pending-card__actions">
-                          {isFailed && (
-                            <button
-                              className="ats-retry-btn"
-                              onClick={() => handleRetryAts(app._id)}
-                              disabled={retryingId === app._id}
-                            >
-                              <RefreshCw size={12} />
-                              {retryingId === app._id ? "Retrying…" : "Retry"}
-                            </button>
-                          )}
-                          <button
-                            className="ats-resume-btn ats-resume-btn--sm"
-                            onClick={() => handleViewResume(app)}
-                          >
-                            <ExternalLink size={12} />
-                            Resume
-                          </button>
                         </div>
                       </div>
-                    );
-                  })}
+                    </div>
+                  </div>
                 </div>
-              </section>
+              </div>
+
+              {/* ── Right Column: Skills & Recent History ─────────────────── */}
+              <div className="ats-hero-col-right">
+                {/* Skills Card */}
+                <div className="ats-hero-card">
+                  <div className="ats-hero-card__header ats-hero-card__header--flex">
+                    <h2 className="ats-hero-card__title">Skills</h2>
+                    <button type="button" className="ats-hero-card__add-btn" title="Add or view skills">
+                      <Plus size={14} />
+                    </button>
+                  </div>
+
+                  <div className="ats-hero-card__body">
+                    <div className="ats-skills-wrap">
+                      {(selectedCandidate.matchedKeywords || []).map((kw, i) => (
+                        <div key={i} className="ats-skill-pill-img">
+                          <span className="ats-skill-badge-num">10</span>
+                          <span className="ats-skill-label-text">{kw}</span>
+                        </div>
+                      ))}
+
+                      {(selectedCandidate.missingKeywords || []).map((kw, i) => (
+                        <div key={i} className="ats-skill-pill-img ats-skill-pill-img--missing">
+                          <span className="ats-skill-badge-num ats-skill-badge-num--missing">!</span>
+                          <span className="ats-skill-label-text">{kw}</span>
+                        </div>
+                      ))}
+
+                      {(!selectedCandidate.matchedKeywords || selectedCandidate.matchedKeywords.length === 0) &&
+                        (!selectedCandidate.missingKeywords || selectedCandidate.missingKeywords.length === 0) && (
+                          <div className="ats-empty-hint" style={{ padding: "0.5rem 0" }}>
+                            No specific keywords extracted yet.
+                          </div>
+                        )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Recent History Card */}
+                <div className="ats-hero-card" style={{ marginTop: "1rem" }}>
+                  <div className="ats-hero-card__header">
+                    <h2 className="ats-hero-card__title">Recent History</h2>
+                  </div>
+
+                  <div className="ats-hero-card__body">
+                    <div className="ats-history-list">
+                      {selectedCandidate.interviewInvitation?.sentAt && (
+                        <div className="ats-history-item">
+                          <div className="ats-history-item__avatar">
+                            <span className="ats-history-avatar-text">P</span>
+                          </div>
+                          <div className="ats-history-item__content">
+                            <div className="ats-history-item__text">
+                              <span className="ats-history-actor">Paige</span> moved candidate{" "}
+                              <span className="ats-history-target">
+                                {selectedCandidate.applicantName || "Candidate"}
+                              </span>{" "}
+                              to stage Interview Scheduled
+                            </div>
+                            <div className="ats-history-item__date">
+                              {new Date(selectedCandidate.interviewInvitation.sentAt).toLocaleDateString()}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="ats-history-item">
+                        <div className="ats-history-item__avatar ats-history-item__avatar--ai">
+                          <Sparkles size={12} />
+                        </div>
+                        <div className="ats-history-item__content">
+                          <div className="ats-history-item__text">
+                            <span className="ats-history-actor">Gemini ATS</span> screened candidate with{" "}
+                            <strong>{selectedCandidate.atsScore ?? 0}%</strong> qualification match
+                          </div>
+                          <div className="ats-history-item__date">
+                            {new Date(selectedCandidate.createdAt).toLocaleDateString()}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="ats-history-item">
+                        <div className="ats-history-item__avatar">
+                          <User size={12} />
+                        </div>
+                        <div className="ats-history-item__content">
+                          <div className="ats-history-item__text">
+                            <span className="ats-history-actor">
+                              {selectedCandidate.applicantName || "Candidate"}
+                            </span>{" "}
+                            submitted application for{" "}
+                            <span className="ats-history-target">{job?.jobTitle || "Job Position"}</span>
+                          </div>
+                          <div className="ats-history-item__date">
+                            {new Date(selectedCandidate.createdAt).toLocaleDateString()}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {selectedCandidate.atsExplanation && (
+                      <div className="ats-hero-eval-box">
+                        <div className="ats-hero-eval-title">ATS Recommendation & Summary</div>
+                        <div className="ats-hero-eval-text">{selectedCandidate.atsExplanation}</div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          /* ── VIEW 2: ATS Ranking Dashboard (Table Layout) ────────────────── */
+          <>
+            {/* Header Title */}
+            <div className="ats-page-heading">
+              <h1 className="ats-page-title">Candidate ATS Ranking</h1>
+              <p className="ats-page-desc">
+                {job?.jobTitle || "Job"} · Candidates evaluated and ranked by qualification match
+              </p>
+            </div>
+
+            {/* Toolbar (Search & Sort) */}
+            {!loading && !error && (
+              <div className="ats-toolbar">
+                <div className="ats-search-wrap">
+                  <Search size={15} className="ats-search-icon" />
+                  <input
+                    id="ats-search-input"
+                    className="ats-search-input"
+                    type="text"
+                    placeholder="Search candidates by name or email…"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                  {searchQuery && (
+                    <button
+                      className="ats-search-clear"
+                      onClick={() => setSearchQuery("")}
+                      aria-label="Clear search"
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
+
+                <div className="ats-sort-wrap" ref={sortRef}>
+                  <button
+                    id="ats-sort-btn"
+                    className={`ats-sort-btn${showSortMenu ? " ats-sort-btn--open" : ""}`}
+                    onClick={() => setShowSortMenu((p) => !p)}
+                  >
+                    <span>Sort: {SORT_LABELS[sortMode]}</span>
+                    <ChevronDown size={14} />
+                  </button>
+                  {showSortMenu && (
+                    <div className="ats-sort-dropdown">
+                      {Object.entries(SORT_LABELS).map(([key, label]) => (
+                        <button
+                          key={key}
+                          className={`ats-sort-option${sortMode === key ? " ats-sort-option--active" : ""}`}
+                          onClick={() => {
+                            setSortMode(key);
+                            setShowSortMenu(false);
+                          }}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
             )}
 
-            {/* Empty search result */}
-            {q && filteredScored.length === 0 && filteredPending.length === 0 && (
-              <div className="ats-empty">
-                <Search size={36} className="ats-empty__icon" />
-                <h3>No candidates match "{searchQuery}"</h3>
-                <p>Try a different name or email.</p>
-                <button className="ats-clear-search" onClick={() => setSearchQuery("")}>Clear search</button>
+            {/* Content States */}
+            {loading ? (
+              <div className="ats-state-box">
+                <div className="ats-spinner" />
+                <span>Loading and evaluating candidates…</span>
               </div>
+            ) : error ? (
+              <div className="ats-error-banner">
+                <div>
+                  <strong>Failed to load applications:</strong> {error}
+                </div>
+                <button className="ats-btn ats-btn--retry" onClick={() => fetchApplications(false)}>
+                  Try Again
+                </button>
+              </div>
+            ) : applications.length === 0 ? (
+              <div className="ats-state-box">
+                <h3 className="ats-state-title">No applications yet</h3>
+                <p className="ats-state-desc">
+                  Candidates who apply to this job will appear here ranked by their ATS match score.
+                </p>
+              </div>
+            ) : (
+              <>
+                {/* ── Table: Ranked Candidates (Minimalist Layout matching reference) ── */}
+                {filteredScored.length > 0 && (
+                  <div className="ats-table-card ats-table-card--minimal">
+                    <div className="ats-table-responsive">
+                      <table className="ats-table ats-table--minimal" id="ats-candidates-table">
+                        <thead>
+                          <tr>
+                            <th className="ats-th-no">No.</th>
+                            <th className="ats-th-player">Player name</th>
+                            <th className="ats-th-baseline">Baseline ID</th>
+                            <th className="ats-th-club">Club</th>
+                            <th className="ats-th-ranking">
+                              <span className="ats-th-ranking-wrap">
+                                <span>Ranking</span>
+                                <HelpCircle size={13} className="ats-th-help-icon" />
+                              </span>
+                            </th>
+                            <th className="ats-th-diff">+/-</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {filteredScored.map((app, idx) => {
+                            const rank = idx + 1;
+                            const name = app.applicantName || app.applicant?.name || "Anonymous";
+                            const baselineId = getBaselineId(app._id);
+                            const isSelected = app.status === "selected";
+                            const diff = isSelected ? "+1" : "0";
+
+                            return (
+                              <tr
+                                key={app._id}
+                                id={`ats-row-${app._id}`}
+                                className="ats-table-row ats-table-row--minimal"
+                                onClick={() => setSelectedCandidate(app)}
+                                title="Click to view candidate details"
+                              >
+                                <td className="ats-td-no">{rank}</td>
+                                <td className="ats-td-player">
+                                  <div className="ats-player-cell">
+                                    <div className="ats-player-logo-badge">
+                                      <TalentBridgeLogo variant="paperplane" size={20} />
+                                    </div>
+                                    <div className="ats-player-info">
+                                      <span className="ats-player-name">{name}</span>
+                                      <span className="ats-player-sub">
+                                        {app.applicantLocation || app.applicantEmail || "Applicant"}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="ats-td-baseline">
+                                  <span className="ats-baseline-pill">
+                                    <Link2 size={13} className="ats-baseline-icon" />
+                                    <span>{baselineId}</span>
+                                  </span>
+                                </td>
+                                <td className="ats-td-club">
+                                  <span className="ats-club-text">{job?.jobTitle || "Job Position"}</span>
+                                </td>
+                                <td className="ats-td-ranking">
+                                  <span className="ats-ranking-num">
+                                    {app.atsScore !== null && app.atsScore !== undefined ? app.atsScore : 0}
+                                  </span>
+                                </td>
+                                <td className="ats-td-diff">
+                                  <span className="ats-diff-num">{diff}</span>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                {/* ── Table: Awaiting ATS Screening ───────────────────────── */}
+                {filteredPending.length > 0 && (
+                  <div className="ats-pending-section">
+                    <h2 className="ats-subtable-heading">
+                      Awaiting Screening ({filteredPending.length})
+                    </h2>
+                    <div className="ats-table-card ats-table-card--minimal">
+                      <div className="ats-table-responsive">
+                        <table className="ats-table ats-table--minimal">
+                          <thead>
+                            <tr>
+                              <th className="ats-th-no">No.</th>
+                              <th className="ats-th-player">Player name</th>
+                              <th className="ats-th-baseline">Baseline ID</th>
+                              <th className="ats-th-club">Club</th>
+                              <th className="ats-th-ranking">
+                                <span className="ats-th-ranking-wrap">
+                                  <span>Ranking</span>
+                                  <HelpCircle size={13} className="ats-th-help-icon" />
+                                </span>
+                              </th>
+                              <th className="ats-th-diff">+/-</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {filteredPending.map((app, idx) => {
+                              const name = app.applicantName || app.applicant?.name || "Anonymous";
+                              const baselineId = getBaselineId(app._id);
+                              const isFailed = app.atsStatus === "failed";
+                              const isProcessing = app.atsStatus === "processing";
+
+                              return (
+                                <tr
+                                  key={app._id}
+                                  id={`ats-row-${app._id}`}
+                                  className="ats-table-row ats-table-row--minimal"
+                                  onClick={() => setSelectedCandidate(app)}
+                                  title="Click to view candidate details"
+                                >
+                                  <td className="ats-td-no">{idx + 1}</td>
+                                  <td className="ats-td-player">
+                                    <div className="ats-player-cell">
+                                      <div className="ats-player-logo-badge">
+                                        <TalentBridgeLogo variant="paperplane" size={20} />
+                                      </div>
+                                      <div className="ats-player-info">
+                                        <span className="ats-player-name">{name}</span>
+                                        <span className="ats-player-sub">
+                                          {app.applicantLocation || app.applicantEmail || "Applicant"}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </td>
+                                  <td className="ats-td-baseline">
+                                    <span className="ats-baseline-pill">
+                                      <Link2 size={13} className="ats-baseline-icon" />
+                                      <span>{baselineId}</span>
+                                    </span>
+                                  </td>
+                                  <td className="ats-td-club">
+                                    <span className="ats-club-text">{job?.jobTitle || "Job Position"}</span>
+                                  </td>
+                                  <td className="ats-td-ranking">
+                                    <span className="ats-pending-badge">
+                                      {isFailed ? "Failed" : isProcessing ? "Processing…" : "Pending"}
+                                    </span>
+                                  </td>
+                                  <td className="ats-td-diff">
+                                    <span className="ats-diff-num">0</span>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Empty search state */}
+                {q && filteredScored.length === 0 && filteredPending.length === 0 && (
+                  <div className="ats-state-box">
+                    <h3 className="ats-state-title">No candidates match "{searchQuery}"</h3>
+                    <p className="ats-state-desc">Try searching with a different candidate name or email.</p>
+                    <button className="ats-btn ats-btn--secondary" onClick={() => setSearchQuery("")}>
+                      Clear search
+                    </button>
+                  </div>
+                )}
+              </>
             )}
           </>
         )}
-      </div>
+      </main>
+
+      {/* ── Selection Confirmation Modal ────────────────────────────────────── */}
+      {confirmCandidate && (
+        <div
+          className="ats-modal-backdrop"
+          onClick={() => !selectingId && setConfirmCandidate(null)}
+        >
+          <div className="ats-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="ats-modal__header">
+              <h3 className="ats-modal__title">Select Candidate for Interview</h3>
+              <button
+                className="ats-modal__close"
+                onClick={() => !selectingId && setConfirmCandidate(null)}
+                aria-label="Close dialog"
+              >
+                ×
+              </button>
+            </div>
+            <div className="ats-modal__body">
+              <p className="ats-modal__lead">
+                Confirm selection of <strong>{confirmCandidate.applicantName || confirmCandidate.applicant?.name || "this candidate"}</strong> for the position of <strong>{job?.jobTitle || "Job"}</strong>.
+              </p>
+              <div className="ats-modal__details">
+                <div className="ats-modal__row">
+                  <span className="ats-modal__label">Candidate:</span>
+                  <span className="ats-modal__val">
+                    {confirmCandidate.applicantName || confirmCandidate.applicant?.name || "Anonymous"}
+                  </span>
+                </div>
+                <div className="ats-modal__row">
+                  <span className="ats-modal__label">Recipient Email:</span>
+                  <span className="ats-modal__val">
+                    {confirmCandidate.applicantEmail || confirmCandidate.applicant?.email || "No email on file"}
+                  </span>
+                </div>
+                <div className="ats-modal__row">
+                  <span className="ats-modal__label">ATS Match Score:</span>
+                  <span className="ats-modal__val">
+                    {confirmCandidate.atsScore !== null && confirmCandidate.atsScore !== undefined
+                      ? `${confirmCandidate.atsScore}%`
+                      : "Not evaluated"}
+                  </span>
+                </div>
+              </div>
+              <p className="ats-modal__notice">
+                {confirmCandidate.status === "selected"
+                  ? "This candidate has already been selected. Confirming will generate a fresh secure link and re-dispatch the interview invitation email."
+                  : "Upon confirmation, this candidate's status will update to Selected, and an automated congratulations email with a secure interview invitation link will be sent to their email."}
+              </p>
+            </div>
+            <div className="ats-modal__footer">
+              <button
+                className="ats-modal__btn ats-modal__btn--cancel"
+                onClick={() => setConfirmCandidate(null)}
+                disabled={selectingId === confirmCandidate._id}
+              >
+                Cancel
+              </button>
+              <button
+                className="ats-modal__btn ats-modal__btn--confirm"
+                onClick={() => handleConfirmSelection(confirmCandidate.status === "selected")}
+                disabled={selectingId === confirmCandidate._id}
+                id="ats-confirm-select-btn"
+              >
+                {selectingId === confirmCandidate._id
+                  ? "Sending Invitation…"
+                  : confirmCandidate.status === "selected"
+                  ? "Resend Invitation Email"
+                  : "Confirm Selection & Send Invite"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

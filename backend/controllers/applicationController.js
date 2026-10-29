@@ -6,9 +6,11 @@ const Job = require("../models/Job");
 const Resume = require("../models/Resume");
 const User = require("../models/User");
 const { ErrorResponse } = require("../middleware/errorHandler");
+const crypto = require("crypto");
 const { computeAtsScore } = require("../utils/atsScoringService");
 const { processApplicationAts } = require("../services/geminiAtsService");
 const { createNotification } = require("../services/notificationService");
+const { sendEmail, getInterviewInvitationEmailTemplate } = require("../utils/sendEmail");
 
 // ─── Multer setup for resume file uploads ──────────────────────────────────
 const uploadDir = path.resolve(__dirname, "../uploads/resumes");
@@ -324,6 +326,23 @@ exports.updateApplicationStatus = async (req, res, next) => {
     }
 
     // Update recruitment decision status (does not alter atsStatus)
+    if (status === "rejected") {
+      if (application.resumePath && fs.existsSync(application.resumePath)) {
+        try {
+          fs.unlinkSync(application.resumePath);
+        } catch (e) {
+          console.warn("[updateApplicationStatus] Could not delete resume file:", e.message);
+        }
+      }
+      await Application.findByIdAndDelete(req.params.id);
+      return res.status(200).json({
+        success: true,
+        deleted: true,
+        message: "Candidate application has been rejected and permanently deleted.",
+        data: { _id: req.params.id, status: "rejected" },
+      });
+    }
+
     application.status = status;
     await application.save();
 
@@ -331,6 +350,46 @@ exports.updateApplicationStatus = async (req, res, next) => {
       success: true,
       message: "Application status updated successfully",
       data: application,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// ─── DELETE /api/applications/:id ──────────────────────────────────────────
+// Recruiter or Admin permanently deletes an application
+exports.deleteApplication = async (req, res, next) => {
+  try {
+    const application = await Application.findById(req.params.id).populate("job");
+    if (!application) {
+      return next(new ErrorResponse("Application not found", 404));
+    }
+
+    // Ensure user is the recruiter who owns the job, or an admin
+    if (
+      application.job &&
+      application.job.recruiter &&
+      application.job.recruiter.toString() !== req.user._id.toString() &&
+      req.user.role !== "admin"
+    ) {
+      return next(new ErrorResponse("Not authorized to delete this application", 403));
+    }
+
+    if (application.resumePath && fs.existsSync(application.resumePath)) {
+      try {
+        fs.unlinkSync(application.resumePath);
+      } catch (fileErr) {
+        console.warn("[deleteApplication] Resume deletion error:", fileErr.message);
+      }
+    }
+
+    await Application.findByIdAndDelete(req.params.id);
+
+    res.status(200).json({
+      success: true,
+      deleted: true,
+      message: "Candidate application deleted successfully",
+      data: { _id: req.params.id },
     });
   } catch (err) {
     next(err);
@@ -429,3 +488,239 @@ exports.getApplicationResume = async (req, res, next) => {
     next(err);
   }
 };
+
+// ─── POST /api/applications/:id/select ────────────────────────────────────
+// Recruiter selects a candidate and dispatches a secure interview invitation
+exports.selectCandidateForInterview = async (req, res, next) => {
+  try {
+    const application = await Application.findById(req.params.id)
+      .populate({
+        path: "job",
+        populate: { path: "recruiter", select: "name companyName email" },
+      })
+      .populate("applicant", "name email");
+
+    if (!application) {
+      return next(new ErrorResponse("Application not found", 404));
+    }
+
+    if (!application.job) {
+      return next(new ErrorResponse("Job associated with this application was not found", 404));
+    }
+
+    // Verify recruiter owns the job (or is admin)
+    const recruiterId = application.job.recruiter?._id || application.job.recruiter;
+    if (
+      (!recruiterId || recruiterId.toString() !== req.user._id.toString()) &&
+      req.user.role !== "admin"
+    ) {
+      return next(new ErrorResponse("Not authorized to select candidates for this job", 403));
+    }
+
+    // Prevent duplicate emails when the same candidate is selected repeatedly
+    const isAlreadySelected = application.status === "selected";
+    const hasActiveToken =
+      application.interviewInvitation?.tokenHash &&
+      application.interviewInvitation?.expiresAt &&
+      new Date(application.interviewInvitation.expiresAt) > new Date();
+
+    const isResend = req.query.resend === "true" || req.body.resend === true;
+
+    if (isAlreadySelected && hasActiveToken && !isResend) {
+      const rawToken = crypto.randomBytes(32).toString("hex");
+      const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
+      application.interviewInvitation.tokenHash = tokenHash;
+      await application.save();
+      const frontendUrl = (process.env.FRONTEND_URL || "http://localhost:5173").trim().replace(/\/+$/, "");
+      const invitationUrl = `${frontendUrl}/interview-invitation?token=${rawToken}`;
+      return res.status(200).json({
+        success: true,
+        alreadySelected: true,
+        emailSent: false,
+        message: "Candidate has already been selected. Opening interview schedule page.",
+        data: application,
+        invitationUrl,
+        invitationToken: rawToken,
+      });
+    }
+
+    // Candidate contact details
+    const candidateName =
+      application.applicantName || application.applicant?.name || "Candidate";
+    const candidateEmail =
+      application.applicantEmail || application.applicant?.email;
+
+    if (!candidateEmail) {
+      return next(
+        new ErrorResponse("Cannot select candidate: no email address is on file for this application", 400)
+      );
+    }
+
+    // Generate secure unpredictable raw token
+    const rawToken = crypto.randomBytes(32).toString("hex");
+
+    // Store secure SHA-256 hash in database
+    const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
+
+    // 7 days expiration
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
+    // Save selection status and invitation token
+    application.status = "selected";
+    application.interviewInvitation = {
+      tokenHash,
+      expiresAt,
+      sentAt: new Date(),
+      status: "sent",
+    };
+    await application.save();
+
+    // Construct secure invitation URL
+    const frontendUrl = (process.env.FRONTEND_URL || "http://localhost:5173").trim().replace(/\/+$/, "");
+    const invitationUrl = `${frontendUrl}/interview-invitation?token=${rawToken}`;
+
+    const jobTitle = application.job.jobTitle || "Job Position";
+    const companyName =
+      application.job.recruiter?.companyName || "Talent Bridge Partner";
+
+    // Attempt email dispatch
+    let emailResult = null;
+    try {
+      emailResult = await sendEmail({
+        to: candidateEmail,
+        subject: "Congratulations! You Have Been Selected for the Next Stage",
+        html: getInterviewInvitationEmailTemplate({
+          candidateName,
+          jobTitle,
+          companyName,
+          invitationUrl,
+        }),
+      });
+    } catch (emailErr) {
+      console.error("[applicationController] Email sending error:", emailErr.message);
+      // Mark as failed in invitation metadata to allow clean retry
+      application.interviewInvitation.status = "failed";
+      await application.save();
+
+      return res.status(200).json({
+        success: true,
+        emailSent: false,
+        warning: `Candidate was marked as selected, but email delivery failed (${emailErr.message}). You can safely retry.`,
+        data: application,
+        invitationUrl,
+        invitationToken: rawToken,
+      });
+    }
+
+    // Notify candidate in-app if registered
+    if (application.applicant?._id) {
+      createNotification({
+        recipient: application.applicant._id,
+        type: "application_status",
+        title: "Selected for Interview",
+        message: `Congratulations! You have been selected for the next stage for ${jobTitle} at ${companyName}.`,
+        job: application.job._id,
+        application: application._id,
+      }).catch((err) => {
+        console.error("[applicationController] Notification dispatch error:", err.message);
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      emailSent: emailResult?.skipped ? false : true,
+      emailSkipped: !!emailResult?.skipped,
+      message: emailResult?.skipped
+        ? `Candidate marked as selected. (Email dispatch skipped: ${emailResult.reason})`
+        : `Candidate successfully selected and invitation email sent to ${candidateEmail}.`,
+      data: application,
+      invitationUrl,
+      invitationToken: rawToken,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// ─── GET /api/applications/interview-invitation/:token ─────────────────────
+// Public endpoint: Validate interview invitation token and return sanitized info
+exports.verifyInterviewInvitation = async (req, res, next) => {
+  try {
+    const { token } = req.params;
+    if (!token || typeof token !== "string" || token.length < 16) {
+      return res.status(400).json({
+        valid: false,
+        reason: "invalid",
+        message: "A valid invitation token is required.",
+      });
+    }
+
+    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+
+    const application = await Application.findOne({
+      "interviewInvitation.tokenHash": tokenHash,
+    })
+      .populate({
+        path: "job",
+        populate: { path: "recruiter", select: "name companyName" },
+      })
+      .populate("applicant", "name email");
+
+    if (!application) {
+      return res.status(404).json({
+        valid: false,
+        reason: "invalid",
+        message: "This interview invitation is invalid or does not exist.",
+      });
+    }
+
+    // Check expiration
+    if (
+      application.interviewInvitation?.expiresAt &&
+      new Date(application.interviewInvitation.expiresAt) < new Date()
+    ) {
+      return res.status(410).json({
+        valid: false,
+        reason: "expired",
+        message: "This interview invitation has expired. Please contact the recruiter for an updated invitation.",
+        data: {
+          jobTitle: application.job?.jobTitle,
+          companyName: application.job?.recruiter?.companyName || "Talent Bridge Partner",
+        },
+      });
+    }
+
+    // Check if already completed
+    if (application.interviewInvitation?.status === "completed") {
+      return res.status(200).json({
+        valid: false,
+        reason: "completed",
+        message: "This interview invitation has already been completed.",
+      });
+    }
+
+    const candidateName =
+      application.applicantName || application.applicant?.name || "Candidate";
+    const jobTitle = application.job?.jobTitle || "Job Position";
+    const companyName =
+      application.job?.recruiter?.companyName || "Talent Bridge Partner";
+    const jobType = application.job?.jobType || "Full-time";
+    const location =
+      application.job?.acceptableLocations?.[0] || "Remote";
+
+    res.status(200).json({
+      valid: true,
+      data: {
+        candidateName,
+        jobTitle,
+        companyName,
+        jobType,
+        location,
+        expiresAt: application.interviewInvitation.expiresAt,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+

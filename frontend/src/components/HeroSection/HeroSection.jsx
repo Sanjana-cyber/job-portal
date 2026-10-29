@@ -1,5 +1,10 @@
-﻿import React from "react";
-import { Search, FileText, BriefcaseBusiness, UserRound, Users } from "lucide-react";
+import React, { useState } from "react";
+import {
+  Search,
+  Sparkles,
+  BriefcaseBusiness,
+  Users
+} from "lucide-react";
 import TalentBridgeLogo from "../TalentBridgeLogo/TalentBridgeLogo";
 import heroImg from "./hero.png";
 import { useAuthModal } from "../../context/AuthModalContext";
@@ -16,10 +21,10 @@ const FEATURES = [
     description: "Find the right opportunity",
   },
   {
-    id: "upload-resume",
-    Icon: FileText,
-    title: "Upload Resume",
-    description: "Showcase your skills",
+    id: "build-resume",
+    Icon: Sparkles,
+    title: "Build Resume",
+    description: "AI-powered resume builder",
   },
   {
     id: "apply-easily",
@@ -27,16 +32,20 @@ const FEATURES = [
     title: "Apply Easily",
     description: "One-click application",
   },
-  {
-    id: "top-employers",
-    Icon: UserRound,
-    title: "Top Employers",
-    description: "Connect with companies",
-  },
 ];
 
 function HeroSection() {
   const { openModal } = useAuthModal();
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearchAction = (e) => {
+    if (e) e.preventDefault();
+    openModal("login");
+  };
+
+  const handleFeatureClick = (id) => {
+    openModal("login");
+  };
 
   return (
     <section className="hero">
@@ -52,9 +61,20 @@ function HeroSection() {
           Find Jobs. Build Career. Shape Your Future.
         </p>
 
+        {/* ── Interactive Hero Search Bar ── */}
+
+
+        {/* ── 3 Key Features: Search Jobs, Build Resume, Apply Easily ── */}
         <ul className="hero__features">
           {FEATURES.map(({ id, Icon, title, description }) => (
-            <li className="feature" key={id}>
+            <li
+              className="feature feature--clickable"
+              key={id}
+              onClick={() => handleFeatureClick(id)}
+              role="button"
+              tabIndex={0}
+              title={`Click to ${title}`}
+            >
               <span className="feature__icon-circle">
                 <Icon
                   size={ICON_SIZE}
@@ -78,7 +98,6 @@ function HeroSection() {
             <h3 className="account-card__title">
               Join Thousands of Job Seekers Today!
             </h3>
-            {/* Opens Auth Dialog instead of navigating */}
             <button
               type="button"
               className="account-card__btn"

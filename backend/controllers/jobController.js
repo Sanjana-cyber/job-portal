@@ -80,10 +80,29 @@ const getAllJobs = async (req, res) => {
       .populate("recruiter", "name email companyName")
       .sort({ createdAt: -1 });
 
+    let jobsWithCounts = jobs;
+    try {
+      const Application = require("../models/Application");
+      const counts = await Application.aggregate([
+        { $group: { _id: "$job", count: { $sum: 1 } } },
+      ]);
+      const countMap = {};
+      counts.forEach((c) => {
+        if (c._id) countMap[c._id.toString()] = c.count;
+      });
+      jobsWithCounts = jobs.map((j) => {
+        const jobObj = j.toObject();
+        jobObj.applicationCount = countMap[j._id.toString()] || 0;
+        return jobObj;
+      });
+    } catch (countErr) {
+      console.warn("Could not aggregate application counts:", countErr.message);
+    }
+
     return res.status(200).json({
       success: true,
-      count: jobs.length,
-      jobs,
+      count: jobsWithCounts.length,
+      jobs: jobsWithCounts,
     });
   } catch (error) {
     console.error("[getAllJobs] Error:", error.name, error.message);

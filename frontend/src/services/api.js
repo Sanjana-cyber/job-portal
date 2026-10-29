@@ -220,6 +220,21 @@ export const retryApplicationAts = async (applicationId) => {
   return res.data; // { success, message, data }
 };
 
+export const deleteApplication = async (applicationId) => {
+  const res = await api.delete(`/applications/${applicationId}`);
+  return res.data;
+};
+
+export const selectCandidateForInterview = async (applicationId, resend = false) => {
+  const res = await api.post(`/applications/${applicationId}/select`, { resend });
+  return res.data; // { success, alreadySelected, emailSent, message, data }
+};
+
+export const verifyInterviewInvitation = async (token) => {
+  const res = await api.get(`/applications/interview-invitation/${encodeURIComponent(token)}`);
+  return res.data; // { valid, reason, message, data }
+};
+
 // ─── Notifications API ────────────────────────────────────────────────────────
 
 export const getNotifications = async () => {
