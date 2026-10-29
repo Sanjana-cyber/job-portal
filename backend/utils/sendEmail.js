@@ -55,8 +55,26 @@ const sendEmail = async (options) => {
     html: options.html,
   };
 
-  const info = await transporter.sendMail(mailOptions);
-  return { success: true, messageId: info.messageId };
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`✅ [sendEmail] Email successfully dispatched to ${options.to} (MessageId: ${info.messageId})`);
+    return { success: true, messageId: info.messageId };
+  } catch (err) {
+    const isAuth =
+      err.code === "EAUTH" ||
+      (err.message && (err.message.includes("535") || err.message.includes("BadCredentials")));
+
+    if (isAuth) {
+      console.error(
+        `\n⚠️ [sendEmail] Gmail Authentication Failed (535-5.7.8 BadCredentials) for ${smtpUser}.\n` +
+        `   Google requires an active 16-character App Password when 2-Step Verification is enabled.\n` +
+        `   Please generate one at https://myaccount.google.com/apppasswords and update SMTP_PASS in backend/.env.\n`
+      );
+      err.isAuthError = true;
+      err.authHelp = "Invalid Google App Password (535 BadCredentials). Please generate a 16-character App Password at https://myaccount.google.com/apppasswords and update SMTP_PASS in backend/.env.";
+    }
+    throw err;
+  }
 };
 
 /**

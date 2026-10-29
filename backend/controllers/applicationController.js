@@ -626,7 +626,7 @@ exports.selectCandidateForInterview = async (req, res, next) => {
     } catch (emailErr) {
       console.error("[applicationController] Email sending error:", emailErr.message);
       emailSent = false;
-      emailError = emailErr.message;
+      emailError = emailErr.authHelp || emailErr.message;
       application.interviewInvitation.status = "failed";
       await application.save();
     }
